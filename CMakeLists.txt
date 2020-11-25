@@ -1,0 +1,64 @@
+cmake_minimum_required(VERSION 3.11)
+
+Include(FetchContent)
+
+project(parc24 VERSION 0.0.1)
+set(CMAKE_C_STANDARD 99)
+
+# Core
+
+file(GLOB_RECURSE src_main "${PROJECT_SOURCE_DIR}/src/main/*.h" "${PROJECT_SOURCE_DIR}/src/main/*.c")
+add_library(parc24 ${src_main})
+include_directories(parc24 ${PROJECT_SOURCE_DIR}/src/api)
+include_directories(parc24 ${PROJECT_SOURCE_DIR}/src/main)
+target_compile_options(parc24 PRIVATE
+	$<$<CXX_COMPILER_ID:MSVC>:/W4 /WX>
+	$<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wno-unused -Werror>
+)
+target_compile_options(parc24 PUBLIC $<$<CONFIG:DEBUG>:--coverage>)
+
+# Exe
+
+file(GLOB_RECURSE src_exe "${PROJECT_SOURCE_DIR}/src/exe/*.h" "${PROJECT_SOURCE_DIR}/src/exe/*.c")
+add_executable(42sh ${src_exe})
+include_directories(42sh ${PROJECT_SOURCE_DIR}/src/api)
+include_directories(42sh ${PROJECT_SOURCE_DIR}/src/main)
+include_directories(42sh ${PROJECT_SOURCE_DIR}/src/exe)
+target_compile_options(42sh PRIVATE
+	$<$<CXX_COMPILER_ID:MSVC>:/W4 /WX>
+	$<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wno-unused -Werror>
+)
+# target_compile_options(42sh PUBLIC $<$<CONFIG:DEBUG>:--coverage>)
+target_link_libraries(42sh parc24 $<$<CONFIG:DEBUG>:gcov>)
+
+# Tests
+
+file(GLOB_RECURSE src_test "${PROJECT_SOURCE_DIR}/src/test/*.h" "${PROJECT_SOURCE_DIR}/src/test/*.c" "${PROJECT_SOURCE_DIR}/src/test/*.hpp" "${PROJECT_SOURCE_DIR}/src/test/*.cpp")
+add_executable(tests ${src_test})
+target_compile_options(tests PRIVATE
+	$<$<CXX_COMPILER_ID:MSVC>:/W4 /WX>
+	$<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wno-unused -Werror>
+)
+
+# Catch2 from Fetch works properly, so 
+FetchContent_Declare(
+  Catch2
+  GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+  GIT_TAG        v2.13.1)
+FetchContent_MakeAvailable(Catch2)
+FetchContent_GetProperties(Catch2 SOURCE_DIR src_Catch2)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${src_Catch2}/contrib/")
+target_link_libraries(tests Catch2::Catch2)
+
+# no uniheaders ~~for now~~
+# list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Modules")
+# include_directories(tests ${PROJECT_SOURCE_DIR}/src/test)
+
+include_directories(tests ${PROJECT_SOURCE_DIR}/src/api)
+include_directories(tests ${PROJECT_SOURCE_DIR}/src/main)
+target_link_libraries(tests parc24 $<$<CONFIG:DEBUG>:gcov>)
+
+set(CTEST_OUTPUT_ON_FAILURE 1)
+include(CTest)
+include(Catch)
+catch_discover_tests(tests)
