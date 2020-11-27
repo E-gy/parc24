@@ -74,7 +74,7 @@ SCENARIO("join arguments", "[args][util][cppo]"){
 			#ifdef _WIN32
 			"hello 'th''e''re' '\"general\" Kenobi' !"
 			#else
-			"hello 'th'\''e'\''re' '\"general\" Kenobi' !"
+			"hello 'th'\\''e'\\''re' '\"general\" Kenobi' !"
 			#endif
 			));
 		}
