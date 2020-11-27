@@ -5,21 +5,35 @@ Include(FetchContent)
 project(parc24 VERSION 0.0.1)
 set(CMAKE_C_STANDARD 99)
 
+# hmmm
+# include(CheckPIESupported)
+# check_pie_supported()
+
 # Core
 
 file(GLOB_RECURSE src_main "${PROJECT_SOURCE_DIR}/src/main/*.h" "${PROJECT_SOURCE_DIR}/src/main/*.c")
-add_library(parc24 ${src_main})
+add_library(parc24 SHARED ${src_main})
 include_directories(parc24 ${PROJECT_SOURCE_DIR}/src/api)
 include_directories(parc24 ${PROJECT_SOURCE_DIR}/src/main)
 target_compile_options(parc24 PRIVATE
 	$<$<CXX_COMPILER_ID:MSVC>:/W4 /WX>
 	$<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wno-unused -Werror>
 )
-target_compile_options(parc24 PUBLIC $<$<CONFIG:DEBUG>:--coverage>)
+
+add_library(parc24cov STATIC ${src_main})
+include_directories(parc24cov ${PROJECT_SOURCE_DIR}/src/api)
+include_directories(parc24cov ${PROJECT_SOURCE_DIR}/src/main)
+target_compile_options(parc24cov PRIVATE
+	$<$<CXX_COMPILER_ID:MSVC>:/W4 /WX>
+	$<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wno-unused -Werror>
+)
+target_compile_options(parc24cov PUBLIC --coverage)
+target_link_libraries(parc24cov gcov)
 
 # Exe
 
 file(GLOB_RECURSE src_exe "${PROJECT_SOURCE_DIR}/src/exe/*.h" "${PROJECT_SOURCE_DIR}/src/exe/*.c")
+
 add_executable(42sh ${src_exe})
 include_directories(42sh ${PROJECT_SOURCE_DIR}/src/api)
 include_directories(42sh ${PROJECT_SOURCE_DIR}/src/main)
@@ -28,8 +42,18 @@ target_compile_options(42sh PRIVATE
 	$<$<CXX_COMPILER_ID:MSVC>:/W4 /WX>
 	$<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wno-unused -Werror>
 )
-# target_compile_options(42sh PUBLIC $<$<CONFIG:DEBUG>:--coverage>)
-target_link_libraries(42sh parc24 $<$<CONFIG:DEBUG>:gcov>)
+target_link_libraries(42sh parc24)
+set_property(TARGET 42sh PROPERTY POSITION_INDEPENDENT_CODE TRUE)
+
+add_executable(42shcov ${src_exe})
+include_directories(42shcov ${PROJECT_SOURCE_DIR}/src/api)
+include_directories(42shcov ${PROJECT_SOURCE_DIR}/src/main)
+include_directories(42shcov ${PROJECT_SOURCE_DIR}/src/exe)
+target_compile_options(42shcov PRIVATE
+	$<$<CXX_COMPILER_ID:MSVC>:/W4 /WX>
+	$<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wno-unused -Werror>
+)
+target_link_libraries(42shcov parc24cov)
 
 # Tests
 
@@ -56,7 +80,7 @@ target_link_libraries(tests Catch2::Catch2)
 
 include_directories(tests ${PROJECT_SOURCE_DIR}/src/api)
 include_directories(tests ${PROJECT_SOURCE_DIR}/src/main)
-target_link_libraries(tests parc24 $<$<CONFIG:DEBUG>:gcov>)
+target_link_libraries(tests $<IF:$<CONFIG:DEBUG>,parc24cov,parc24>)
 
 set(CTEST_OUTPUT_ON_FAILURE 1)
 include(CTest)
