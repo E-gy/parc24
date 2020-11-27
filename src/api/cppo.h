@@ -38,3 +38,8 @@ Result_T(exewait_result, int, string_v);
  * @consumes proc _on success_
  */
 ExeWaitResult exe_waitretcode(ChildProcessInfo proc);
+
+/**
+ * @produces error description
+ */
+string_v get_last_error_desc(void);
