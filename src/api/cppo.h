@@ -49,6 +49,6 @@ string_mut exe_args_join(string args[]);
 #define exe_args_join_caste(args) exe_args_join((string*)args)
 
 /**
- * @produces error description
+ * @nullable addinfo
  */
-string_v get_last_error_desc(void);
+void exe_print_last_syserr(string addinfo);
