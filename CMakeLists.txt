@@ -80,6 +80,7 @@ target_link_libraries(tests Catch2::Catch2)
 
 include_directories(tests ${PROJECT_SOURCE_DIR}/src/api)
 include_directories(tests ${PROJECT_SOURCE_DIR}/src/main)
+include_directories(tests ${PROJECT_SOURCE_DIR}/src/test)
 target_link_libraries(tests $<IF:$<CONFIG:DEBUG>,parc24cov,parc24>)
 
 set(CTEST_OUTPUT_ON_FAILURE 1)
