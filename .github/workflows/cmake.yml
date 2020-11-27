@@ -37,7 +37,7 @@ jobs:
     - name: lcov
       working-directory: ${{runner.workspace}}/build
       shell: bash
-      run: lcov --capture --directory ./CMakeFiles/parc24.dir -o lcov.info
+      run: lcov --capture --directory ./CMakeFiles/parc24cov.dir -o lcov.info
     - name: Publish coverage to Coveralls
       uses: coverallsapp/github-action@master
       with:
