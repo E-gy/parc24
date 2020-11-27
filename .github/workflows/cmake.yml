@@ -12,6 +12,9 @@ jobs:
     - uses: actions/checkout@v2
     - name: Create Build Environment
       run: cmake -E make_directory ${{runner.workspace}}/build
+    - name: Install Lcov
+      shell: bash
+      run: sudo apt-get install -y lcov
     - name: Configure CMake
       shell: bash
       working-directory: ${{runner.workspace}}/build
@@ -23,6 +26,10 @@ jobs:
       working-directory: ${{runner.workspace}}/build
       shell: bash
       run: cmake --build . --config $BUILD_TYPE
+    - name: Collect base coverage
+      working-directory: ${{runner.workspace}}/build
+      shell: bash
+      run: lcov --capture -i --directory ./CMakeFiles/parc24cov.dir -o cov-base.info
     - name: Test
       working-directory: ${{runner.workspace}}/build
       shell: bash
@@ -31,15 +38,16 @@ jobs:
       working-directory: ${{runner.workspace}}/build
       shell: bash
       run: make ExperimentalCoverage
-    - name: Install Lcov
-      shell: bash
-      run: sudo apt-get install -y lcov
-    - name: lcov
+    - name: Collect tests coverage
       working-directory: ${{runner.workspace}}/build
       shell: bash
-      run: lcov --capture --directory ./CMakeFiles/parc24cov.dir -o lcov.info
+      run: lcov --capture --directory ./CMakeFiles/parc24cov.dir -o cov-test.info
+    - name: Combine to actual coverage
+      working-directory: ${{runner.workspace}}/build
+      shell: bash
+      run: lcov -a cov-base.info -a cov-test.info -o cov.info
     - name: Publish coverage to Coveralls
       uses: coverallsapp/github-action@master
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
-        path-to-lcov: ${{runner.workspace}}/build/lcov.info
+        path-to-lcov: ${{runner.workspace}}/build/cov.info
