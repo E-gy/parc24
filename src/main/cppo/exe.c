@@ -29,14 +29,18 @@ struct childprocinf {
 
 #define fd2handle(fd, handle) do { intptr_t _h = _get_osfhandle(fd); if(_h < 0) return Error_T(exerun_result, {"File not associated with a stream - can't retrieve handle"}); if(!SetHandleInformation((HANDLE) _h, HANDLE_FLAG_INHERIT, true)) return Error_T(exerun_result, {"Handle set inherit failed"}); handle = (HANDLE) _h; } while(0)
 
-ExeRunResult exe_run(string_mut args, struct exe_opts opts){
+ExeRunResult exe_run(char* const* args, struct exe_opts opts){
 	STARTUPINFO startup = {.dwFlags = STARTF_USESTDHANDLES};
 	if(opts.stdio.in >= 0) fd2handle(opts.stdio.in, startup.hStdInput);
 	if(opts.stdio.out >= 0) fd2handle(opts.stdio.out, startup.hStdOutput);
 	if(opts.stdio.err >= 0) fd2handle(opts.stdio.err, startup.hStdError);
+	string_mut cmd = exe_args_join_caste(args);
+	if(!cmd) return Error_T(exerun_result, {"Args join failed"});
 	cpr_new(procinf);
 	PROCESS_INFORMATION cpi;
-	if(!CreateProcessA(null, args, null, null, true, 0, null, null, &startup, &cpi)) return Error_T(exerun_result, {"CreateProcess failed :("});
+	bool ok = CreateProcessA(null, cmd, null, null, true, 0, null, null, &startup, &cpi);
+	free(cmd);
+	if(!ok) return Error_T(exerun_result, {"CreateProcess failed :("});
 	procinf->ph = cpi.hProcess;
 	CloseHandle(cpi.hThread);
 	return Ok_T(exerun_result, procinf);
