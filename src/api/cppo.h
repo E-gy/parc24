@@ -17,7 +17,7 @@ struct exe_opts {
 	 * Files/handles for the 3 standard streams.
 	 * Default -1.
 	 */
-	fd_t io[3];
+	struct { fd_t in, out, err; } stdio;
 };
 
 struct childprocinf;
