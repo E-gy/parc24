@@ -17,7 +17,7 @@ PipeResult pipe_new(void){
 		if(writef >= 0) close(writef); else CloseHandle(write);
 		return Error_T(pipe_result, {"Handle to file conversion failed"});
 	}
-	return Ok_T(pipe_result, {writef, readf});
+	return Ok_T(pipe_result, {.write = writef, .read = readf});
 }
 
 #else
@@ -28,7 +28,7 @@ PipeResult pipe_new(void){
 PipeResult pipe_new(void){
 	fd_t piped[2];
 	if(pipe2(piped, O_CLOEXEC) < 0) return Error_T(pipe_result, {"Pipe creation failed"});
-	return Ok_T(pipe_result, {piped[1], piped[0]});
+	return Ok_T(pipe_result, {.write = piped[1], .read = piped[0]});
 }
 
 #endif
