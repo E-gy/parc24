@@ -3,7 +3,7 @@ using Catch::Matchers::Equals;
 
 extern "C" {
 #include <cppo.h>
-#include <fcntl.h>
+#include <unistd.h>
 #include <string.h>
 }
 
