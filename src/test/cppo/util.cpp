@@ -72,9 +72,9 @@ SCENARIO("join arguments", "[args][util][cppo]"){
 		THEN("everything is ookay"){
 			REQUIRE_THAT(cmd, Equals(
 			#ifdef _WIN32
-			"hello 'th''e''re' '\"general\" Kenobi\" !"
+			"hello 'th''e''re' '\"general\" Kenobi' !"
 			#else
-			"hello 'th'\''e'\''re' '\"general\" Kenobi\" !"
+			"hello 'th'\''e'\''re' '\"general\" Kenobi' !"
 			#endif
 			));
 		}
