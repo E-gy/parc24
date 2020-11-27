@@ -31,7 +31,10 @@ Result_T(exerun_result, ChildProcessInfo, string_v);
  */
 ExeRunResult exe_run(string* args, struct exe_opts opts);
 
+Result_T(exewait_result, int, string_v);
+#define ExeWaitResult struct exewait_result
+
 /**
- * @consumes proc
+ * @consumes proc _on success_
  */
-int exe_waitretcode(ChildProcessInfo proc);
+ExeWaitResult exe_waitretcode(ChildProcessInfo proc);
