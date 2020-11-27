@@ -47,6 +47,7 @@ ExeRunResult exe_run(char* const args[], struct exe_opts opts){
 }
 
 ExeWaitResult exe_waitretcode(ChildProcessInfo proc){
+	if(!proc) return Error_T(exewait_result, {"Invalid child process info"});
 	if(WaitForSingleObject(proc->ph, INFINITE) != 0) return Error_T(exewait_result, {"Wait failed"});
 	DWORD exitcode;
 	if(!GetExitCodeProcess(proc->ph, &exitcode)) return Error_T(exewait_result, {"GetExitCode failed"});
