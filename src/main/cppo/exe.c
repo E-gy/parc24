@@ -57,16 +57,33 @@ ExeWaitResult exe_waitretcode(ChildProcessInfo proc){
 
 #else
 
+#include <unistd.h>
+#include <sys/wait.h>
+
 struct childprocinf {
 	pid_t pid;
 };
 
-ExeRunResult exe_run(string* args, struct exe_opts opts){
+ExeRunResult exe_run(char* const args[], struct exe_opts opts){
 	cpr_new(procinf);
-	//TODO
+	pid_t cpid = fork();
+	if(cpid < 0){
+		free(procinf);
+		return Error_T(exerun_result, {"fork failed"});
+	}
+	if(cpid == 0){
+		execvp(args[0], args);
+		exit(69); //exec failed
+	}
+	procinf->pid = cpid;
 	return Ok_T(exerun_result, procinf);
 }
 
-int exe_waitretcode(ChildProcessInfo proc); //TODO
+ExeWaitResult exe_waitretcode(ChildProcessInfo proc){
+	if(!proc) return Error_T(exewait_result, {"Invalid child process info"});
+	int cstatus;
+	if(waitpid(proc->pid, &cstatus, 0) < 0) return Error_T(exewait_result, {"wait failed"});
+	return Ok_T(exewait_result, WEXITSTATUS(cstatus));
+}
 
 #endif
