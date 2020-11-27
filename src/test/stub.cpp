@@ -1,5 +1,7 @@
 #include <catch2ext.hpp>
 
+int fun(int a, int b);
+
 SCENARIO("stub", "[stub]"){
-	REQUIRE(1 == 1);
+	REQUIRE(fun(2, 4) == 3);
 }
