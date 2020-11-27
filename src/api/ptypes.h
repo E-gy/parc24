@@ -4,6 +4,8 @@
 #include <stddef.h>
 #include <stdbool.h>
 
+typedef int fd_t;
+
 typedef bool Result;
 #define Ok false
 #define Error true
