@@ -22,7 +22,6 @@ PipeResult pipe_new(void){
 
 #else
 
-#define _GNU_SOURCE
 #include <unistd.h>
 #include <fcntl.h>
 
