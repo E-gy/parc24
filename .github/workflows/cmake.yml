@@ -29,7 +29,7 @@ jobs:
     - name: Collect base coverage
       working-directory: ${{runner.workspace}}/build
       shell: bash
-      run: lcov --capture -i --directory ./CMakeFiles/parc24cov.dir -o cov-base.info
+      run: lcov --capture -i --directory ./CMakeFiles/parc24cov.dir --directory ./CMakeFiles/42shcov.dir -o cov-base.info
     - name: Test
       working-directory: ${{runner.workspace}}/build
       shell: bash
@@ -41,7 +41,7 @@ jobs:
     - name: Collect tests coverage
       working-directory: ${{runner.workspace}}/build
       shell: bash
-      run: lcov --capture --directory ./CMakeFiles/parc24cov.dir -o cov-test.info
+      run: lcov --capture --directory ./CMakeFiles/parc24cov.dir --directory ./CMakeFiles/42shcov.dir -o cov-test.info
     - name: Combine to actual coverage
       working-directory: ${{runner.workspace}}/build
       shell: bash
