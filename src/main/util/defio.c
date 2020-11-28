@@ -9,7 +9,7 @@ static void std_write(LogLevel level, string message, ...){
 	#ifdef NDEBUG
 	if(level <= LL_DEBUG) return;
 	#endif
-	fprintf(level >= LL_ERROR ? stderr : stdout, "%s: ", "parc24");
+	if(level >= LL_WARN) fprintf(level >= LL_ERROR ? stderr : stdout, "%s: ", "parc24");
 	va_list vargs;
 	va_start(vargs, message);
 	vfprintf(level >= LL_ERROR ? stderr : stdout, message, vargs);
