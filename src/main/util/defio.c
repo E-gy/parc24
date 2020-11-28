@@ -8,7 +8,7 @@ static void std_write(LogLevel level, string message){
 	#ifdef NDEBUG
 	if(level <= LL_DEBUG) return;
 	#endif
-	fprintf(level >= LL_ERROR ? stderr : stdout, "%s: %s", "parc24", message);
+	fprintf(level >= LL_ERROR ? stderr : stdout, "%s: %s\n", "parc24", message);
 }
 
 static ParC24IOReadResult std_read(void){
