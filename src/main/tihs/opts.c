@@ -6,6 +6,7 @@
 
 #define tihsopts_default ((struct tihsopts){.parcopts = parc_options_default})
 
+#define ifsetopt(opt) (streq(#opt, *args)) opts.parcopts. ## opt = setto
 #define printopt(opt) do { if(printshopt == 1) io.logger(LL_INFO, "shopt %s %s", opts.parcopts. ## opt ? "-s" : "-u", #opt); else if(printshopt == 2) io.logger(LL_INFO, "%s	%s", #opt, opts.parcopts. ## opt ? "on" : "off"); } while(0)
 
 TihsOptsParseResult tihsopts_parse(argsarr args, ParC24IO io){
@@ -24,7 +25,16 @@ TihsOptsParseResult tihsopts_parse(argsarr args, ParC24IO io){
 		} else if(streq("-s", *args)) readfromstdin = true;
 		else if(streq("-O", *args) || streq("+O", *args)){
 			bool setto = **args == '+' ? false : true;
-			printshopt = !*++args ? 1+!!setto : 0;
+			if(!(printshopt = !*++args ? 1+!!setto : 0)){
+				if ifsetopt(dotglob);
+				else if ifsetopt(extglob);
+				else if ifsetopt(nocaseglob);
+				else if ifsetopt(nullglob);
+				else if ifsetopt(expand_aliases);
+				else if ifsetopt(sourcepath);
+				else if ifsetopt(xpg_echo);
+				else io.logger(LL_ERROR, "%s: invalid shell option name", *args);
+			}
 		}
 	}
 	if(printshopt){
