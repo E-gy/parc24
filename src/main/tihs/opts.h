@@ -16,8 +16,8 @@ Result_T(tihsopts_parse_result, struct tihsopts, string_v);
 #define TihsOptsParseResult struct tihsopts_parse_result
 
 /**
- * @ref args
- * @produces options
+ * @param args @ref
+ * @returns @produces options
  */
 TihsOptsParseResult tihsopts_parse(argsarr args);
 #define tihsopts_parse_caste(args) tihsopts_parse((argsarr) args)

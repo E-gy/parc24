@@ -26,8 +26,8 @@ Result_T(exerun_result, ChildProcessInfo, string_v);
 #define ExeRunResult struct exerun_result
 
 /**
- * @ref args
- * @produces child process info
+ * @param args @ref
+ * @returns @produces child process info
  */
 ExeRunResult exe_run(argsarr args, struct exe_opts opts);
 
@@ -35,15 +35,15 @@ Result_T(exewait_result, int, string_v);
 #define ExeWaitResult struct exewait_result
 
 /**
- * @consumes proc _on success_
+ * @param proc @consumes _on success_
  */
 ExeWaitResult exe_waitretcode(ChildProcessInfo proc);
 
 //Utils
 
 /**
- * @ref args
- * @produces joined arguments
+ * @param args @ref
+ * @returns @produces joined arguments
  */
 string_mut exe_args_join(string args[]);
 #define exe_args_join_caste(args) exe_args_join((string*)args)
