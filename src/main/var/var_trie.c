@@ -63,6 +63,7 @@ static struct rem_res var_trie_remove(VarStore t, string s){
 			var_trie_destroy(t);
 			return rem_res_c(true, repl);
 		}
+		free(t->val);
 		t->val = null;
 		return rem_res_c(true, t);
 	}
@@ -71,7 +72,7 @@ static struct rem_res var_trie_remove(VarStore t, string s){
 	if(!*rc || (*rc)->c != *s) return rem_res_c(false, t);
 	struct rem_res rrr = var_trie_remove(*rc, s + 1);
 	*rc = rrr.newchild;
-	if(!t->children && t->c) {
+	if(!t->children && t->c && !t->val){
 		VarStore repl = t->sibling;
 		var_trie_destroy(t);
 		return rem_res_c(rrr.removed, repl);
