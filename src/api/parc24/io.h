@@ -16,6 +16,7 @@
 enum log_level {
 	LL_DEBUG = 0, LL_INFO, LL_WARN, LL_ERROR, LL_CRITICAL,
 };
+typedef enum log_level LogLevel;
 
 /**
  * Write message (to console)
@@ -41,3 +42,9 @@ struct parc24io {
 };
 #define ParC24IO struct parc24io
 
+/**
+ * IO that reads/writes from/to std streams.
+ * 
+ * @return ParC24IO 
+ */
+ParC24IO parc24io_fromstd();
