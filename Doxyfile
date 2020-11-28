@@ -1,0 +1,26 @@
+# Doxyfile 1.8.20
+
+DOXYFILE_ENCODING = UTF-8
+
+# Project
+
+PROJECT_NAME = "ParC24&42sh"
+PROJECT_NUMBER = 0.0.1
+PROJECT_BRIEF = ParC24 is cross platform lib for shell-like functionality, and 42sh is an exe making active use of it to be a shell. 
+
+# Build
+
+OUTPUT_DIRECTORY = doc
+INPUT = src/api
+FILE_PATTERNS = *.h
+RECURSIVE = TRUE
+
+# Doccing settings
+
+ALLOW_UNICODE_NAMES = YES
+JAVADOC_AUTOBRIEF = YES
+
+ALIASES += ref="_&lt;reference&gt;_"
+ALIASES += refmut="_&lt;mutable reference&gt;_"
+ALIASES += consumed="_&lt;consumed&gt;_"
+ALIASES += produced="_&lt;produced&gt;_"
