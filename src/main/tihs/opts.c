@@ -6,7 +6,7 @@
 
 #define tihsopts_default ((struct tihsopts){.parcopts = parc_options_default})
 
-TihsOptsParseResult tihsopts_parse(argsarr args){
+TihsOptsParseResult tihsopts_parse(argsarr args, ParC24IO io){
 	if(!args) return Error_T(tihsopts_parse_result, {"Args array invalid"});
 	struct tihsopts opts = tihsopts_default;
 	for(; *args && strpref("--", *args); args++){

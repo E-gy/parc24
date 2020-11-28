@@ -8,7 +8,7 @@ extern "C" {
 
 SCENARIO("deciding where to read from", "[opts][parse][tihs]"){
 	WHEN("nada args"){
-		TihsOptsParseResult res = tihsopts_parse_caste(null);
+		TihsOptsParseResult res = tihsopts_parse_caste(null, parc24io_fromstd());
 		THEN("error"){
 			REQUIRE(!IsOk_T(res));
 		}
@@ -16,7 +16,7 @@ SCENARIO("deciding where to read from", "[opts][parse][tihs]"){
 	WHEN("no args"){
 		string args[] = {null};
 		THEN("parsing ok"){
-			IfElse_T(tihsopts_parse_caste(args), opts, {
+			IfElse_T(tihsopts_parse_caste(args, parc24io_fromstd()), opts, {
 				AND_THEN("read from stdin"){
 					REQUIRE(!opts.commandstr);
 					REQUIRE(!opts.commandfile);
@@ -29,7 +29,7 @@ SCENARIO("deciding where to read from", "[opts][parse][tihs]"){
 	WHEN("single arg"){
 		string args[] = {"file.script", null};
 		THEN("parsing ok"){
-			IfElse_T(tihsopts_parse_caste(args), opts, {
+			IfElse_T(tihsopts_parse_caste(args, parc24io_fromstd()), opts, {
 				AND_THEN("read from file and positional args start at the file"){
 					REQUIRE(!opts.commandstr);
 					REQUIRE_THAT(opts.commandfile, Equals(args[0]));
@@ -42,7 +42,7 @@ SCENARIO("deciding where to read from", "[opts][parse][tihs]"){
 	WHEN("explicit stdin"){
 		string args[] = {"-s", null};
 		THEN("parsing ok"){
-			IfElse_T(tihsopts_parse_caste(args), opts, {
+			IfElse_T(tihsopts_parse_caste(args, parc24io_fromstd()), opts, {
 				AND_THEN("read from stdin"){
 					REQUIRE(!opts.commandstr);
 					REQUIRE(!opts.commandfile);
@@ -55,7 +55,7 @@ SCENARIO("deciding where to read from", "[opts][parse][tihs]"){
 	WHEN("read from string"){
 		WHEN("args end too early"){
 			string args[] = {"-c", null};
-			TihsOptsParseResult res = tihsopts_parse_caste(args);
+			TihsOptsParseResult res = tihsopts_parse_caste(args, parc24io_fromstd());
 			THEN("error"){
 				REQUIRE(!IsOk_T(res));
 			}
@@ -63,7 +63,7 @@ SCENARIO("deciding where to read from", "[opts][parse][tihs]"){
 		WHEN("it's the last arg"){
 			string args[] = {"-c", "echo 'dub dub'", null};
 			THEN("parsing ok"){
-				IfElse_T(tihsopts_parse_caste(args), opts, {
+				IfElse_T(tihsopts_parse_caste(args, parc24io_fromstd()), opts, {
 					AND_THEN("read from the string"){
 						REQUIRE_THAT(opts.commandstr, Equals(args[1]));
 						REQUIRE(!opts.commandfile);
@@ -76,7 +76,7 @@ SCENARIO("deciding where to read from", "[opts][parse][tihs]"){
 		WHEN("it isn't the last arg"){
 			string args[] = {"-c", "echo 'dub dub'", "-s", "-c", "ping pong", null};
 			THEN("parsing ok"){
-				IfElse_T(tihsopts_parse_caste(args), opts, {
+				IfElse_T(tihsopts_parse_caste(args, parc24io_fromstd()), opts, {
 					AND_THEN("read from the string and everything after it is not parsed"){
 						REQUIRE_THAT(opts.commandstr, Equals(args[1]));
 						REQUIRE(!opts.commandfile);

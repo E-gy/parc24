@@ -1,6 +1,7 @@
 #pragma once
 
 #include <parc24/options.h>
+#include <parc24/io.h>
 
 struct tihsopts {
 	/** @ref */ string_mut commandstr;
@@ -17,7 +18,8 @@ Result_T(tihsopts_parse_result, struct tihsopts, string_v);
 
 /**
  * @param args @ref
+ * @param io
  * @returns @produces options
  */
-TihsOptsParseResult tihsopts_parse(argsarr args);
-#define tihsopts_parse_caste(args) tihsopts_parse((argsarr) args)
+TihsOptsParseResult tihsopts_parse(argsarr args, ParC24IO io);
+#define tihsopts_parse_caste(args, io) tihsopts_parse((argsarr) args, io)
