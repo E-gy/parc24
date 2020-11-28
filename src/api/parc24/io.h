@@ -37,8 +37,8 @@ Result_T(parc24io_read_result, string_mut, string_v);
 typedef ParC24IOReadResult (*parc24io_reader)(void);
 
 struct parc24io {
-	parc24io_logger logger;
-	parc24io_reader reader;
+	parc24io_logger log;
+	parc24io_reader readline;
 };
 #define ParC24IO struct parc24io
 
