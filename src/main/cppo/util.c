@@ -10,6 +10,7 @@
 #define SQRS "'\\''"
 #endif
 #define SQRL (sizeof(SQRS)/sizeof(*SQRS))
+#define WSEPS "\"'|&;()<> \t"
 
 string_mut exe_args_join(string args[]){
 	if(!args) return null;
@@ -18,7 +19,9 @@ string_mut exe_args_join(string args[]){
 	Buffer aj = null;
 	for(string* arg = args; *arg; arg++){
 		if(j->size > 0) buffer_append_str(j, " ");
-		if(strchr(*arg, ' ') || strchr(*arg, '"') || strchr(*arg, '\'')){ //FIXME always quote cos too many special characters?
+		bool ahasep = false;
+		for(string ms = WSEPS; *ms && !ahasep; ms++) ahasep |= !!strchr(*arg, *ms); 
+		if(ahasep){
 			size_t nl = 2;
 			for(string s = *arg; *s; s++) nl += *s == '\'' ? SQRL : 1;
 			if(aj) buffer_resize(aj, nl);
