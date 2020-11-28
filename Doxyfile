@@ -20,7 +20,12 @@ RECURSIVE = TRUE
 ALLOW_UNICODE_NAMES = YES
 JAVADOC_AUTOBRIEF = YES
 
+ALIASES += copy="_&lt;copy&gt;_"
 ALIASES += ref="_&lt;reference&gt;_"
+ALIASES += refc{1}="\1 by reference"
 ALIASES += refmut="_&lt;mutable reference&gt;_"
-ALIASES += consumed="_&lt;consumed&gt;_"
-ALIASES += produced="_&lt;produced&gt;_"
+ALIASES += refmut{1}="\1 by mutable reference"
+ALIASES += consumes="_&lt;consumed&gt;_"
+ALIASES += produces="_&lt;produced&gt;_"
+ALIASES += consumes{1}="consumes \1"
+ALIASES += produces{1}="produces \1"
