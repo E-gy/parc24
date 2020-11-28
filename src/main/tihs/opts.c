@@ -35,7 +35,7 @@ TihsOptsParseResult tihsopts_parse(argsarr args, ParC24IO io){
 				else if ifsetopt(xpg_echo);
 				else io.logger(LL_ERROR, "%s: invalid shell option name", *args);
 			}
-		}
+		} else io.logger(LL_ERROR, "%s: invalid option", *args);
 	}
 	if(printshopt){
 		printopt(dotglob);
