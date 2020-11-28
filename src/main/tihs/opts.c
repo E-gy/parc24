@@ -6,7 +6,7 @@
 
 #define tihsopts_default ((struct tihsopts){.parcopts = parc_options_default})
 
-#define printopt(opt, reusable) do { if(printshopt == 1) io.logger("shopt %s %s", opts.parcopts. ## opt ? "-s" : "-u", #opt); else if(printshopt == 2) io.logger("%s	%s", #opt, opts.parcopts. ## opt ? "on" : "off"); } while(0)
+#define printopt(opt, reusable) do { if(printshopt == 1) io.logger(LL_INFO, "shopt %s %s", opts.parcopts. ## opt ? "-s" : "-u", #opt); else if(printshopt == 2) io.logger(LL_INFO, "%s	%s", #opt, opts.parcopts. ## opt ? "on" : "off"); } while(0)
 
 TihsOptsParseResult tihsopts_parse(argsarr args, ParC24IO io){
 	if(!args) return Error_T(tihsopts_parse_result, {"Args array invalid"});
