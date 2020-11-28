@@ -27,3 +27,5 @@ struct string_v {
 	char s[128];
 };
 #define string_v struct string_v
+
+typedef string_mut const* argsarr;

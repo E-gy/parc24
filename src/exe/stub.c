@@ -5,7 +5,7 @@
 
 #include <cppo.h>
 
-int main(int argc, string_mut args[]){
+int main(int argc, argsarr args){
 	if(argc < 2){
 		puts("Not enough arguments!");
 		return 127;

@@ -29,7 +29,7 @@ Result_T(exerun_result, ChildProcessInfo, string_v);
  * @ref args
  * @produces child process info
  */
-ExeRunResult exe_run(char* const args[], struct exe_opts opts);
+ExeRunResult exe_run(argsarr args, struct exe_opts opts);
 
 Result_T(exewait_result, int, string_v);
 #define ExeWaitResult struct exewait_result

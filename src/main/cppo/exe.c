@@ -29,7 +29,7 @@ struct childprocinf {
 
 #define fd2handle(fd, handle) do { intptr_t _h = _get_osfhandle(fd); if(_h < 0) return Error_T(exerun_result, {"File not associated with a stream - can't retrieve handle"}); if(!SetHandleInformation((HANDLE) _h, HANDLE_FLAG_INHERIT, true)) return Error_T(exerun_result, {"Handle set inherit failed"}); handle = (HANDLE) _h; } while(0)
 
-ExeRunResult exe_run(char* const args[], struct exe_opts opts){
+ExeRunResult exe_run(argsarr args, struct exe_opts opts){
 	STARTUPINFO startup = {.dwFlags = STARTF_USESTDHANDLES};
 	if(opts.stdio.in >= 0) fd2handle(opts.stdio.in, startup.hStdInput);
 	if(opts.stdio.out >= 0) fd2handle(opts.stdio.out, startup.hStdOutput);
@@ -64,7 +64,7 @@ struct childprocinf {
 	pid_t pid;
 };
 
-ExeRunResult exe_run(char* const args[], struct exe_opts opts){
+ExeRunResult exe_run(cargarr args, struct exe_opts opts){
 	cpr_new(procinf);
 	pid_t cpid = fork();
 	if(cpid < 0){
