@@ -83,8 +83,8 @@ SCENARIO("storing, getting, and removing variables from the store", "[variables 
 								REQUIRE(varstore_get(store, "sherman&p-body") == nullstr);
 								AND_THEN("removing same thing again is error and does nothing"){
 									REQUIRE(!IsOk(varstore_remove(store, newthing)));
-									REQUIRE(varstore_get(store, "potato") == nullstr);
-									REQUIRE_THAT(varstore_get(store, newthing), Equals("yummy"));
+									REQUIRE_THAT(varstore_get(store, "potato"), Equals("big"));
+									REQUIRE(varstore_get(store, newthing) == nullstr);
 									REQUIRE_THAT(varstore_get(store, "that thing over there"), Equals("An Apache Attack Helicopter"));
 									REQUIRE(varstore_get(store, "sherman&p-body") == nullstr);
 								}
