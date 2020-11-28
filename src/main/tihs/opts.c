@@ -6,7 +6,7 @@
 
 #define tihsopts_default ((struct tihsopts){.parcopts = parc_options_default})
 
-#define printopt(opt, reusable) do { if(printshopt == 1) io.logger(LL_INFO, "shopt %s %s", opts.parcopts. ## opt ? "-s" : "-u", #opt); else if(printshopt == 2) io.logger(LL_INFO, "%s	%s", #opt, opts.parcopts. ## opt ? "on" : "off"); } while(0)
+#define printopt(opt) do { if(printshopt == 1) io.logger(LL_INFO, "shopt %s %s", opts.parcopts. ## opt ? "-s" : "-u", #opt); else if(printshopt == 2) io.logger(LL_INFO, "%s	%s", #opt, opts.parcopts. ## opt ? "on" : "off"); } while(0)
 
 TihsOptsParseResult tihsopts_parse(argsarr args, ParC24IO io){
 	if(!args) return Error_T(tihsopts_parse_result, {"Args array invalid"});
@@ -28,13 +28,13 @@ TihsOptsParseResult tihsopts_parse(argsarr args, ParC24IO io){
 		}
 	}
 	if(printshopt){
-		printopt(dotglob, setto);
-		printopt(extglob, setto);
-		printopt(nocaseglob, setto);
-		printopt(nullglob, setto);
-		printopt(expand_aliases, setto);
-		printopt(sourcepath, setto);
-		printopt(xpg_echo, setto);
+		printopt(dotglob);
+		printopt(extglob);
+		printopt(nocaseglob);
+		printopt(nullglob);
+		printopt(expand_aliases);
+		printopt(sourcepath);
+		printopt(xpg_echo);
 	}
 	if(!(opts.commandstr || readfromstdin) && *args) opts.commandfile = *args;
 	opts.args = args;
