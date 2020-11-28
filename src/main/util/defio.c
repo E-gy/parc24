@@ -3,12 +3,18 @@
 #include "null.h"
 #include "buffer.h"
 #include "string.h"
+#include <stdarg.h>
 
-static void std_write(LogLevel level, string message){
+static void std_write(LogLevel level, string message, ...){
 	#ifdef NDEBUG
 	if(level <= LL_DEBUG) return;
 	#endif
-	fprintf(level >= LL_ERROR ? stderr : stdout, "%s: %s\n", "parc24", message);
+	fprintf(level >= LL_ERROR ? stderr : stdout, "%s: ", "parc24");
+	va_list vargs;
+	va_start(vargs, message);
+	vfprintf(level >= LL_ERROR ? stderr : stdout, message, vargs);
+	va_end(vargs);
+	fputc('\n', level >= LL_ERROR ? stderr : stdout);
 }
 
 static ParC24IOReadResult std_read(void){

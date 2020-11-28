@@ -24,7 +24,7 @@ typedef enum log_level LogLevel;
  * @param level log level
  * @param str @ref message
  */
-typedef void (*parc24io_logger)(enum log_level level, string str);
+typedef void (*parc24io_logger)(enum log_level level, string str, ...);
 
 Result_T(parc24io_read_result, string_mut, string_v);
 #define ParC24IOReadResult struct parc24io_read_result
