@@ -15,6 +15,7 @@ file(GLOB_RECURSE src_calp "${PROJECT_SOURCE_DIR}/src/calp/main/*.h" "${PROJECT_
 add_library(calp OBJECT ${src_calp})
 include_directories(calp ${PROJECT_SOURCE_DIR}/src/calp/api)
 include_directories(calp ${PROJECT_SOURCE_DIR}/src/calp/main)
+set_property(TARGET calp PROPERTY POSITION_INDEPENDENT_CODE TRUE)
 
 # Core
 
