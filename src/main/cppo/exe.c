@@ -64,7 +64,7 @@ struct childprocinf {
 	pid_t pid;
 };
 
-ExeRunResult exe_run(cargarr args, struct exe_opts opts){
+ExeRunResult exe_run(argsarr args, struct exe_opts opts){
 	cpr_new(procinf);
 	pid_t cpid = fork();
 	if(cpid < 0){
