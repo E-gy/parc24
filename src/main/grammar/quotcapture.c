@@ -37,7 +37,7 @@ string capture_expando(const string str){
 		int bal = 1;
 		string s = str+2;
 		while(s && *s && bal > 0){
-			if(capture_isquotstart(s) && !isescaped(s, str)) s = capture_quot(str);
+			if(capture_isquotstart(s) && !isescaped(s, str)) s = capture_quot(s);
 			else if(capture_isexpandostart(s) && !isescaped(s, str)) s = capture_expando(s);
 			else {
 				if(!isescaped(s, str)) bal += *s == '(' ? 1 : *s == ')' ? -1 : 0;
