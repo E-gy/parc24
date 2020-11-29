@@ -95,7 +95,7 @@ ExeRunResult exe_run(argsarr args, struct exe_opts opts){
 	}	
 	if(opts.background){
 		int cstatus;
-		if(waitpid(cpid, &cstatus, 0) < 0) return Error_T(exewait_result, {"wait failed"});
+		if(waitpid(cpid, &cstatus, 0) < 0) return Error_T(exerun_result, {"wait failed"});
 	} else procinf->pid = cpid;
 	return Ok_T(exerun_result, procinf);
 }
