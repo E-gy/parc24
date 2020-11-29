@@ -18,7 +18,15 @@ ExpandoResult expando_quot(Buffer buff, size_t* si, struct expando_targets what,
 ExpandoResult expando_expando(Buffer buff, size_t* si, struct expando_targets what, ParContext context);
 
 ExpandoResult expando_quot(Buffer buff, size_t* si, struct expando_targets what, ParContext context){
-	//TODO
+	if(str[0] == '\''){
+		string e = strchr(str+1, '\'');
+		if(!e) return Error_T(expando_result, {"didn't fint matching `'`"});
+		size_t ei = e-str;
+		buffer_delete(buff, ei, ei+1);
+		buffer_delete(buff, *si, (*si)+1);
+		*si = ei-1;
+		return Ok_T(expando_result, null);
+	}
 	return Error_T(expando_result, {"not a quoted"});
 }
 
