@@ -27,6 +27,30 @@ ExpandoResult expando_quot(Buffer buff, size_t* si, struct expando_targets what,
 		*si = ei-1;
 		return Ok_T(expando_result, null);
 	}
+	if(str[0] == '\"'){
+		size_t i = 0;
+		buffer_delete(buff, *si, (*si)+1);
+		while(true){
+			string nquot = strchr(s, '"');
+			if(!nquot) return Error_T(expando_result, {"didn't fint matching '\"'"});
+			size_t ei = nquot-str;
+			while(i <= ei){
+				if(i == ei){
+					buffer_delete(buff, (*si)+i, (*si)+i+1);
+					*si = i;
+					return Ok_T(expando_result, null);
+				}
+				if(capture_isexpandostart(s)){
+					IfError_T(expando_expando(buff, &i, what, context), err, { return Error_T(expando_result, err); });
+					break;
+				} else if(strpref("\\$", s) || strpref("\\`", s) || strpref("\\\"", s) || strpref("\\\\", s) || strpref("\\\n", s)){
+					buffer_delete(buff, (*si)+i, (*si)+i+1);
+					i++;
+					break;
+				} else i++;
+			}
+		}
+	}
 	return Error_T(expando_result, {"not a quoted"});
 }
 
