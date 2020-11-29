@@ -46,6 +46,9 @@ struct expando_targets {
 	bool quot;
 };
 
+Result_T(expando_result, string_mut, string_v);
+#define ExpandoResult struct expando_result
+
 /**
  * Expands the word
  * 
@@ -54,4 +57,4 @@ struct expando_targets {
  * @param context @ref
  * @return @produces expanded word 
  */
-string_mut expando_word(string str, struct expando_targets what, ParContext context);
+ExpandoResult expando_word(string str, struct expando_targets what, ParContext context);
