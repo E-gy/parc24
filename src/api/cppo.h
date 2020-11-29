@@ -18,6 +18,10 @@ struct exe_opts {
 	 * Default -1.
 	 */
 	struct { fd_t in, out, err; } stdio;
+	/**
+	 * if true, detaches all handles to the child (so the returned info _will_ be null) making it unawaitable 
+	 */
+	bool background;
 };
 
 struct childprocinf;

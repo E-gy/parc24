@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <util/null.h>
 
-#define cpr_new(var) ChildProcessInfo var = malloc(sizeof(*var)); if(!var) return Error_T(exerun_result, {"Process info allocation failed"})
+#define cpr_new(var) ChildProcessInfo var = opts.background ? null : malloc(sizeof(*var)); if(!var && !opts.background) return Error_T(exerun_result, {"Process info allocation failed"})
 
 #ifdef _WIN32
 
@@ -41,7 +41,8 @@ ExeRunResult exe_run(argsarr args, struct exe_opts opts){
 	bool ok = CreateProcessA(null, cmd, null, null, true, 0, null, null, &startup, &cpi);
 	free(cmd);
 	if(!ok) return Error_T(exerun_result, {"CreateProcess failed :("});
-	procinf->ph = cpi.hProcess;
+	if(opts.background) CloseHandle(cpi.hProcess);
+	else procinf->ph = cpi.hProcess;
 	CloseHandle(cpi.hThread);
 	return Ok_T(exerun_result, procinf);
 }
@@ -51,6 +52,7 @@ ExeWaitResult exe_waitretcode(ChildProcessInfo proc){
 	if(WaitForSingleObject(proc->ph, INFINITE) != 0) return Error_T(exewait_result, {"Wait failed"});
 	DWORD exitcode;
 	if(!GetExitCodeProcess(proc->ph, &exitcode)) return Error_T(exewait_result, {"GetExitCode failed"});
+	CloseHandle(proc->ph);
 	free(proc);
 	return Ok_T(exewait_result, exitcode);
 }
@@ -84,13 +86,17 @@ ExeRunResult exe_run(argsarr args, struct exe_opts opts){
 		return Error_T(exerun_result, {"fork failed"});
 	}
 	if(cpid == 0){
+		if(opts.background) if(fork() != 0) exit(69);
 		if(opts.stdio.in >= 0) fdup(opts.stdio.in, STDIN_FILENO); else fvoid(STDIN_FILENO);
 		if(opts.stdio.out >= 0) fdup(opts.stdio.out, STDOUT_FILENO); else fvoid(STDOUT_FILENO);
 		if(opts.stdio.err >= 0) fdup(opts.stdio.err, STDERR_FILENO); else fvoid(STDERR_FILENO);
 		execvp(args[0], args);
 		exit(69); //exec failed
-	}
-	procinf->pid = cpid;
+	}	
+	if(opts.background){
+		int cstatus;
+		if(waitpid(cpid, &cstatus, 0) < 0) return Error_T(exewait_result, {"wait failed"});
+	} else procinf->pid = cpid;
 	return Ok_T(exerun_result, procinf);
 }
 
