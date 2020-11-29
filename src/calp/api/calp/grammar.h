@@ -1,5 +1,13 @@
 #pragma once
 
+/**
+ * @file grammar.h
+ * Grammar types.
+ * 
+ * And only - for functionality look for dedicated imports in respective folder.
+ * 
+ */
+
 #include "ptypes.h"
 
 struct symbol;

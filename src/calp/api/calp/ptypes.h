@@ -1,5 +1,13 @@
 #pragma once
 
+/**
+ * @file ptypes.h
+ * Primitive Types commonly used by CALP.
+ * 
+ * And some operations for some of them.
+ * 
+ */
+
 #include <sys/types.h>
 #include <stddef.h>
 #include <stdbool.h>

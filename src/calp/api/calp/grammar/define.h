@@ -1,5 +1,13 @@
 #pragma once
 
+/**
+ * @file define.h
+ * Grammar compile time syntatic definition.
+ * 
+ * Provides tools necessary to "construct" grammar at compile time.
+ * 
+ */
+
 #include "build.h"
 
 #define DEF_SYMBOL_TERMINAL(name, pbody) static string name(string str) pbody

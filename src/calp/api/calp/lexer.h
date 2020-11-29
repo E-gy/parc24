@@ -1,11 +1,20 @@
 #pragma once
 
+/**
+ * @file lexer.h
+ * Lexer definition.
+ * 
+ * Definition of what a lexer is.
+ * No implementations here.
+ * 
+ */
+
 #include "ptypes.h"
 
 /**
  * Given a string finds the end of the token, returning null if the string does not begin with the token
- * @ref str
- * @produces @ref end [exclusive]
+ * @param str @ref
+ * @returns @produces @ref end [exclusive]
  */
 typedef string (*SelfLexingToken)(string);
 
@@ -17,8 +26,8 @@ Result_T(lexer_result, struct {
 #define LexerResult struct lexer_result
 
 /**
- * @ref str
- * @ref token
- * @produces result
+ * @param str @ref
+ * @param token @ref
+ * @returns @produces result
  */
 typedef struct lexer_result (*Lexer)(string,SelfLexingToken);

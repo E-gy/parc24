@@ -1,5 +1,10 @@
 #pragma once
 
+/**
+ * @file ast.h
+ * AST structure & operations
+ */
+
 #include "grammar.h"
 
 #include "ptypes.h"
@@ -27,22 +32,22 @@ struct ast {
 };
 
 /**
- * @ref symbol
- * @produces ast
+ * @param symbol @ref
+ * @returns @produces ast
  */
 AST ast_new_group(Symbol symbol, Group g, size_t children_count);
 /**
- * @ref symbol
- * @consumes val
+ * @param symbol @ref
+ * @param val @consumes
  */
 AST ast_new_leaf(Symbol symbol, string_mut val);
 
 /**
- * @consumes ast
+ * @param ast @consumes
  */
 void ast_destroy(AST ast);
 
 /**
- * @ref ast
+ * @param ast @ref
  */
 void ast_log(AST ast);

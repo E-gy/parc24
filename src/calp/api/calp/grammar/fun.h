@@ -1,14 +1,22 @@
 #pragma once
 
+/**
+ * @file fun.h
+ * Grammar functions.
+ * 
+ * Everything you can do with the grammar itself.
+ * 
+ */
+
 #include <calp/grammar.h>
 
 /**
- * @ref grammar
- * @ref symbols
+ * @param grammar @ref
+ * @param symbols @ref
  */
 void symbols_logi(Grammar grammar, Symbol symbols);
 
 /**
- * @ref grammar
+ * @param grammar @ref
  */
 void grammar_log(Grammar grammar);

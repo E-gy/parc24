@@ -1,21 +1,28 @@
 #pragma once
 
+/**
+ * @file build.h
+ * Grammar construction functionality.
+ * 
+ * Provides functions necessary to construct a grammar at runtime.
+ */
+
 #include <calp/grammar.h>
 
 /**
- * @ref term
- * @ref name
- * @produces symbol
+ * @param term @ref
+ * @param name @ref
+ * @returns @produces symbol
  */
 Symbol symbol_new_term(TerminalSymbolId term, string name);
 /**
- * @ref group
- * @produces symbol
+ * @param group @ref
+ * @returns @produces symbol
  */
 Symbol symbol_new_group(GroupId group);
 
 /**
- * @consumes symbol
+ * @param symbol @consumes
  */
 void symbol_destroy(Symbol symbol);
 
@@ -23,17 +30,17 @@ struct ruleb;
 typedef struct ruleb* RuleBuilder;
 
 /**
- * @produces builder
+ * @returns @produces builder
  */
 RuleBuilder ruleb_new();
 /**
- * @refmut builder
- * @consumes symbol
+ * @param builder @refmut
+ * @param symbol @consumes
  */
 RuleBuilder ruleb_add(RuleBuilder builder, Symbol symbol);
 /**
- * @consumes builder
- * @produces rule
+ * @param builder @consumes
+ * @returns @produces rule
  */
 Rule ruleb_uild(RuleBuilder builder);
 
@@ -41,19 +48,19 @@ struct groupb;
 typedef struct groupb* GroupBuilder;
 
 /**
- * @ref id
- * @ref name
- * @produces builder
+ * @param id @ref
+ * @param name @ref
+ * @returns @produces builder
  */
 GroupBuilder groupb_new(GroupId id, string name);
 /**
- * @refmut builder
- * @consumes rule
+ * @param builder @refmut
+ * @param rule @consumes
  */
 GroupBuilder groupb_add(GroupBuilder builder, Rule rule);
 /**
- * @consumes builder
- * @produces group
+ * @param builder @consumes
+ * @returns @produces group
  */
 Group groupb_uild(GroupBuilder builder);
 
@@ -61,16 +68,16 @@ struct gramb;
 typedef struct gramb* GrammarBuilder;
 
 /**
- * @produces builder
+ * @returns @produces builder
  */
 GrammarBuilder gramb_new(string name);
 /**
- * @refmut builder
- * @consumes group
+ * @param builder @refmut
+ * @param group @consumes
  */
 GrammarBuilder gramb_add(GrammarBuilder builder, Group group);
 /**
- * @consumes builder
- * @produces grammar
+ * @param builder @consumes
+ * @returns @produces grammar
  */
 Grammar gramb_uild(GrammarBuilder builder);
