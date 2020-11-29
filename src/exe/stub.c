@@ -1,28 +1,15 @@
 #include <stdlib.h>
-#include <stdio.h>
-#include <unistd.h>
 #include <ptypes.h>
 
-#include <cppo.h>
+#include <parc24/io.h>
+#include <tihs/opts.h>
 
 int main(int argc, argsarr args){
-	if(argc < 2){
-		puts("Not enough arguments!");
-		return 127;
-	}
-	ExeRunResult exer = exe_run(args+1, (struct exe_opts){.stdio = {STDIN_FILENO, STDOUT_FILENO, STDERR_FILENO}});
-	if(!IsOk_T(exer)){
-		puts(exer.r.error.s);
-		exe_print_last_syserr("exe_run");
-		return 128;
-	}
-	puts("Child created");
-	ExeWaitResult wr = exe_waitretcode(exer.r.ok);
-	if(!IsOk_T(wr)){
-		puts(wr.r.error.s);
-		exe_print_last_syserr("exe_waitretcode");
-		return 129;
-	}
-	puts("Child finished");
-	return wr.r.ok;
+	const ParC24IO io = parc24io_fromstd();
+	TihsOptsParseResult optpars = tihsopts_parse_caste(args+1, io);
+	IfError_T(optpars, err, {
+		io.log(LL_CRITICAL, "Failed to parse arguments - %s", err.s);
+		return 1;
+	});
+	struct tihsopts opts = optpars.r.ok;
 }
