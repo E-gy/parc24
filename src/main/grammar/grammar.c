@@ -10,7 +10,7 @@
 DEF_SYMBOL_TERMINAL(word, {
 	return capture_word(str);
 });
-#define AWSEPS "\"'|&;()<> \t\r\n"
+#define AWSEPS "\"'|&;(){}<> \t\r\n"
 DEF_SYMBOL_TERMINAL(assignment, {
 	if(!str) return null;
 	for(; *str && *str != '='; str++) if(strchr(AWSEPS, *str)) return null;

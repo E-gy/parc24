@@ -57,7 +57,7 @@ string capture_expando(const string str){
 	return null;
 }
 
-#define WSEPS "\"'|&;()<> \t\r\n"
+#define WSEPS "\"'|&;(){}<> \t\r\n"
 
 string capture_word(const string str){
 	if(!str || !*str) return null;
