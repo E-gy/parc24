@@ -1,9 +1,11 @@
 #include <stdlib.h>
 #include <ptypes.h>
-
+#include <unistd.h>
 #include <parc24/io.h>
 #include <tihs/opts.h>
 #include <parc24/pars.h>
+#include <parc24/var_store.h>
+#include <parc24/context.h>
 #include <tihs/exe.h>
 #include <util/bufferio.h>
 
@@ -20,6 +22,12 @@ int main(int argc, argsarr args){
 		io.log(LL_CRITICAL, "Failed to initalize parser. Report logs to CALP, thx.");
 		return 1;
 	}
+	VarStore vars = varstore_new();
+	if(!vars){
+		io.log(LL_CRITICAL, "Failed to create variables store");
+		return 1;
+	}
+	struct parcontext ctxt = {vars, {{STDIN_FILENO, STDOUT_FILENO, STDERR_FILENO}, false}, io, parcer};
 	if(opts.commandstr || opts.commandfile){
 		string_mut str = opts.commandstr;
 		if(!(str = opts.commandstr)){
@@ -30,7 +38,7 @@ int main(int argc, argsarr args){
 			});
 			str = buffer_destr(buff.r.ok);
 		}
-		TihsExeResult exer = tihs_exestr(str, parcer, &opts, io);
+		TihsExeResult exer = tihs_exestr(str, &ctxt);
 		IfError_T(exer, err, {
 			io.log(LL_ERROR, "Execution error - %s", err.s);
 			return 1;
@@ -40,7 +48,7 @@ int main(int argc, argsarr args){
 		int lec = 0;
 		IfElse_T(io.readline(), line, {
 			if(!line) return lec;
-			TihsExeResult exer = tihs_exestr(line, parcer, &opts, io);
+			TihsExeResult exer = tihs_exestr(line, &ctxt);
 			IfError_T(exer, err, { io.log(LL_ERROR, "Execution error - %s", err.s); });
 			IfOk_T(exer, ec, { lec = ec; });
 		}, err, {
