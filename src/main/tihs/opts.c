@@ -20,7 +20,7 @@ TihsOptsParseResult tihsopts_parse(argsarr args, ParC24IO io){
 	for(; *args && (strpref("-", *args) || strpref("+", *args)); args++){
 		if(streq("-c", *args)){
 			if(!*++args) return Error_T(tihsopts_parse_result, {"-c requires an argument"});
-			opts.commandstr = *args++;
+			opts.commandstr = *args;
 			break;
 		} else if(streq("-s", *args)) readfromstdin = true;
 		else if(streq("-O", *args) || streq("+O", *args)){
@@ -34,7 +34,7 @@ TihsOptsParseResult tihsopts_parse(argsarr args, ParC24IO io){
 				else if ifsetopt(sourcepath);
 				else if ifsetopt(xpg_echo);
 				else io.log(LL_ERROR, "%s: invalid shell option name", *args);
-			}
+			} else args--;
 		} else io.log(LL_ERROR, "%s: invalid option", *args);
 	}
 	if(printshopt){
