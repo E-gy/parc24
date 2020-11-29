@@ -1,6 +1,6 @@
 #pragma once
 
-#include <parc24/io.h>
+#include <parc24/context.h>
 #include <tihs/opts.h>
 #include <calp/parser.h>
 
@@ -11,9 +11,7 @@ Result_T(tihs_exe_result, int, string_v);
  * Parses & executes string
  * 
  * @param str @ref input
- * @param parcer @ref parser
- * @param opts @ref
- * @param io
+ * @param ctxt @ref
  * @return TihsExeResult 
  */
-TihsExeResult tihs_exestr(string str, Parser parcer, TihsOptions opts, ParC24IO io);
+TihsExeResult tihs_exestr(string str, ParContext ctxt);

@@ -5,7 +5,6 @@
 #include <parc24/pars.h>
 #include <parc24/travast.h>
 #include <cppo.h>
-#include <unistd.h>
 
 /**
  * Executes AST
@@ -15,10 +14,9 @@
  * @param io
  * @return TihsExeResult 
  */
-TihsExeResult tihs_exeast(AST ast, TihsOptions opts, ParC24IO io){
+TihsExeResult tihs_exeast(AST ast, ParContext ctxt){
 	ast_log(ast); //TODO merge(?) tihs options and ParContext
-	struct parcontext ctxt = {null, {{STDIN_FILENO, STDOUT_FILENO, STDERR_FILENO}, false}, io};
-	TraverseASTResult trr = traverse_ast(ast, &ctxt);
+	TraverseASTResult trr = traverse_ast(ast, ctxt);
 	if(!IsOk_T(trr)) return Error_T(tihs_exe_result, trr.r.error);
 	if(!trr.r.ok.running) return Ok_T(tihs_exe_result, trr.r.ok.completed);
 	ExeWaitResult wr = exe_waitretcode(trr.r.ok.running);
@@ -26,9 +24,9 @@ TihsExeResult tihs_exeast(AST ast, TihsOptions opts, ParC24IO io){
 	return Ok_T(tihs_exe_result, wr.r.ok);
 }
 
-TihsExeResult tihs_exestr(string str, Parser parcer, TihsOptions opts, ParC24IO io){
-	IfElse_T(parcer_parse(parcer, str), ast, {
-		TihsExeResult exer = tihs_exeast(ast, opts, io);
+TihsExeResult tihs_exestr(string str, ParContext ctxt){
+	IfElse_T(parcer_parse(ctxt->parcer, str), ast, {
+		TihsExeResult exer = tihs_exeast(ast, ctxt);
 		ast_destroy(ast);
 		return exer;
 	}, err, {
