@@ -11,8 +11,8 @@
 
 #define isescaped(str, s0) __extension__({ bool _esc = false; for(string _s = str-1; _s >= s0 && *_s == '\\'; _s--) _esc = !_esc; _esc; })
 
-#define str (buff->data+*si)
-#define s (buff->data+*si+i)
+#define str (buff->data+(*si))
+#define s (buff->data+(*si)+i)
 
 ExpandoResult expando_quot(Buffer buff, size_t* si, struct expando_targets what, ParContext context);
 ExpandoResult expando_expando(Buffer buff, size_t* si, struct expando_targets what, ParContext context);
