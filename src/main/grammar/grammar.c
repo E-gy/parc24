@@ -382,7 +382,7 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 					if(!IsOk_T(rredir)) return rredir;
 				}
 			}
-			ExeRunResult rrun = exe_run(args->args, c.exeopts);
+			ExeRunResult rrun = exe_runa(args->args, c.exeopts);
 			argsarrmut_destroy(args);
 			if(!IsOk_T(rrun)) return Error_T(travast_result, rrun.r.error);
 			return Ok_T(travast_result, {rrun.r.ok, -1});

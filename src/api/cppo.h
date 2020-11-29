@@ -6,7 +6,13 @@
  * @param args @ref
  * @returns @produces child process info
  */
-ExeRunResult exe_run(argsarr args, struct exe_opts opts);
+ExeRunResult exe_runa(argsarr args, struct exe_opts opts);
+
+/**
+ * @param cmd @ref
+ * @returns @produces child process info
+ */
+ExeRunResult exe_runs(string_mut cmd, struct exe_opts opts);
 
 /**
  * @param proc @consumes _on success_

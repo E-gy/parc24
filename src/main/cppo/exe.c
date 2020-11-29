@@ -29,13 +29,19 @@ struct childprocinf {
 
 #define fd2handle(fd, handle) do { intptr_t _h = _get_osfhandle(fd); if(_h < 0) return Error_T(exerun_result, {"File not associated with a stream - can't retrieve handle"}); if(!SetHandleInformation((HANDLE) _h, HANDLE_FLAG_INHERIT, true)) return Error_T(exerun_result, {"Handle set inherit failed"}); handle = (HANDLE) _h; } while(0)
 
-ExeRunResult exe_run(argsarr args, struct exe_opts opts){
+ExeRunResult exe_runa(argsarr args, struct exe_opts opts){
+	string_mut cmd = exe_args_join_caste(args);
+	if(!cmd) return Error_T(exerun_result, {"Args join failed"});
+	ExeRunResult rr = exe_runs(cmd, opts);
+	free(cmd);
+	return rr;
+}
+
+ExeRunResult exe_runs(string_mut cmd, struct exe_opts opts){
 	STARTUPINFO startup = {.dwFlags = STARTF_USESTDHANDLES};
 	if(opts.stdio.in >= 0) fd2handle(opts.stdio.in, startup.hStdInput);
 	if(opts.stdio.out >= 0) fd2handle(opts.stdio.out, startup.hStdOutput);
 	if(opts.stdio.err >= 0) fd2handle(opts.stdio.err, startup.hStdError);
-	string_mut cmd = exe_args_join_caste(args);
-	if(!cmd) return Error_T(exerun_result, {"Args join failed"});
 	cpr_new(procinf);
 	PROCESS_INFORMATION cpi;
 	bool ok = CreateProcessA(null, cmd, null, null, true, 0, null, null, &startup, &cpi);
@@ -78,7 +84,7 @@ static Result fdremainopenonexec(fd_t fd){
 #define fdup(fd, fdst) do { if(fd != fdst && dup2(fd, fdst) < 0) return Error_T(exerun_result, {"dup2 failed"}); if(!IsOk(fdremainopenonexec(fdst))) return Error_T(exerun_result, {"Marking fd to remain open on exec failed"}); } while(0)
 #define fvoid(fdst) do { fd_t _devnul = open("/dev/null", O_RDWR); if(_devnul < 0) return Error_T(exerun_result, {"open /dev/null failed"}); if(dup2(_devnul, fdst) < 0) return Error_T(exerun_result, {"dup2 failed"}); close(_devnul); } while(0)
 
-ExeRunResult exe_run(argsarr args, struct exe_opts opts){
+ExeRunResult exe_runa(argsarr args, struct exe_opts opts){
 	cpr_new(procinf);
 	pid_t cpid = fork();
 	if(cpid < 0){
