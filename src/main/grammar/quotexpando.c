@@ -95,8 +95,14 @@ ExpandoResult expando_word(string str, struct expando_targets what, ParContext c
 	while(buff->data[i]){
 		if(capture_isquotstart(s) && !isescaped(s, str)) IfError_T(expando_quot(buff, &i, what, context), err, { return Error_T(expando_result, err); });
 		else if(capture_isexpandostart(s) && !isescaped(s, str)) IfError_T(expando_expando(buff, &i, what, context), err, { return Error_T(expando_result, err); });
-		else if(strchr(WSEPS, *s) && !isescaped(s, str)) break;
-		else i++;
+		else if(s[0] == '\\'){
+			i++;
+			if(!s){
+				buffer_destroy(buff);
+				return Error_T(expando_result, {"\\ last character"});
+			}
+			buffer_delete(buff, i-1, i);
+		} else i++;
 	}
 	return Ok_T(expando_result, buffer_destr(buff));
 }
