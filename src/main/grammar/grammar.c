@@ -256,7 +256,7 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 			//TODO
 			return Ok_T(travast_result, {null, 0});
 		}
-		return Error_T(travast_result, {"AST not recognized"});
+		return Error_T(travast_result, {"AST (leaf) not recognized"});
 	}
 	const GroupId gid = ast->d.group.groupId;
 	if(gid == entry){
@@ -357,13 +357,23 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 			return traverse_ast(ast->d.group.children[1], ctxt);
 		}
 		if(ast->d.group.cc == 3){
-			size_t words = ast->d.group.children[1]->d.group.children[0]->type == AST_LEAF ? 1 : 0;
+			const AST c0 = ast->d.group.children[1]->d.group.children[0];
+			size_t words = c0->type == AST_LEAF ? 1 : 0;
 			for(AST elr = ast->d.group.children[2]; elr->d.group.cc > 1; elr = elr->d.group.children[1]) if(elr->d.group.children[0]->d.group.children[0]->type == AST_LEAF) words++;
 			if(words == 0) return Error_T(travast_result, {"don't know what to do with a command without words"}); //FIXME
 			struct parcontext c = *ctxt; //TODO dup varstore
-			TraverseASTResult rass = traverse_ast(ast->d.group.children[0], &c);
-			if(!IsOk_T(rass)) return rass;
+			for(AST ar = ast->d.group.children[0]; ar->d.group.cc > 1; ar = ar->d.group.children[1]){
+				TraverseASTResult rass = traverse_ast(ar->d.group.children[0]->d.group.children[0], &c);
+				if(!IsOk_T(rass)) return rass;
+			}
 			ArgsArr_Mut args = argsarrmut_new(words);
+			if(!args) return Error_T(travast_result, {"args construction failed"});
+			if(c0->type == AST_LEAF){
+				if(!IsOk(argsarrmut_append(args, expando_word(c0->d.leaf.val, (struct expando_targets){ .tilde = true, .parvar = true, .arithmetics = true, .command = true, .process = true, .path = true, .quot = true }, &c)))) return Error_T(travast_result, {"command word expando failed"});
+			} else {
+				TraverseASTResult rredir = traverse_ast(c0, &c);
+				if(!IsOk_T(rredir)) return rredir;
+			}
 			{
 				for(AST elr = ast->d.group.children[2]; elr->d.group.cc > 1; elr = elr->d.group.children[1]) if(elr->d.group.children[0]->d.group.children[0]->type == AST_LEAF){
 				if(!IsOk(argsarrmut_append(args, expando_word(elr->d.group.children[0]->d.group.children[0]->d.leaf.val, (struct expando_targets){ .tilde = true, .parvar = true, .arithmetics = true, .command = true, .process = true, .path = true, .quot = true }, &c)))) return Error_T(travast_result, {"command word expando failed"});
@@ -388,5 +398,5 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 	}
 	//blocks
 	//TODO
-	return Error_T(travast_result, {"AST not recognized"});
+	return Error_T(travast_result, {"AST (group) not recognized"});
 }
