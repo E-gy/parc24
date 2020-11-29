@@ -78,7 +78,8 @@ EntityInfo entimap_add(EntitiesMap m, struct entinf ii){
 	return *i = nii;
 }
 
-#ifndef NDEBUG
+#define NDEBUG_CALP
+#ifndef NDEBUG_CALP
 
 #include <calp/util/log.h>
 #include <calp/grammar/fun.h>
