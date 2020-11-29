@@ -240,3 +240,153 @@ Parser parcer_defolt_new(void){
 ParseResult parcer_parse(Parser p, string str){
 	return parser_parse(p, lexer_spacebegone, str, &entry);
 }
+
+#include <parc24/travast.h>
+#include <cppo.h>
+#include <unistd.h>
+#include <util/argsarr_mut.h>
+
+#define isexitcodeok(c) ((c&0xFF) != 0)
+
+
+TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
+	if(ast->type == AST_LEAF){
+		const TerminalSymbolId sid = ast->d.leaf.symbolId;
+		if(sid == assignment){
+			//TODO
+			return Ok_T(travast_result, {null, 0});
+		}
+		return Error_T(travast_result, {"AST not recognized"});
+	}
+	const GroupId gid = ast->d.group.groupId;
+	if(gid == entry){
+		if(ast->d.group.cc > 1) return traverse_ast(ast->d.group.children[0], ctxt);
+		else return Ok_T(travast_result, {null, 0});
+	}
+	//l3: ; & \n
+	if(gid == cmdlist_l3 || gid == cmdlist_l3_r){
+		if(ast->d.group.cc == 1) return Ok_T(travast_result, {null, 0});
+		const size_t it1 = gid == cmdlist_l3 ? 0 : 1;
+		const size_t ir = gid == cmdlist_l3 ? 1 : 2;
+		TraverseASTResult t1 = traverse_ast(ast->d.group.children[it1], ctxt);
+		if(!IsOk_T(t1)) return t1;
+		if(ast->d.group.children[ir]->d.group.cc == 1) return t1;
+		if(t1.r.ok.running) exe_waitretcode(t1.r.ok.running);
+		return traverse_ast(ast->d.group.children[ir], ctxt);
+	}
+	if(gid == cmdlist_l3ext || gid == cmdlist_l3ext_r){
+		if(ast->d.group.cc == 1) return Ok_T(travast_result, {null, 0});
+		const size_t it1 = gid == cmdlist_l3ext ? 1 : 1;
+		const size_t ir = gid == cmdlist_l3ext ? 2 : 2;
+		TraverseASTResult t1 = traverse_ast(ast->d.group.children[it1], ctxt);
+		if(!IsOk_T(t1)) return t1;
+		if(ast->d.group.children[ir]->d.group.cc == 1) return t1;
+		if(t1.r.ok.running) exe_waitretcode(t1.r.ok.running);
+		return traverse_ast(ast->d.group.children[ir], ctxt);
+	}
+	//l2: || &&
+	if(gid == cmdlist_l2 || gid == cmdlist_l2_r){
+		if(ast->d.group.cc == 1) return Ok_T(travast_result, {null, 0});
+		const size_t it1 = gid == cmdlist_l2 ? 0 : 2;
+		const size_t ir = gid == cmdlist_l2 ? 1 : 3;
+		TraverseASTResult t1 = traverse_ast(ast->d.group.children[it1], ctxt);
+		if(!IsOk_T(t1)) return t1;
+		AST r = ast->d.group.children[ir];
+		if(r->d.group.cc == 1) return t1;
+		int rc;
+		if(t1.r.ok.running){
+			ExeWaitResult wr = exe_waitretcode(t1.r.ok.running);
+			if(!IsOk_T(wr)) return Error_T(travast_result, wr.r.error);
+			rc = wr.r.ok;
+			t1.r.ok.running = null;
+		} else rc = t1.r.ok.completed;
+		return(r->d.group.children[0]->d.group.children[0]->d.leaf.symbolId == (isexitcodeok(rc) ? vpipvpip : ampamp)) ? t1 : traverse_ast(ast->d.group.children[ir], ctxt);
+	}
+	//l1: |
+	if(gid == cmdlist_l1 || gid == cmdlist_l1_r){
+		if(ast->d.group.cc == 1) return Ok_T(travast_result, {null, 0});
+		const size_t it1 = gid == cmdlist_l1 ? 1 : 2;
+		const size_t ir = gid == cmdlist_l1 ? 2 : 3;
+		if(ast->d.group.children[ir]->d.group.cc == 1) return traverse_ast(ast->d.group.children[it1], ctxt);
+		struct parcontext cl = *ctxt;
+		struct parcontext cr = *ctxt;
+		PipeResult pipe = pipe_new();
+		if(!IsOk_T(pipe)) return Error_T(travast_result, pipe.r.error);
+		cl.exeopts.stdio.out = pipe.r.ok.write;
+		cl.exeopts.background = true;
+		cr.exeopts.stdio.in = pipe.r.ok.read;
+		TraverseASTResult t1 = traverse_ast(ast->d.group.children[it1], &cl);
+		close(pipe.r.ok.write);
+		if(!IsOk_T(t1)){
+			close(pipe.r.ok.read);
+			return t1;
+		}
+		TraverseASTResult t2 = traverse_ast(ast->d.group.children[ir], &cr);
+		close(pipe.r.ok.read);
+		return t2;
+	}
+	//sparlkes
+	if(gid == redirection){
+		const TerminalSymbolId assid = ast->d.group.children[1]->d.leaf.symbolId;
+		//TODO
+		return Ok_T(travast_result, {null, 0});
+	}
+	if(gid == redirections){
+		if(ast->d.group.cc == 1) return Ok_T(travast_result, {null, 0});
+		TraverseASTResult r = traverse_ast(ast->d.group.children[0], ctxt);
+		if(!IsOk_T(r)) return r;
+		return traverse_ast(ast->d.group.children[1], ctxt);
+	}
+	//command
+	if(gid == command){
+		if(ast->d.group.cc > 1){
+			TraverseASTResult r = traverse_ast(ast->d.group.children[1], ctxt);
+			if(!IsOk_T(r)) return r;
+		}
+		return traverse_ast(ast->d.group.children[0], ctxt);
+	}
+	//simple cmd
+	if(gid == cmd_simple_pref){
+		//TODO
+		return Ok_T(travast_result, {null, 0});
+	}
+	if(gid == cmd_simple){
+		if(ast->d.group.cc == 2){
+			TraverseASTResult r1 = traverse_ast(ast->d.group.children[0], ctxt);
+			if(!IsOk_T(r1)) return r1;
+			return traverse_ast(ast->d.group.children[1], ctxt);
+		}
+		if(ast->d.group.cc == 3){
+			size_t words = ast->d.group.children[1]->d.group.children[0]->type == AST_LEAF ? 1 : 0;
+			for(AST elr = ast->d.group.children[2]; elr->d.group.cc > 1; elr = elr->d.group.children[1]) if(elr->d.group.children[0]->d.group.children[0]->type == AST_LEAF) words++;
+			if(words == 0) return Error_T(travast_result, {"don't know what to do with a command without words"}); //FIXME
+			struct parcontext c = *ctxt; //TODO dup varstore
+			TraverseASTResult rass = traverse_ast(ast->d.group.children[0], &c);
+			if(!IsOk_T(rass)) return rass;
+			ArgsArr_Mut args = argsarrmut_new(words);
+			{
+				for(AST elr = ast->d.group.children[2]; elr->d.group.cc > 1; elr = elr->d.group.children[1]) if(elr->d.group.children[0]->d.group.children[0]->type == AST_LEAF){
+				if(!IsOk(argsarrmut_append(args, expando_word(elr->d.group.children[0]->d.group.children[0]->d.leaf.val, (struct expando_targets){ .tilde = true, .parvar = true, .arithmetics = true, .command = true, .process = true, .path = true, .quot = true }, &c)))) return Error_T(travast_result, {"command word expando failed"});
+				} else {
+					TraverseASTResult rredir = traverse_ast(elr->d.group.children[0]->d.group.children[0], &c);
+					if(!IsOk_T(rredir)) return rredir;
+				}
+			}
+			ExeRunResult rrun = exe_run(args->args, c.exeopts);
+			argsarrmut_destroy(args);
+			if(!IsOk_T(rrun)) return Error_T(travast_result, rrun.r.error);
+			return Ok_T(travast_result, {rrun.r.ok, -1});
+		}
+	}
+	if(gid == cmd_compound){
+		if(ast->d.group.cc == 3) return traverse_ast(ast->d.group.children[1], ctxt);
+		if(ast->d.group.cc == 1) return traverse_ast(ast->d.group.children[0], ctxt);
+	}
+	if(gid == cmd_fundecl){
+		//TODO
+		return Error_T(travast_result, {"NOT YET IMPLEMENTED"});	
+	}
+	//blocks
+	//TODO
+	return Error_T(travast_result, {"AST not recognized"});
+}
