@@ -157,7 +157,8 @@ DEF_GKLEENE(cmd_simple_pref_r, SYMBOL_G(cmd_simple_pref));
 DEF_GROUP(cmd_simple_el, RULE(SYMBOL_T(word)); RULE(SYMBOL_G(redirection)));
 DEF_GKLEENE(cmd_simple_el_r, SYMBOL_G(cmd_simple_el));
 DEF_GROUP(cmd_simple,
-	RULE(SYMBOL_G(cmd_simple_pref); SYMBOL_G(cmd_simple_pref_r)); RULE(SYMBOL_G(cmd_simple_pref_r); SYMBOL_G(cmd_simple_el); SYMBOL_G(cmd_simple_el_r))
+	RULE(SYMBOL_G(cmd_simple_pref); SYMBOL_G(cmd_simple_pref_r));
+	RULE(SYMBOL_G(cmd_simple_pref_r); SYMBOL_G(cmd_simple_el); SYMBOL_G(cmd_simple_el_r))
 );
 
 static Group blok_if();
