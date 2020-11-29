@@ -5,4 +5,4 @@
 
 Parser parcer_defolt_new(void);
 
-Group parcer_defolt_entrgrp(void);
+GroupId parcer_defolt_entrgrp(void);
