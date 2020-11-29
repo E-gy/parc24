@@ -7,7 +7,10 @@
 
 string capture_quot(const string str){
 	if(!capture_isquotstart(str)) return null;
-	if(str[0] == '\'') return strchr(str+1, '\'')+1;
+	if(str[0] == '\''){
+		string e = strchr(str+1, '\'');
+		return e ? e+1 : null;
+	}
 	if(str[0] == '"'){
 		string quot = str;
 		do {
