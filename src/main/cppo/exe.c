@@ -123,7 +123,7 @@ ExeRunResult exe_runs(string_mut cmd, struct exe_opts opts){
 		if(!IsOk(argsarrmut_append(args, buffer_destr(buffer_new_from(next.r.ok.start, next.r.ok.end-next.r.ok.start))))) return Error_T(exerun_result, {"Args split (append) failed"});
 		s = next.r.ok.next;
 	}
-	ExeRunResult rr = exe_runa(args, opts);
+	ExeRunResult rr = exe_runa(args->args, opts);
 	argsarrmut_destroy(args);
 	return rr;
 }
