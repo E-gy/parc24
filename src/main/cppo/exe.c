@@ -70,7 +70,7 @@ static Result fdremainopenonexec(fd_t fd){
 	int flags = fcntl(fd, F_GETFD, 0);
 	if(flags < 0) return Error;
 	flags &= ~FD_CLOEXEC;
-	return fcntl(fd, F_SETF, flags) < 0 ? Error : Ok;
+	return fcntl(fd, F_SETFD, flags) < 0 ? Error : Ok;
 } 
 
 #define fdup(fd, fdst) do { if(fd != fdst && dup2(fd, fdst) < 0) return Error_T(exerun_result, {"dup2 failed"}); if(!IsOk(fdremainopenonexec(fdst))) return Error_T(exerun_result, {"Marking fd to remain open on exec failed"}); } while(0)
