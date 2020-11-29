@@ -58,11 +58,22 @@ ExeWaitResult exe_waitretcode(ChildProcessInfo proc){
 #else
 
 #include <unistd.h>
+#include <fcntl.h>
 #include <sys/wait.h>
+#include <stdio.h>
 
 struct childprocinf {
 	pid_t pid;
 };
+
+static Result fdremainopenonexec(fd_t fd){
+	int flags = fcntl(fd, F_GETFD, 0);
+	if(flags < 0) return Error;
+	flags &= ~FD_CLOEXEC;
+	return fcntl(fd, F_SETF, flags) < 0 ? Error : Ok;
+} 
+
+#define fdup(fd, fdst) do { if(fd != fdst && dup2(fd, fdst) < 0) return Error_T(exerun_result, {"dup2 failed"}); if(!IsOk(fdremainopenonexec(fdst))) return Error_T(exerun_result, {"Marking fd to remain open on exec failed"}); } while(0)
 
 ExeRunResult exe_run(argsarr args, struct exe_opts opts){
 	cpr_new(procinf);
@@ -72,6 +83,9 @@ ExeRunResult exe_run(argsarr args, struct exe_opts opts){
 		return Error_T(exerun_result, {"fork failed"});
 	}
 	if(cpid == 0){
+		if(opts.stdio.in >= 0) fdup(opts.stdio.in, STDIN_FILENO);
+		if(opts.stdio.out >= 0) fdup(opts.stdio.out, STDOUT_FILENO);
+		if(opts.stdio.err >= 0) fdup(opts.stdio.err, STDERR_FILENO);
 		execvp(args[0], args);
 		exit(69); //exec failed
 	}
