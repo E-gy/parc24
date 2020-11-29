@@ -101,5 +101,6 @@ SCENARIO("storing, getting, and removing variables from the store", "[variables 
 				}
 			}
 		}
+		varstore_destroy(store);
 	}
 }
