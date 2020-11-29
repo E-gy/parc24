@@ -244,6 +244,7 @@ ParseResult parcer_parse(Parser p, string str){
 #include <parc24/travast.h>
 #include <cppo.h>
 #include <unistd.h>
+#include <stdlib.h>
 #include <util/argsarr_mut.h>
 
 #define isexitcodeok(c) ((c&0xFF) != 0)
@@ -369,14 +370,16 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 			ArgsArr_Mut args = argsarrmut_new(words);
 			if(!args) return Error_T(travast_result, {"args construction failed"});
 			if(c0->type == AST_LEAF){
-				if(!IsOk(argsarrmut_append(args, expando_word(c0->d.leaf.val, (struct expando_targets){ .tilde = true, .parvar = true, .arithmetics = true, .command = true, .process = true, .path = true, .quot = true }, &c)))) return Error_T(travast_result, {"command word expando failed"});
+				ExpandoResult expr = expando_word(c0->d.leaf.val, (struct expando_targets){ .tilde = true, .parvar = true, .arithmetics = true, .command = true, .process = true, .path = true, .quot = true }, &c);
+				if(!IsOk_T(expr) || !IsOk(argsarrmut_append(args, expr.r.ok))) return Error_T(travast_result, {"command word expando failed"});
 			} else {
 				TraverseASTResult rredir = traverse_ast(c0, &c);
 				if(!IsOk_T(rredir)) return rredir;
 			}
 			{
 				for(AST elr = ast->d.group.children[2]; elr->d.group.cc > 1; elr = elr->d.group.children[1]) if(elr->d.group.children[0]->d.group.children[0]->type == AST_LEAF){
-				if(!IsOk(argsarrmut_append(args, expando_word(elr->d.group.children[0]->d.group.children[0]->d.leaf.val, (struct expando_targets){ .tilde = true, .parvar = true, .arithmetics = true, .command = true, .process = true, .path = true, .quot = true }, &c)))) return Error_T(travast_result, {"command word expando failed"});
+					ExpandoResult expr = expando_word(elr->d.group.children[0]->d.group.children[0]->d.leaf.val, (struct expando_targets){ .tilde = true, .parvar = true, .arithmetics = true, .command = true, .process = true, .path = true, .quot = true }, &c);
+					if(!IsOk_T(expr) || !IsOk(argsarrmut_append(args, expr.r.ok))) return Error_T(travast_result, {"command word expando failed"});
 				} else {
 					TraverseASTResult rredir = traverse_ast(elr->d.group.children[0]->d.group.children[0], &c);
 					if(!IsOk_T(rredir)) return rredir;
