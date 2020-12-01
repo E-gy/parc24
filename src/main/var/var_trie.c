@@ -102,8 +102,8 @@ void varstore_destroy(VarStore t){
 
 VarStore varstore_clone(VarStore store){
 	if(!store) return null;
-	string_mut valcpy = strdup(store->val);
-	if(store->val && !valcpy) return null;
+	string_mut valcpy = null;
+	if(store->val && !(valcpy = strdup(store->val))) return null;
 	VarStore clone = var_trie_new(store->c, valcpy, null, null);
 	if(!clone){
 		free(valcpy);
