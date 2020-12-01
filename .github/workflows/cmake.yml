@@ -12,9 +12,9 @@ jobs:
     - uses: actions/checkout@v2
     - name: Create Build Environment
       run: cmake -E make_directory ${{runner.workspace}}/build
-    - name: Install Lcov
+    - name: Install Utilities
       shell: bash
-      run: sudo apt-get install -y lcov
+      run: sudo apt-get install -y lcov valgrind
     - name: Configure CMake
       shell: bash
       working-directory: ${{runner.workspace}}/build
