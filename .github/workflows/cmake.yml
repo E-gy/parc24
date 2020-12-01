@@ -33,7 +33,7 @@ jobs:
     - name: Test
       working-directory: ${{runner.workspace}}/build
       shell: bash
-      run: ctest -C $BUILD_TYPE -T memcheck
+      run: ctest -C $BUILD_TYPE -T memcheck --output-on-failure
     - name: Generate Coverage
       working-directory: ${{runner.workspace}}/build
       shell: bash
