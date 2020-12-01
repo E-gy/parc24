@@ -28,6 +28,7 @@ struct ccmdstore {
 
 CCMDStore ccmdstore_new(){
 	new(CCMDStore, s);
+	*s = (struct ccmdstore){null};
 	return s;
 }
 
