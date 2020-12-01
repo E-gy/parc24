@@ -59,7 +59,7 @@ Result ccmdstore_set(CCMDStore s, string cmd, CCMD exe){
 	if(!cmdv) return Error;
 	CCMDSEl* e = &s->els;
 	for(; *e && strcmp((*e)->cmd, cmd) < 0; e = &((*e)->next));
-	if(e && streq((*e)->cmd, cmd)){
+	if(*e && streq((*e)->cmd, cmd)){
 		CCMDSEl el = *e;
 		free(el->cmd);
 		el->cmd = cmdv;
