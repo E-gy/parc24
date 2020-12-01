@@ -16,6 +16,12 @@ VarStore varstore_new(void);
 void varstore_destroy(VarStore store);
 
 /**
+ * @param @ref store 
+ * @return @produces stpre 
+ */
+VarStore varstore_clone(VarStore store);
+
+/**
  * @param @ref store
  * @param @ref var
  * @returns @ref val

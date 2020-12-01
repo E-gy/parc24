@@ -100,6 +100,22 @@ void varstore_destroy(VarStore t){
 	var_trie_destroy(t);
 }
 
+VarStore varstore_clone(VarStore store){
+	if(!store) return null;
+	string_mut valcpy = strdup(store->val);
+	if(store->val && !valcpy) return null;
+	VarStore clone = var_trie_new(store->c, valcpy, null, null);
+	if(!clone){
+		free(valcpy);
+		return null;
+	}
+	if((store->children && !(clone->children = varstore_clone(store->children))) || (store->sibling && !(clone->sibling = varstore_clone(store->sibling)))){
+		varstore_destroy(clone);
+		return null;
+	}
+	return clone;
+}
+
 string_mut varstore_get(VarStore t, string var){
 	VarStore r = var_trie_find(t, var);
 	return r ? r->val : null;

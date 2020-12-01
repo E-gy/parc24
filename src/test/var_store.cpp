@@ -104,3 +104,71 @@ SCENARIO("storing, getting, and removing variables from the store", "[variables 
 		varstore_destroy(store);
 	}
 }
+
+SCENARIO("cloning variables store", "[variables store][parc24]"){
+	GIVEN("store with stuff"){
+		VarStore store = varstore_new();
+		CHECK(IsOk(varstore_add(store, "potato", "bit")));
+		CHECK(IsOk(varstore_add(store, "tidbit", "left")));
+		CHECK(IsOk(varstore_add(store, "Death", "stranding")));
+		WHEN("making a clone"){
+			VarStore clone = varstore_clone(store);
+			REQUIRE(!!clone);
+			THEN("clone keeps the variables"){
+				REQUIRE_THAT(varstore_get(clone, "potato"), Equals("bit"));
+				REQUIRE_THAT(varstore_get(clone, "tidbit"), Equals("left"));
+				REQUIRE_THAT(varstore_get(clone, "Death"), Equals("stranding"));
+				AND_THEN("altering one doesn't change the other"){
+					REQUIRE(IsOk(varstore_add(store, "potato", "pink")));
+					REQUIRE(IsOk(varstore_remove(store, "Death")));
+					REQUIRE_THAT(varstore_get(store, "potato"), Equals("pink"));
+					REQUIRE_THAT(varstore_get(store, "tidbit"), Equals("left"));
+					REQUIRE(varstore_get(store, "Death") == nullstr);
+					REQUIRE_THAT(varstore_get(clone, "potato"), Equals("bit"));
+					REQUIRE_THAT(varstore_get(clone, "tidbit"), Equals("left"));
+					REQUIRE_THAT(varstore_get(clone, "Death"), Equals("stranding"));
+					AND_THEN("destroying one keeps the other"){
+						varstore_destroy(store);
+						store = null;
+						REQUIRE_THAT(varstore_get(clone, "potato"), Equals("bit"));
+						REQUIRE_THAT(varstore_get(clone, "tidbit"), Equals("left"));
+						REQUIRE_THAT(varstore_get(clone, "Death"), Equals("stranding"));
+					}
+					AND_THEN("destroying the other keeps one"){
+						varstore_destroy(clone);
+						clone = null;
+						REQUIRE_THAT(varstore_get(store, "potato"), Equals("pink"));
+						REQUIRE_THAT(varstore_get(store, "tidbit"), Equals("left"));
+						REQUIRE(varstore_get(store, "Death") == nullstr);
+					}
+				}
+				AND_THEN("altering the other doesn't change one"){
+					REQUIRE(IsOk(varstore_add(clone, "potato", "pink")));
+					REQUIRE(IsOk(varstore_remove(clone, "Death")));
+					REQUIRE_THAT(varstore_get(clone, "potato"), Equals("pink"));
+					REQUIRE_THAT(varstore_get(clone, "tidbit"), Equals("left"));
+					REQUIRE(varstore_get(clone, "Death") == nullstr);
+					REQUIRE_THAT(varstore_get(store, "potato"), Equals("bit"));
+					REQUIRE_THAT(varstore_get(store, "tidbit"), Equals("left"));
+					REQUIRE_THAT(varstore_get(store, "Death"), Equals("stranding"));
+					AND_THEN("destroying one keeps the other"){
+						varstore_destroy(store);
+						store = null;
+						REQUIRE_THAT(varstore_get(clone, "potato"), Equals("pink"));
+						REQUIRE_THAT(varstore_get(clone, "tidbit"), Equals("left"));
+						REQUIRE(varstore_get(clone, "Death") == nullstr);
+					}
+					AND_THEN("destroying the other keeps one"){
+						varstore_destroy(clone);
+						clone = null;
+						REQUIRE_THAT(varstore_get(store, "potato"), Equals("bit"));
+						REQUIRE_THAT(varstore_get(store, "tidbit"), Equals("left"));
+						REQUIRE_THAT(varstore_get(store, "Death"), Equals("stranding"));
+						
+					}
+				}
+			}
+		}
+		varstore_destroy(store);
+	}
+}
