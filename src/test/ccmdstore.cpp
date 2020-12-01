@@ -31,7 +31,7 @@ SCENARIO("ccmds store is operational", "[ccmds store][parc24]"){
 			REQUIRE(ccmdstore_get(store, cmd3) == dummyf3);
 			AND_THEN("and replaceable"){
 				REQUIRE(IsOk(ccmdstore_set(store, cmd1, dummyf4)));
-				REQUIRE(ccmdstore_get(store, "echo") == dummyf4);
+				REQUIRE(ccmdstore_get(store, cmd1) == dummyf4);
 				REQUIRE(ccmdstore_get(store, cmd2) == dummyf2);
 				REQUIRE(ccmdstore_get(store, cmd3) == dummyf3);
 			}
