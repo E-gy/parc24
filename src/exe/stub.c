@@ -27,7 +27,12 @@ int main(int argc, argsarr args){
 		io.log(LL_CRITICAL, "Failed to create variables store");
 		return 1;
 	}
-	struct parcontext ctxt = {vars, {{STDIN_FILENO, STDOUT_FILENO, STDERR_FILENO}, false}, io, parcer};
+	CCMDStore ccmds = ccmdstore_new();
+	if(!ccmds){
+		io.log(LL_CRITICAL, "Failed to create ccmds store");
+		return 1;
+	}
+	struct parcontext ctxt = {vars, ccmds, {{STDIN_FILENO, STDOUT_FILENO, STDERR_FILENO}, false}, io, parcer};
 	if(opts.commandstr || opts.commandfile){
 		string_mut str = opts.commandstr;
 		if(!(str = opts.commandstr)){
