@@ -168,6 +168,7 @@ SCENARIO("cloning variables store", "[variables store][parc24]"){
 					}
 				}
 			}
+			varstore_destroy(clone);
 		}
 		varstore_destroy(store);
 	}
