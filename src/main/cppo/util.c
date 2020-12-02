@@ -4,8 +4,7 @@
 #include <util/null.h>
 #include <util/buffer.h>
 #include <util/string.h>
-#include <grammar/quotexpando.h>
-#include <calp/lexers.h>
+#include <ctype.h>
 
 #define SQRS "'\\''"
 #define SQRL (sizeof(SQRS)/sizeof(*SQRS))
@@ -53,15 +52,44 @@ string_mut exe_args_join(string args[], bool os){
 	return buffer_destr(j);
 }
 
+#define isescaped(str, s0) __extension__({ bool _esc = false; for(string _s = str-1; _s >= s0 && *_s == '\\'; _s--) _esc = !_esc; _esc; })
+
 ArgsArr_Mut exe_args_split(string cmd){
 	if(!cmd) return null;
 	ArgsArr_Mut args = argsarrmut_new(16);
 	if(!args) return null;
 	for(string s = cmd; *s;){
-		LexerResult next = lexer_spacebegone(s, capture_word);
-		if(!IsOk_T(next)) retclean(null, {argsarrmut_destroy(args);});
-		if(!IsOk(argsarrmut_append(args, buffer_destr(buffer_new_from(next.r.ok.start, next.r.ok.end-next.r.ok.start))))) retclean(null, {argsarrmut_destroy(args);});
-		s = next.r.ok.next;
+		Buffer buff = buffer_new(64);
+		if(!buff) retclean(null, {argsarrmut_destroy(args);});
+		string srp = s;
+		while(s && *s && !isspace(*s)) switch(*s){
+			case '\'': {
+				buffer_append(buff, srp, s-srp);
+				string clo = strchr(s+1, '\'');
+				if(!clo) retclean(null, {buffer_destroy(buff); argsarrmut_destroy(args);});
+				buffer_append(buff, s+1, clo-s-1);
+				if(strpref(SQRS, clo)){
+					buffer_append_str(buff, "'");
+					srp = s = clo+3;
+				} else srp = s = clo+1;
+				break;
+			}
+			case '"': { //do we _actually_ need this like really?
+				buffer_append(buff, srp, s-srp);
+				string clo = s+1;
+				do {
+					clo = strchr(clo+1, '"');
+					if(!clo) retclean(null, {buffer_destroy(buff); argsarrmut_destroy(args);});
+				} while(isescaped(clo, s));
+				buffer_append(buff, s+1, clo-s-1); //TODO escapes if we need this section at all i guess
+				srp = s = clo+1;
+				break;
+			}
+			default: s++;
+		}
+		buffer_append(buff, srp, s-srp);
+		if(!IsOk(argsarrmut_append(args, buffer_destr(buff)))) retclean(null, {argsarrmut_destroy(args);});
+		while(isspace(*s)) s++;
 	}
 	return args;
 }
