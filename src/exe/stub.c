@@ -60,4 +60,7 @@ int main(int argc, argsarr args){
 			io.log(LL_ERROR, "Failed to read from standard input - %s", err.s);
 		});
 	}
+	ccmdstore_destroy(ccmds);
+	varstore_destroy(vars);
+	parser_destroy(parcer);
 }
