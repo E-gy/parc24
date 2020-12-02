@@ -21,10 +21,10 @@ typedef struct groupfle* FirstListElement;
 
 struct groupfl {
 	FirstListElement first;
-	Rule fallback;
+	/** @ref */ Rule fallback;
 	struct {
-		Rule r;
-		Symbol from;
+		/** @ref */ Rule r;
+		/** @ref */ Symbol from;
 	} lr;
 };
 
@@ -38,6 +38,12 @@ struct groupfle {
  * @returns @produces list
  */
 FirstList FirstList_new();
+
+/**
+ * @param l @consumes 
+ */
+void FirstList_destroy(FirstList l);
+
 /**
  * @param l @refmut
  * @param symbol @ref
@@ -58,16 +64,16 @@ struct entinf {
 	bool nullable;
 	union {
 		struct {
-			TerminalSymbolId symbolId;
-			Symbol symbol;
+			/** @ref */ TerminalSymbolId symbolId;
+			/** @ref */ Symbol symbol;
 		} term;
 		struct {
-			GroupId groupId;
-			Group group;
+			/** @ref */ GroupId groupId;
+			/** @ref */ Group group;
 			FirstList firsts;
 		} group;
 		struct {
-			Rule rule;
+			/** @ref */ Rule rule;
 		} rule;
 	} i;
 	EntityInfo mapnext;
@@ -99,6 +105,12 @@ bool entinf_eq(EntityInfo i, struct entinf ii);
  * @returns @produces map
  */
 EntitiesMap entimap_new();
+
+/**
+ * @param map @consumes
+ */
+void entimap_destroy(EntitiesMap map);
+
 /**
  * @param map @ref
  * @param key @copy

@@ -26,6 +26,7 @@ typedef bool Result;
 #define IfOk_T(result, var, closure) do{ typeof(result) _r = result; if(IsOk_T(_r)){ typeof(_r.r.ok) var = _r.r.ok; closure } }while(0)
 #define IfError_T(result, var, closure) do{ typeof(result) _r = result; if(IsNotOk_T(_r)){ typeof(_r.r.error) var = _r.r.error; closure } }while(0)
 #define IfElse_T(result, vok, clok, verr, clerr) do{ typeof(result) _r = result; if(IsOk_T(_r)){ typeof(_r.r.ok) vok = _r.r.ok; clok } else { typeof(_r.r.error) verr = _r.r.error; clerr } }while(0)
+#define OrElse_T(result, els) __extension__({ typeof(result) _r = result; IsOk_T(result) ? result.r.ok : els; })
 
 typedef const char* string;
 typedef char* string_mut;

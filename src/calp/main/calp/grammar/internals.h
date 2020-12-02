@@ -9,11 +9,11 @@ struct symbol {
 	} type;
 	union {
 		struct {
-			TerminalSymbolId id;
+			/** @ref */ TerminalSymbolId id;
 			/** @ref */  string name;
 		} term;
 		struct {
-			GroupId id;
+			/** @ref */ GroupId id;
 		} group;
 	} val;
 	Symbol next;
@@ -26,15 +26,15 @@ struct rule {
 };
 
 struct group {
-	GroupId id;
-	string name;
+	/** @ref */ GroupId id;
+	/** @ref */ string name;
 	Rule rules;
 	size_t rulesc;
 	Group next;
 };
 
 struct grammar {
-	string name;
+	/** @ref */ string name;
 	Group groups;
 	size_t groupsc;
 };

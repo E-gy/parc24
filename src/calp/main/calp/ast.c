@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <calp/util/null.h>
 #include <calp/grammar/internals.h>
+#include <calp/util/string.h>
 
 AST ast_new_group(Symbol symbol, Group g, size_t children_count){
 	AST ast = calloc(sizeof(*ast)/sizeof(ast) + children_count, sizeof(*ast->d.group.children));
@@ -28,6 +29,33 @@ void ast_destroy(AST ast){
 			break;
 	}
 	free(ast);
+}
+
+AST ast_clone(AST ast){
+	if(!ast) return null;
+	switch(ast->type){
+		case AST_GROUP: {
+			AST a = ast_new_group(ast->symbol, ast->d.group.group, ast->d.group.cc);
+			if(!a) return null;
+			for(size_t i = 0; i < a->d.group.cc; i++) if(ast->d.group.children[i]){
+				AST cc = ast_clone(ast->d.group.children[i]);
+				if(!cc){
+					ast_destroy(a);
+					return null;
+				}
+				a->d.group.children[i] = cc;
+			}
+			return a;
+		}
+		case AST_LEAF: {
+			string_mut vdup = strdup(ast->d.leaf.val);
+			if(!vdup) return null;
+			AST a = ast_new_leaf(ast->symbol, vdup);
+			if(!a) free(vdup);
+			return a;
+		}
+		default: return null;
+	}
 }
 
 #include <calp/util/log.h>

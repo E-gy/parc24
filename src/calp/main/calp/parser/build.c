@@ -98,9 +98,16 @@ ParserBuildResult parser_build(Grammar gr){
 			return Error_T(parser_build_result, err);
 		});
 	}
-	entimap_log(gr, m);
+	// entimap_log(gr, m);
 	Parser p = malloc(sizeof(*p));
 	if(!p) return Error_T(parser_build_result, {"Parser allocation failed"});
 	*p = (struct parser){gr, m};
 	return Ok_T(parser_build_result, p);
+}
+
+void parser_destroy(Parser p){
+	if(!p) return;
+	entimap_destroy(p->ents);
+	grammar_destroy(p->grammar);
+	free(p);
 }

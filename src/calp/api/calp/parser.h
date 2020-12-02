@@ -8,3 +8,8 @@
 
 struct parser;
 typedef struct parser* Parser;
+
+/**
+ * @param parser @consumes 
+ */
+void parser_destroy(Parser parser);

@@ -12,6 +12,16 @@ FirstList FirstList_new(){
 	return l;
 }
 
+void FirstList_destroy(FirstList l){
+	if(!l) return;
+	for(FirstListElement el = l->first; el;){
+		FirstListElement next = el->next;
+		free(el);
+		el = next;
+	}
+	free(l);
+}
+
 Result FirstList_add(FirstList l, EntityInfo symbol, Rule r){
 	if(!l) return Error;
 	for(FirstListElement e = l->first; e; e = e->next) if(e->symbol == symbol && e->r == r) return Ok;
@@ -61,6 +71,17 @@ EntitiesMap entimap_new(){
 	return m;
 }
 
+void entimap_destroy(EntitiesMap m){
+	if(!m) return;
+	for(size_t i = 0; i < ENTIMAPS; i++) for(EntityInfo e = m->ents[i]; e;){
+		EntityInfo next = e->mapnext;
+		if(e->type == SYMB_GROUP) FirstList_destroy(e->i.group.firsts);
+		free(e);
+		e = next;
+	}
+	free(m);
+}
+
 EntityInfo entimap_get(EntitiesMap m, struct entinf ii){
 	if(!m) return null;
 	const hash_t h = entinf_hash(ii);
@@ -78,8 +99,7 @@ EntityInfo entimap_add(EntitiesMap m, struct entinf ii){
 	return *i = nii;
 }
 
-#define NDEBUG_CALP
-#ifndef NDEBUG_CALP
+#ifndef NDEBUG
 
 #include <calp/util/log.h>
 #include <calp/grammar/fun.h>

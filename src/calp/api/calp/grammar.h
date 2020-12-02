@@ -5,6 +5,7 @@
  * Grammar types.
  * 
  * And only - for functionality look for dedicated imports in respective folder.
+ * (destructors are considered part of type declaration)
  * 
  */
 
@@ -30,3 +31,8 @@ typedef struct grammar* Grammar;
  */
 typedef string (*TerminalSymbolId)(string);
 typedef Group (*GroupId)(void);
+
+/**
+ * @param grammar @consumes 
+ */
+void grammar_destroy(Grammar grammar);

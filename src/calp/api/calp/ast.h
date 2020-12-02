@@ -16,7 +16,7 @@ struct ast {
 		AST_GROUP,
 		AST_LEAF,
 	} type;
-	Symbol symbol;
+	/** @ref */ Symbol symbol;
 	union {
 		struct {
 			/** @ref */ GroupId groupId;
@@ -46,6 +46,12 @@ AST ast_new_leaf(Symbol symbol, string_mut val);
  * @param ast @consumes
  */
 void ast_destroy(AST ast);
+
+/**
+ * @param ast @ref 
+ * @return AST 
+ */
+AST ast_clone(AST ast);
 
 /**
  * @param ast @ref
