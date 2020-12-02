@@ -36,7 +36,7 @@ RealiasResult realias(string args[], AliasStore s){
 			for(size_t i = 0; i < aargs2->size; i++) if(!IsOk(argsarrmut_append(aargs, aargs->args[i]))) retclean(Error_T(realias_result, {"failed to construct recurse"}), {argsarrmut_destroy(aargs2);argsarrmut_destroy(aargs);}); else aargs->args[i] = null;
 			argsarrmut_destroy(aargs2);
 		}
-	} else for(string* s = args+1; s; s++){
+	} else for(string* s = args+1; *s; s++){
 		string_mut dup = strdup(*s);
 		if(!dup || !IsOk(argsarrmut_append(aargs, dup))) retclean(Error_T(realias_result, {"failed to reconstruct args"}), {argsarrmut_destroy(aargs);});
 	}
