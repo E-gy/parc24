@@ -127,8 +127,7 @@ ExpandoResult expando_variable(Buffer buff, size_t* si, struct expando_targets w
 		if(!ent) return Error_T(expando_result, {"failed to capture variable"});
 		esi = (*si)+2;
 		eei = (rei=ent-str)-1;
-	}
-	if(str[0] == '$'){
+	} else if(str[0] == '$'){
 		string ent = capture_variable(str);
 		if(!ent) return Error_T(expando_result, {"failed to capture variable"});
 		esi = (*si)+1;
