@@ -92,8 +92,6 @@ SCENARIO("aliaser does the aliasing", "[alias][exe]"){
 			}, err, { FAIL_FMT("Realias failed with - %s", err.s); });
 			string expected2[] = {"wroom", "boom", "boom", null};
 			IfElse_T(realias(args2, aliases), args, {
-				CAPTURE(args->args[0]);
-				CAPTURE(args->args[1]);
 				REQUIRE(args != nulla);
 				REQUIRE(args->size == 3);
 				for(size_t i = 0; i < args->size; i++) REQUIRE_THAT(args->args[i], Equals(expected2[i]));
