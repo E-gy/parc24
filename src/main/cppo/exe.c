@@ -31,7 +31,7 @@ struct childprocinf {
 #define fd2handle(fd, handle) do { intptr_t _h = _get_osfhandle(fd); if(_h < 0) return Error_T(exerun_result, {"File not associated with a stream - can't retrieve handle"}); if(!SetHandleInformation((HANDLE) _h, HANDLE_FLAG_INHERIT, true)) return Error_T(exerun_result, {"Handle set inherit failed"}); handle = (HANDLE) _h; } while(0)
 
 ExeRunResult exe_runa(argsarr args, struct exe_opts opts){
-	string_mut cmd = exe_args_join_caste(args);
+	string_mut cmd = exe_args_join_caste(args, true);
 	if(!cmd) return Error_T(exerun_result, {"Args join failed"});
 	ExeRunResult rr = exe_runs(cmd, opts);
 	free(cmd);
