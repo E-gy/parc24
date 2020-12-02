@@ -125,12 +125,12 @@ ExpandoResult expando_variable(Buffer buff, size_t* si, struct expando_targets w
 	if(strpref("${", str)){
 		string ent = capture_variable(str);
 		if(!ent) return Error_T(expando_result, {"failed to capture variable"});
-		esi = (*si)+2;
+		esi = 2;
 		eei = (rei=ent-str)-1;
 	} else if(str[0] == '$'){
 		string ent = capture_variable(str);
 		if(!ent) return Error_T(expando_result, {"failed to capture variable"});
-		esi = (*si)+1;
+		esi = 1;
 		eei = rei = ent-str;
 	}
 	if(esi){
@@ -139,7 +139,7 @@ ExpandoResult expando_variable(Buffer buff, size_t* si, struct expando_targets w
 		string varv = parcontext_getunivar(context, varn);
 		free(varn);
 		if(!varv) varv = "";
-		if(!IsOk(buffer_splice_str(buff, *si, rei, varv))) return Error_T(expando_result, {"variable value splice failed"});
+		if(!IsOk(buffer_splice_str(buff, *si, (*si)+rei, varv))) return Error_T(expando_result, {"variable value splice failed"});
 		*si += strlen(varv);
 		return Ok_T(expando_result, null);
 	}
