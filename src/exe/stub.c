@@ -37,7 +37,12 @@ int main(int argc, argsarr args){
 		io.log(LL_CRITICAL, "Failed to create ccmds store");
 		return 1;
 	}
-	struct parcontext ctxt = {vars, funcs, ccmds, {{STDIN_FILENO, STDOUT_FILENO, STDERR_FILENO}, false}, io, parcer};
+	AliasStore aliases = aliastore_new();
+	if(!ccmds){
+		io.log(LL_CRITICAL, "Failed to create aliases store");
+		return 1;
+	}
+	struct parcontext ctxt = {vars, funcs, ccmds, aliases, {{STDIN_FILENO, STDOUT_FILENO, STDERR_FILENO}, false}, io, parcer};
 	if(opts.commandstr || opts.commandfile){
 		string_mut str = opts.commandstr;
 		if(!(str = opts.commandstr)){
@@ -65,6 +70,7 @@ int main(int argc, argsarr args){
 			io.log(LL_ERROR, "Failed to read from standard input - %s", err.s);
 		});
 	}
+	aliastore_destroy(aliases);
 	ccmdstore_destroy(ccmds);
 	funcstore_destroy(funcs);
 	varstore_destroy(vars);
