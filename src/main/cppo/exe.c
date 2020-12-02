@@ -1,4 +1,5 @@
 #include <cppo.h>
+#include "util.h"
 
 #include <stdlib.h>
 #include <util/null.h>
