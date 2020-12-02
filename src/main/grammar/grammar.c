@@ -79,6 +79,8 @@ DEF_SYMBOL_TERMINAL_CSTRE(sp_esac,	"esac");
 #define DEF_GKLEENE(name, r0symbols) DEF_GROUP(name, RULE(r0symbols; SYMBOL_G(name)); RULE(SYMBOL_T(s0)))
 #define DEF_GOPT(name, rules) DEF_GROUP(name, rules; RULE(SYMBOL_T(s0)))
 
+DEF_GKLEENE(words, SYMBOL_T(word));
+
 DEF_SYMBOL_TERMINAL(newline, {
 	if(!str) return null;
 	if(strpref("\r\n", str)) return str+2;
@@ -86,6 +88,9 @@ DEF_SYMBOL_TERMINAL(newline, {
 	return null;
 });
 DEF_GKLEENE(newlines, SYMBOL_T(newline))
+
+DEF_GROUP(scol_or_newline, RULE(SYMBOL_T(scol)); RULE(SYMBOL_T(newline)));
+
 //fd_t
 DEF_SYMBOL_TERMINAL(streamid, {
 	if(!str) return null;
@@ -162,12 +167,19 @@ DEF_GROUP(cmd_simple,
 );
 
 static Group blok_if();
-//TODO more blocks
+static Group blok_for();
+static Group blok_while();
+static Group blok_until();
+static Group blok_case();
 
 DEF_GROUP(cmd_compound,
 	RULE(SYMBOL_T(parl); SYMBOL_G(cmdlist_l3ext); SYMBOL_T(parr));
 	RULE(SYMBOL_T(bracl); SYMBOL_G(cmdlist_l3ext); SYMBOL_T(bracr));
-	RULE(SYMBOL_G(blok_if))
+	RULE(SYMBOL_G(blok_if));
+	RULE(SYMBOL_G(blok_for));
+	RULE(SYMBOL_G(blok_while));
+	RULE(SYMBOL_G(blok_until));
+	RULE(SYMBOL_G(blok_case))
 );
 
 DEF_SYMBOL_TERMINAL_CSTRE(sp_function,	"function");
@@ -182,7 +194,28 @@ DEF_GOPT(blok_if_else,
 	RULE(SYMBOL_T(sp_elif); SYMBOL_G(cmdlist_l3ext); SYMBOL_T(sp_then); SYMBOL_G(cmdlist_l3ext); SYMBOL_G(blok_if_else))
 );
 DEF_GROUP(blok_if, RULE(SYMBOL_T(sp_if); SYMBOL_G(cmdlist_l3ext); SYMBOL_T(sp_then); SYMBOL_G(cmdlist_l3ext); SYMBOL_G(blok_if_else); SYMBOL_T(sp_fi)));
-//TODO add more
+
+DEF_GROUP(blok_do_done, RULE(SYMBOL_T(sp_do); SYMBOL_G(cmdlist_l3ext); SYMBOL_T(sp_done)));
+
+DEF_GROUP(blok_for_list,
+	RULE(SYMBOL_T(s0));
+	RULE(SYMBOL_T(scol));
+	RULE(SYMBOL_G(newlines); SYMBOL_T(sp_in); SYMBOL_G(words); SYMBOL_G(scol_or_newline))
+);
+DEF_GROUP(blok_for, RULE(SYMBOL_T(sp_for); SYMBOL_T(word); SYMBOL_G(blok_for_list); SYMBOL_G(newlines); SYMBOL_G(blok_do_done)));
+
+DEF_GROUP(blok_while, RULE(SYMBOL_T(sp_while); SYMBOL_G(cmdlist_l3ext); SYMBOL_G(blok_do_done)));
+DEF_GROUP(blok_until, RULE(SYMBOL_T(sp_until); SYMBOL_G(cmdlist_l3ext); SYMBOL_G(blok_do_done)));
+
+DEF_GOPT(parl_opt, RULE(SYMBOL_T(parl)));
+DEF_GOPT(scolscol_opt, RULE(SYMBOL_T(scolscol)));
+
+DEF_GKLEENE(blok_case_case_rec, SYMBOL_T(vpip); SYMBOL_T(word));
+DEF_GOPT(cmdlist_l3ext_opt, RULE(SYMBOL_G(cmdlist_l3ext)));
+DEF_GROUP(blok_case_case, RULE(SYMBOL_G(parl_opt); SYMBOL_T(word); SYMBOL_G(blok_case_case_rec); SYMBOL_T(parr); SYMBOL_G(newlines); SYMBOL_G(cmdlist_l3ext_opt)));
+DEF_GKLEENE(blok_case_s_rec, SYMBOL_T(scolscol); SYMBOL_G(newlines); SYMBOL_G(blok_case_case));
+DEF_GROUP(blok_case_s, RULE(SYMBOL_G(blok_case_case); SYMBOL_G(blok_case_s_rec); SYMBOL_G(scolscol_opt); SYMBOL_G(newlines)));
+DEF_GROUP(blok_case, RULE(SYMBOL_T(sp_case); SYMBOL_T(word); SYMBOL_G(newlines); SYMBOL_T(sp_in); SYMBOL_G(newlines); SYMBOL_G(blok_case_s); SYMBOL_T(sp_esac)));
 
 DEF_SYMBOL_TERMINAL(eoi, { return str && !*str ? str : null; });
 DEF_GROUP(newline_or_eoi, RULE(SYMBOL_T(newline)); RULE(SYMBOL_T(eoi)));
@@ -191,7 +224,9 @@ DEF_GROUP(entry, RULE(SYMBOL_G(cmdlist_l3); SYMBOL_G(newline_or_eoi)); RULE(SYMB
 DEF_GRAMMAR(tihs24def,
 	GROUP(amp_or_scol);
 	GROUP(ampamp_or_vpipvpip);
+	GROUP(words);
 	GROUP(newlines);
+	GROUP(scol_or_newline);
 	GROUP(streamid_opt);
 	GROUP(redirection);
 	GROUP(redirections);
@@ -218,6 +253,19 @@ DEF_GRAMMAR(tihs24def,
 	GROUP(cmd_fundecl);
 	GROUP(blok_if_else);
 	GROUP(blok_if);
+	GROUP(blok_do_done);
+	GROUP(blok_for_list);
+	GROUP(blok_for);
+	GROUP(blok_while);
+	GROUP(blok_until);
+	GROUP(parl_opt);
+	GROUP(scolscol_opt);
+	GROUP(blok_case_case_rec);
+	GROUP(cmdlist_l3ext_opt);
+	GROUP(blok_case_case);
+	GROUP(blok_case_s_rec);
+	GROUP(blok_case_s);
+	GROUP(blok_case);
 	GROUP(newline_or_eoi);
 	GROUP(entry)
 ); //TODO impatiently waiting for CALP 0.3
