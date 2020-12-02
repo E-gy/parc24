@@ -7,15 +7,17 @@
 #include <grammar/quotexpando.h>
 #include <calp/lexers.h>
 
-#ifdef _WIN32
-#define SQRS "''"
-#else
 #define SQRS "'\\''"
-#endif
 #define SQRL (sizeof(SQRS)/sizeof(*SQRS))
+#ifdef _WIN32
+#define SQRosS "''"
+#else
+#define SQRosS SQRS
+#endif
+#define SQRosL (sizeof(SQRosS)/sizeof(*SQRosS))
 #define WSEPS "\"'|&;()<> \t"
 
-string_mut exe_args_join(string args[]){
+string_mut exe_args_join(string args[], bool os){
 	if(!args) return null;
 	Buffer j = buffer_new(255);
 	if(!j) return null;
@@ -26,7 +28,7 @@ string_mut exe_args_join(string args[]){
 		for(string ms = WSEPS; *ms && !ahasep; ms++) ahasep |= !!strchr(*arg, *ms); 
 		if(ahasep){
 			size_t nl = 2;
-			for(string s = *arg; *s; s++) nl += *s == '\'' ? SQRL : 1;
+			for(string s = *arg; *s; s++) nl += *s == '\'' ? (os ? SQRosL : SQRL) : 1;
 			if(aj) buffer_resize(aj, nl);
 			else aj = buffer_new(nl);
 			buffer_append_str(aj, "'");
@@ -37,7 +39,7 @@ string_mut exe_args_join(string args[]){
 					break;
 				} else {
 					buffer_append(aj, s, sn-s);
-					buffer_append_str(aj, SQRS);
+					buffer_append_str(aj, os ? SQRosS : SQRS);
 					s = sn+1;
 				}
 			}
