@@ -198,9 +198,9 @@ DEF_GROUP(blok_if, RULE(SYMBOL_T(sp_if); SYMBOL_G(cmdlist_l3ext); SYMBOL_T(sp_th
 DEF_GROUP(blok_do_done, RULE(SYMBOL_T(sp_do); SYMBOL_G(cmdlist_l3ext); SYMBOL_T(sp_done)));
 
 DEF_GROUP(blok_for_list,
-	RULE(SYMBOL_T(s0));
+	RULE(SYMBOL_G(newlines); SYMBOL_T(sp_in); SYMBOL_G(words); SYMBOL_G(scol_or_newline));
 	RULE(SYMBOL_T(scol));
-	RULE(SYMBOL_G(newlines); SYMBOL_T(sp_in); SYMBOL_G(words); SYMBOL_G(scol_or_newline))
+	RULE(SYMBOL_T(s0))
 );
 DEF_GROUP(blok_for, RULE(SYMBOL_T(sp_for); SYMBOL_T(word); SYMBOL_G(blok_for_list); SYMBOL_G(newlines); SYMBOL_G(blok_do_done)));
 
