@@ -18,8 +18,8 @@ string capture_quot(const string str){
 			if(!quot) return null;
 		} while(isescaped(quot, str));
 		for(string s = str+1; s < quot;){
-			if(capture_isexpandostart(s) && !isescaped(s, str)){
-				string expend = capture_expando(s);
+			if((capture_isexpandostart(s) || capture_isvariablestart(s)) && !isescaped(s, str)){
+				string expend = (capture_isexpandostart(s) ? capture_expando : capture_variable)(s);
 				if(!expend) return null;
 				quot = strchr(expend, '"');
 				if(!quot) return null;
@@ -39,6 +39,7 @@ string capture_expando(const string str){
 		while(s && *s && bal > 0){
 			if(capture_isquotstart(s) && !isescaped(s, str)) s = capture_quot(s);
 			else if(capture_isexpandostart(s) && !isescaped(s, str)) s = capture_expando(s);
+			else if(capture_isvariablestart(s) && !isescaped(s, str)) s = capture_variable(s);
 			else {
 				if(!isescaped(s, str)) bal += *s == '(' ? 1 : *s == ')' ? -1 : 0;
 				s++;
@@ -59,12 +60,29 @@ string capture_expando(const string str){
 
 #define WSEPS "\"'|&;(){}<> \t\r\n"
 
+string capture_variable(string str){
+	if(!str) return null;
+	if(strpref("${", str)){
+		int bal = 1;
+		string s = str+2;
+		for(; *s && bal > 0; s++) bal += *s == '{' ? 1 : *s == '}' ? -1 : 0;
+		return bal == 0 ? s : null;
+	}
+	if(str[0] == '$'){
+		string s = str+1;
+		for(; *s && !strchr(WSEPS, *s); s++);
+		return s > str+1 ? s : null;
+	}
+	return null;
+}
+
 string capture_word(const string str){
 	if(!str || !*str) return null;
 	string s = str;
 	while(s && *s){
 		if(capture_isquotstart(s) && !isescaped(s, str)) s = capture_quot(s);
 		else if(capture_isexpandostart(s) && !isescaped(s, str)) s = capture_expando(s);
+		else if(capture_isvariablestart(s) && !isescaped(s, str)) s = capture_variable(s);
 		else if(strchr(WSEPS, *s) && !isescaped(s, str)) break;
 		else s++;
 	}

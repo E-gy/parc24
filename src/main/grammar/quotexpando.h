@@ -11,6 +11,7 @@
 
 #define capture_isquotstart(str) (str && (str[0] == '\'' || str[0] == '"'))
 #define capture_isexpandostart(str) (str && (str[0] == '`' || strpref("$(", str)))
+#define capture_isvariablestart(str) (str && (str[0] == '$'))
 
 /**
  * Attempts to capture quoted subword
@@ -27,6 +28,14 @@ string capture_quot(string str);
  * @return @ref right after the end of subword, or null if capture error
  */
 string capture_expando(string str);
+
+/**
+ * Attempts to capture variable subword
+ * 
+ * @param str @ref string beginning with "$""
+ * @return @ref right after the end of subword, or null if capture error
+ */
+string capture_variable(string str);
 
 /**
  * Attempts to capture a word 
