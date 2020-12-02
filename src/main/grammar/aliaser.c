@@ -25,7 +25,7 @@ RealiasResult realias(string args[], AliasStore s){
 	if(!args[0] || !(isalnum(args[0][0]) || args[0][0] == '-' || args[0][0] == '_')) return Ok_T(realias_result, null);
 	string_mut repl = aliastore_get(s, args[0]);
 	if(!repl) return Ok_T(realias_result, null);
-	const bool recurs = *repl && iswspace(repl[strlen(repl)-1]);
+	const bool recurs = *repl && isspace(repl[strlen(repl)-1]);
 	ArgsArr_Mut aargs = exe_args_split(whitespacetrim(repl));
 	if(!aargs) return Error_T(realias_result, {"failed to reconstruct arguments"});
 	if(recurs){
