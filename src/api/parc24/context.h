@@ -18,7 +18,8 @@ struct parcontext {
 typedef struct parcontext* ParContext;
 
 /**
+ * @param context @ref
  * @param variable @ref 
  * @return @ref value
  */
-string parcontext_getunivar(string variable);
+string parcontext_getunivar(ParContext context, string variable);
