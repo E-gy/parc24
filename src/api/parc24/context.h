@@ -3,6 +3,7 @@
 #include <ptypes.h>
 
 #include "var_store.h"
+#include "funcstore.h"
 #include "ccmdstore.h"
 #include "io.h"
 #include <cppo/types.h>
@@ -10,6 +11,7 @@
 
 struct parcontext {
 	/** @ref */ VarStore vars;
+	/** @ref */ FuncStore funcs;
 	/** @ref */ CCMDStore ccmds;
 	struct exe_opts exeopts;
 	ParC24IO io;

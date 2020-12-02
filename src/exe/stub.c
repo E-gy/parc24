@@ -27,12 +27,17 @@ int main(int argc, argsarr args){
 		io.log(LL_CRITICAL, "Failed to create variables store");
 		return 1;
 	}
+	FuncStore funcs = funcstore_new();
+	if(!funcs){
+		io.log(LL_CRITICAL, "Failed to create functions store");
+		return 1;
+	}
 	CCMDStore ccmds = ccmdstore_new();
 	if(!ccmds){
 		io.log(LL_CRITICAL, "Failed to create ccmds store");
 		return 1;
 	}
-	struct parcontext ctxt = {vars, ccmds, {{STDIN_FILENO, STDOUT_FILENO, STDERR_FILENO}, false}, io, parcer};
+	struct parcontext ctxt = {vars, funcs, ccmds, {{STDIN_FILENO, STDOUT_FILENO, STDERR_FILENO}, false}, io, parcer};
 	if(opts.commandstr || opts.commandfile){
 		string_mut str = opts.commandstr;
 		if(!(str = opts.commandstr)){
@@ -61,6 +66,7 @@ int main(int argc, argsarr args){
 		});
 	}
 	ccmdstore_destroy(ccmds);
+	funcstore_destroy(funcs);
 	varstore_destroy(vars);
 	parser_destroy(parcer);
 }
