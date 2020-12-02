@@ -18,4 +18,6 @@ Result_T(travast_result, struct {
 }, string_v);
 #define TraverseASTResult struct travast_result
 
+TraverseASTResult parcontext_unixec(argsarr args, ParContext context);
+
 TraverseASTResult traverse_ast(AST ast, ParContext context);
