@@ -43,6 +43,10 @@ ExpandoResult expando_quot(Buffer buff, size_t* si, struct expando_targets what,
 				if(capture_isexpandostart(s)){
 					IfError_T(expando_expando(buff, &i, what, context), err, { return Error_T(expando_result, err); });
 					break;
+				} else
+				if(capture_isvariablestart(s)){
+					IfError_T(expando_variable(buff, &i, what, context), err, { return Error_T(expando_result, err); });
+					break;
 				} else if(strpref("\\$", s) || strpref("\\`", s) || strpref("\\\"", s) || strpref("\\\\", s) || strpref("\\\n", s)){
 					buffer_delete(buff, (*si)+i, (*si)+i+1);
 					i++;
@@ -62,6 +66,7 @@ ExpandoResult expando_expando(Buffer buff, size_t* si, struct expando_targets wh
 		while(*s && bal > 0){
 			if(capture_isquotstart(s) && !isescaped(s, str)) IfError_T(expando_quot(buff, &i, what, context), err, { return Error_T(expando_result, err); });
 			else if(capture_isexpandostart(s) && !isescaped(s, str)) IfError_T(expando_expando(buff, &i, what, context), err, { return Error_T(expando_result, err); });
+			else if(capture_isvariablestart(s) && !isescaped(s, str)) IfError_T(expando_variable(buff, &i, what, context), err, { return Error_T(expando_result, err); });
 			else {
 				if(!isescaped(s, str)) bal += *s == '(' ? 1 : *s == ')' ? -1 : 0;
 				i++;
@@ -114,6 +119,33 @@ ExpandoResult expando_expando(Buffer buff, size_t* si, struct expando_targets wh
 	return Error_T(expando_result, {"not an expandable"});
 }
 
+ExpandoResult expando_variable(Buffer buff, size_t* si, struct expando_targets what, ParContext context){
+	size_t esi = 0, eei, rei;
+	if(strpref("${", str)){
+		string ent = capture_variable(str);
+		if(!ent) return Error_T(expando_result, {"failed to capture variable"});
+		esi = (*si)+2;
+		eei = (rei=ent-str)-1;
+	}
+	if(str[0] == '$'){
+		string ent = capture_variable(str);
+		if(!ent) return Error_T(expando_result, {"failed to capture variable"});
+		esi = (*si)+1;
+		eei = rei = ent-str;
+	}
+	if(esi){
+		string_mut varn = buffer_destr(buffer_new_from(str+esi, eei-esi));
+		if(!varn) return Error_T(expando_result, {"buffer capture failed"});
+		string varv = parcontext_getunivar(varn);
+		free(varn);
+		if(!varv) varv = "";
+		if(!IsOk(buffer_splice_str(buff, *si, rei, varv))) return Error_T(expando_result, {"variable value splice failed"});
+		*si += strlen(varv);
+		return Ok_T(expando_result, null);
+	}
+	return Error_T(expando_result, {"not a variable"});
+}
+
 #undef s
 #undef str
 
@@ -127,6 +159,7 @@ ExpandoResult expando_word(string str, struct expando_targets what, ParContext c
 	while(buff->data[i]){
 		if(capture_isquotstart(s) && !isescaped(s, str)) IfError_T(expando_quot(buff, &i, what, context), err, { return Error_T(expando_result, err); });
 		else if(capture_isexpandostart(s) && !isescaped(s, str)) IfError_T(expando_expando(buff, &i, what, context), err, { return Error_T(expando_result, err); });
+		else if(capture_isvariablestart(s) && !isescaped(s, str)) IfError_T(expando_variable(buff, &i, what, context), err, { return Error_T(expando_result, err); });
 		else if(s[0] == '\\'){
 			i++;
 			if(!s){
