@@ -1,8 +1,11 @@
 #include <cppo.h>
+#include "util.h"
 
 #include <util/null.h>
 #include <util/buffer.h>
 #include <util/string.h>
+#include <grammar/quotexpando.h>
+#include <calp/lexers.h>
 
 #ifdef _WIN32
 #define SQRS "''"
@@ -46,4 +49,16 @@ string_mut exe_args_join(string args[]){
 	}
 	buffer_destroy(aj);
 	return buffer_destr(j);
+}
+
+ArgsArr_Mut exe_args_split(string cmd){
+	ArgsArr_Mut args = argsarrmut_new(16);
+	if(!args) return null;
+	for(string s = cmd; *s;){
+		LexerResult next = lexer_spacebegone(s, capture_word);
+		if(!IsOk_T(next)) retclean(null, {argsarrmut_destroy(args);});
+		if(!IsOk(argsarrmut_append(args, buffer_destr(buffer_new_from(next.r.ok.start, next.r.ok.end-next.r.ok.start))))) retclean(null, {argsarrmut_destroy(args);});
+		s = next.r.ok.next;
+	}
+	return args;
 }

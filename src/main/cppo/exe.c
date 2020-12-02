@@ -71,11 +71,6 @@ ExeWaitResult exe_waitretcode(ChildProcessInfo proc){
 #include <sys/wait.h>
 #include <stdio.h>
 
-#include <util/argsarr_mut.h>
-#include <grammar/quotexpando.h>
-#include <calp/lexers.h>
-#include <util/buffer.h>
-
 struct childprocinf {
 	pid_t pid;
 };
@@ -113,17 +108,8 @@ ExeRunResult exe_runa(argsarr args, struct exe_opts opts){
 }
 
 ExeRunResult exe_runs(string_mut cmd, struct exe_opts opts){
-	ArgsArr_Mut args = argsarrmut_new(16);
+	ArgsArr_Mut args = exe_args_split(cmd);
 	if(!args) return Error_T(exerun_result, {"Args new failed"});
-	for(string s = cmd; *s;){
-		LexerResult next = lexer_spacebegone(s, capture_word);
-		if(!IsOk_T(next)){
-			argsarrmut_destroy(args);
-			return Error_T(exerun_result, {"Args split failed"});
-		}
-		if(!IsOk(argsarrmut_append(args, buffer_destr(buffer_new_from(next.r.ok.start, next.r.ok.end-next.r.ok.start))))) return Error_T(exerun_result, {"Args split (append) failed"});
-		s = next.r.ok.next;
-	}
 	ExeRunResult rr = exe_runa(args->args, opts);
 	argsarrmut_destroy(args);
 	return rr;
