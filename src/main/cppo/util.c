@@ -54,6 +54,7 @@ string_mut exe_args_join(string args[], bool os){
 }
 
 ArgsArr_Mut exe_args_split(string cmd){
+	if(!cmd) return null;
 	ArgsArr_Mut args = argsarrmut_new(16);
 	if(!args) return null;
 	for(string s = cmd; *s;){
