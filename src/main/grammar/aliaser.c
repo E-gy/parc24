@@ -23,7 +23,7 @@ RealiasResult realias(string args[], AliasStore s){
 		if(!IsOk_T(a2)) retclean(a2, {argsarrmut_destroy(aargs);});
 		const ArgsArr_Mut aargs2 = a2.r.ok;
 		if(aargs2){
-			for(size_t i = 0; i < aargs2->size; i++) if(!IsOk(argsarrmut_append(aargs, aargs->args[i]))) retclean(Error_T(realias_result, {"failed to construct recurse"}), {argsarrmut_destroy(aargs2);argsarrmut_destroy(aargs);}); else aargs->args[i] = null;
+			for(size_t i = 0; i < aargs2->size; i++) if(!IsOk(argsarrmut_append(aargs, aargs2->args[i]))) retclean(Error_T(realias_result, {"failed to construct recurse"}), {argsarrmut_destroy(aargs2);argsarrmut_destroy(aargs);}); else aargs2->args[i] = null;
 			argsarrmut_destroy(aargs2);
 		}
 	} else for(string* s = args+1; *s; s++){
