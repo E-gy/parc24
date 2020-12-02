@@ -12,7 +12,7 @@ struct trie {
 	Trie children;
 };
 
-static Trie _trie_new(Trie_V_Destructor _d, char c, string_mut val, Trie sibling, Trie children){
+static Trie _trie_new(Trie_V_Destructor _d, char c, Trie_V val, Trie sibling, Trie children){
 	new(Trie, t);
 	*t = (struct trie){_d, c, val, sibling, children};
 	return t;
@@ -27,7 +27,7 @@ static void _trie_destroy(Trie t){
 	free(t);
 }
 
-static Trie _trie_add(Trie t, string s, string_mut val){
+static Trie _trie_add(Trie t, string s, Trie_V val){
 	if(!t || !s || !*s) return null;
 	if(!t->children){
 		t->children = _trie_new_c(t->_d, *s);
