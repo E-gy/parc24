@@ -11,4 +11,4 @@ Result_T(realias_result, /** @nullable */ ArgsArr_Mut, string_v);
  * @param aliases @ref
  * @return @produces aliased args (`null` if no aliasing is necessary)
  */
-RealiasResult realias(argsarr args, AliasStore aliases);
+RealiasResult realias(string args[], AliasStore aliases);

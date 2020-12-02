@@ -5,7 +5,7 @@
 #include <cppo/util.h>
 #include <ctype.h>
 
-RealiasResult realias(argsarr args, AliasStore s){
+RealiasResult realias(string args[], AliasStore s){
 	if(!args || !s) return Error_T(realias_result, {"invalid input"});
 	if(!args[0] || !(isalnum(args[0][0]) || args[0][0] == '-' || args[0][0] == '_')) return Ok_T(realias_result, null);
 	string_mut repl = aliastore_get(s, args[0]);
