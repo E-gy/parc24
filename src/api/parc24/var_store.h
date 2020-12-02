@@ -2,8 +2,10 @@
 
 #include <ptypes.h>
 
+#ifndef _VARSTORE_IMPL
 struct var_store;
 typedef struct var_store *VarStore;
+#endif
 
 /**
  * @returns @produces store
