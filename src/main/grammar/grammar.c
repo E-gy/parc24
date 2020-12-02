@@ -303,18 +303,18 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 		const TerminalSymbolId sid = ast->d.leaf.symbolId;
 		if(sid == assignment){
 			//TODO
-			return Ok_T(travast_result, {null, 0});
+			return Ok_T(travast_result, {0});
 		}
 		return Error_T(travast_result, {"AST (leaf) not recognized"});
 	}
 	const GroupId gid = ast->d.group.groupId;
 	if(gid == entry){
 		if(ast->d.group.cc > 1) return traverse_ast(ast->d.group.children[0], ctxt);
-		else return Ok_T(travast_result, {null, 0});
+		else return Ok_T(travast_result, {0});
 	}
 	//l3: ; & \n
 	if(gid == cmdlist_l3 || gid == cmdlist_l3_r){
-		if(ast->d.group.cc == 1) return Ok_T(travast_result, {null, 0});
+		if(ast->d.group.cc == 1) return Ok_T(travast_result, {0});
 		const size_t it1 = gid == cmdlist_l3 ? 0 : 1;
 		const size_t ir = gid == cmdlist_l3 ? 1 : 2;
 		TraverseASTResult t1 = traverse_ast(ast->d.group.children[it1], ctxt);
@@ -324,7 +324,7 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 		return traverse_ast(ast->d.group.children[ir], ctxt);
 	}
 	if(gid == cmdlist_l3ext || gid == cmdlist_l3ext_r){
-		if(ast->d.group.cc == 1) return Ok_T(travast_result, {null, 0});
+		if(ast->d.group.cc == 1) return Ok_T(travast_result, {0});
 		const size_t it1 = gid == cmdlist_l3ext ? 1 : 1;
 		const size_t ir = gid == cmdlist_l3ext ? 2 : 2;
 		TraverseASTResult t1 = traverse_ast(ast->d.group.children[it1], ctxt);
@@ -335,7 +335,7 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 	}
 	//l2: || &&
 	if(gid == cmdlist_l2 || gid == cmdlist_l2_r){
-		if(ast->d.group.cc == 1) return Ok_T(travast_result, {null, 0});
+		if(ast->d.group.cc == 1) return Ok_T(travast_result, {0});
 		const size_t it1 = gid == cmdlist_l2 ? 0 : 2;
 		const size_t ir = gid == cmdlist_l2 ? 1 : 3;
 		TraverseASTResult t1 = traverse_ast(ast->d.group.children[it1], ctxt);
@@ -353,7 +353,7 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 	}
 	//l1: |
 	if(gid == cmdlist_l1 || gid == cmdlist_l1_r){
-		if(ast->d.group.cc == 1) return Ok_T(travast_result, {null, 0});
+		if(ast->d.group.cc == 1) return Ok_T(travast_result, {0});
 		const size_t it1 = gid == cmdlist_l1 ? 1 : 2;
 		const size_t ir = gid == cmdlist_l1 ? 2 : 3;
 		if(ast->d.group.children[ir]->d.group.cc == 1) return traverse_ast(ast->d.group.children[it1], ctxt);
@@ -378,10 +378,10 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 	if(gid == redirection){
 		const TerminalSymbolId assid = ast->d.group.children[1]->d.leaf.symbolId;
 		//TODO
-		return Ok_T(travast_result, {null, 0});
+		return Ok_T(travast_result, {0});
 	}
 	if(gid == redirections){
-		if(ast->d.group.cc == 1) return Ok_T(travast_result, {null, 0});
+		if(ast->d.group.cc == 1) return Ok_T(travast_result, {0});
 		TraverseASTResult r = traverse_ast(ast->d.group.children[0], ctxt);
 		if(!IsOk_T(r)) return r;
 		return traverse_ast(ast->d.group.children[1], ctxt);
@@ -397,7 +397,7 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 	//simple cmd
 	if(gid == cmd_simple_pref){
 		//TODO
-		return Ok_T(travast_result, {null, 0});
+		return Ok_T(travast_result, {0});
 	}
 	if(gid == cmd_simple){
 		if(ast->d.group.cc == 2){
@@ -438,7 +438,7 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 			argsarrmut_destroy(args);
 			varstore_destroy(c.vars);
 			if(!IsOk_T(rrun)) return Error_T(travast_result, rrun.r.error);
-			return Ok_T(travast_result, {rrun.r.ok, -1});
+			return Ok_T(travast_result, {rrun.r.ok, -1, SHRTCT_NO, 0});
 		}
 	}
 	if(gid == cmd_compound){
