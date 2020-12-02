@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <ptypes.h>
 #include <unistd.h>
+#include <stdio.h>
 #include <parc24/io.h>
 #include <tihs/opts.h>
 #include <parc24/pars.h>
@@ -60,6 +61,10 @@ int main(int argc, argsarr args){
 		});
 		return exer.r.ok;
 	} else while(true){
+		if(isatty(STDIN_FILENO)){ //FIXME shouldn't `io` be used for that..?
+			printf("42sh> ");
+			fflush(stdout);
+		}
 		int lec = 0;
 		IfElse_T(io.readline(), line, {
 			if(!line) return lec;
