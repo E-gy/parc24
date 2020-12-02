@@ -16,6 +16,7 @@
 
 ExpandoResult expando_quot(Buffer buff, size_t* si, struct expando_targets what, ParContext context);
 ExpandoResult expando_expando(Buffer buff, size_t* si, struct expando_targets what, ParContext context);
+ExpandoResult expando_variable(Buffer buff, size_t* si, struct expando_targets what, ParContext context);
 
 ExpandoResult expando_quot(Buffer buff, size_t* si, struct expando_targets what, ParContext context){
 	if(str[0] == '\''){
