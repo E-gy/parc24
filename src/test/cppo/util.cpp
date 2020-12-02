@@ -80,3 +80,53 @@ SCENARIO("join arguments", "[args][util][cppo]"){
 		free(cmd);
 	}
 }
+
+SCENARIO("splitting arguments", "[args][util][cppo]"){
+	GIVEN("given nothing"){
+		THEN("is error"){
+			REQUIRE(!exe_args_split(null));
+		}
+	}
+	GIVEN("empty"){
+		ArgsArr_Mut args = exe_args_split("");
+		THEN("is empty args"){
+			REQUIRE(!!args);
+			REQUIRE(args->size == 0);
+			REQUIRE(args->args[args->size] == nullstr);
+		}
+		argsarrmut_destroy(args);
+	}
+	GIVEN("plain command"){
+		string expected[] = {"hello", null};
+		ArgsArr_Mut args = exe_args_split("hello");
+		THEN("result that arg"){
+			REQUIRE(!!args);
+			REQUIRE(args->size == 1);
+			for(size_t i = 0; i < args->size; i++) REQUIRE_THAT(args->args[i], Equals(expected[i]));
+			REQUIRE(args->args[args->size] == nullstr);
+		}
+		argsarrmut_destroy(args);
+	}
+	GIVEN("2 args command"){
+		string expected[] = {"hello", "world", null};
+		ArgsArr_Mut args = exe_args_split("hello world");
+		THEN("they are split"){
+			REQUIRE(!!args);
+			REQUIRE(args->size == 2);
+			for(size_t i = 0; i < args->size; i++) REQUIRE_THAT(args->args[i], Equals(expected[i]));
+			REQUIRE(args->args[args->size] == nullstr);
+		}
+		argsarrmut_destroy(args);
+	}
+	GIVEN("lots of args with weird symbols"){
+		string expected[] = {"hello", "world   ' there", "how're yee, doin?", "!", null};
+		ArgsArr_Mut args = exe_args_split("hello     'world   '\\'' there'		\"how're yee, doin?\" !");
+		THEN("they are split"){
+			REQUIRE(!!args);
+			REQUIRE(args->size == 4);
+			for(size_t i = 0; i < args->size; i++) REQUIRE_THAT(args->args[i], Equals(expected[i]));
+			REQUIRE(args->args[args->size] == nullstr);
+		}
+		argsarrmut_destroy(args);
+	}
+}
