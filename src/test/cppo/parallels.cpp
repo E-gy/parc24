@@ -7,10 +7,10 @@ extern "C" {
 #include <util/caste.h>
 }
 
-#define STRS 8388608
+#define STRS 262144
 
 SCENARIO("with parallels we can pipe BIG!", "[parallels][pipe][cppo]"){
-	auto strb = GENERATE(chunk(STRS, take(STRS*4, random(' ', '~'))));
+	auto strb = GENERATE(chunk(STRS, take(STRS, random(' ', '~'))));
 	strb.push_back('\0');
 	const string str = strb.data();
 	const size_t strl = strb.size();
