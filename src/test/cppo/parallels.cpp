@@ -5,7 +5,6 @@ extern "C" {
 #include <cppo.h>
 #include <cppo/parallels.h>
 #include <util/caste.h>
-#include <pthread.h>
 }
 
 #define STRS 8388608
@@ -24,10 +23,9 @@ SCENARIO("with parallels we can pipe BIG!", "[parallels][pipe][cppo]"){
 					auto rr = parallels_readstr(pipe.read, &result);
 					REQUIRE(IsOk_T(wr));
 					REQUIRE(IsOk_T(rr));
-					void* rrr;
-					REQUIRE(pthread_join(rr.r.ok, &rrr) == 0);
-					int rs = ptr2int(rrr);
-					REQUIRE(rs == 0);
+					auto rrw = exethread_waitretcode(rr.r.ok);
+					REQUIRE(IsOk_T(rrw));
+					REQUIRE(rrw.r.ok == 0);
 					REQUIRE_THAT(result, Equals(str));
 					free(result);
 				}

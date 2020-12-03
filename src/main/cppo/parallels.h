@@ -19,3 +19,11 @@ ThreadResult parallels_writestr(fd_t f, string str, bool background);
  * @return thread that runs the operation
  */
 ThreadResult parallels_readstr(fd_t f, string_mut* str);
+
+Result_T(thrwait_result, void*, string_v);
+#define ThreadWaitResult struct thrwait_result
+
+/**
+ * @param thread
+ */
+ThreadWaitResult thread_waitret(thread_t thread);

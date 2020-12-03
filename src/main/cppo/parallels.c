@@ -57,3 +57,9 @@ ThreadResult parallels_readstr(fd_t f, string_mut* str){
 	if(pthread_create(&t, null, readstr_wrap, i) != 0) return Error_T(parallels_tc_result, {"thread create failed"});
 	return Ok_T(parallels_tc_result, t);
 }
+
+ThreadWaitResult thread_waitret(thread_t t){
+	void* r;
+	if(pthread_join(t, &r) != 0) return Error_T(thrwait_result, {"failed to join"});
+	return Ok_T(thrwait_result, r);
+}
