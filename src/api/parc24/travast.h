@@ -25,4 +25,10 @@ Result_T(travast_result, struct {
 
 TraverseASTResult parcontext_unixec(argsarr args, ParContext context);
 
+/**
+ * @param @consumes r 
+ * @return @produces result 
+ */
+TraverseASTResult parcontext_uniwait(TraverseASTResult r);
+
 TraverseASTResult traverse_ast(AST ast, ParContext context);
