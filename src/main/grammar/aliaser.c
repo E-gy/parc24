@@ -2,6 +2,7 @@
 
 #include <util/null.h>
 #include <util/string.h>
+#include <util/caste.h>
 #include <cppo/util.h>
 #include <ctype.h>
 
@@ -25,9 +26,17 @@ static RealiasResult realias_(string args[], AliasStore s, RealiaStek stek){
 	const bool recurs = *repl && isspace(repl[strlen(repl)-1]);
 	ArgsArr_Mut aargs = exe_args_split(whitespaceskip(repl));
 	if(!aargs) return Error_T(realias_result, {"failed to reconstruct arguments"});
-	if(recurs){
+	if(aargs->size > 1){
 		struct realisstek snext = {args[0], stek};
-		const RealiasResult a2 = realias_(args+1, s, &snext);
+		const RealiasResult a1re = realias_(ptr2ptr(aargs->args), s, &snext);
+		if(!IsOk_T(a1re)) retclean(a1re, {argsarrmut_destroy(aargs);});
+		if(a1re.r.ok){
+			argsarrmut_destroy(aargs);
+			aargs = a1re.r.ok;
+		}
+	}
+	if(recurs){
+		const RealiasResult a2 = realias_(args+1, s, null);
 		if(!IsOk_T(a2)) retclean(a2, {argsarrmut_destroy(aargs);});
 		const ArgsArr_Mut aargs2 = a2.r.ok;
 		if(aargs2){
