@@ -12,6 +12,8 @@ enum travast_result_type {
 	TRAV_SHRTCT_BREAK,
 	TRAV_SHRTCT_CONTINUE
 };
+#define travt_is_wait(t) (TRAV_COMPLETED < t && t < TRAV_SHRTCT_EXIT)
+#define travt_is_shrtct(t) (t >= TRAV_SHRTCT_EXIT)
 Result_T(travast_result, struct {
 	enum travast_result_type type;
 	union {
