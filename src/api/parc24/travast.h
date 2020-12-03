@@ -4,17 +4,22 @@
 #include <cppo/types.h>
 #include "context.h"
 
-enum travast_shrortcut_type {
-	SHRTCT_NO = 0,
-	SHRTCT_EXIT,
-	SHRTCT_BREAK,
-	SHRTCT_CONTINUE
+enum travast_result_type {
+	TRAV_COMPLETED = 0,
+	TRAV_WAIT_CHILD,
+	TRAV_WAIT_THREAD,
+	TRAV_SHRTCT_EXIT,
+	TRAV_SHRTCT_BREAK,
+	TRAV_SHRTCT_CONTINUE
 };
 Result_T(travast_result, struct {
-	ChildProcessInfo running;
-	int completed;
-	enum travast_shrortcut_type shortcut;
-	int shortcut_depth;
+	enum travast_result_type type;
+	union {
+		int completed;
+		ChildProcessInfo child;
+		thread_t thread;
+		int shortcut_depth;
+	} v;
 }, string_v);
 #define TraverseASTResult struct travast_result
 
