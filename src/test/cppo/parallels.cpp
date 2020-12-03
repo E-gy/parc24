@@ -29,6 +29,7 @@ SCENARIO("with parallels we can pipe BIG!", "[parallels][pipe][cppo]"){
 					int rs = ptr2int(rrr);
 					REQUIRE(rs == 0);
 					REQUIRE_THAT(result, Equals(str));
+					free(result);
 				}
 			}, err, { FAIL_FMT("Pipe creation failed with error - %s", err.s); });
 		}
