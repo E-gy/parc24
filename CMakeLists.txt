@@ -19,6 +19,8 @@ set_property(TARGET calp PROPERTY POSITION_INDEPENDENT_CODE TRUE)
 
 # Core
 
+find_package(Threads)
+
 file(GLOB_RECURSE src_main "${PROJECT_SOURCE_DIR}/src/main/*.h" "${PROJECT_SOURCE_DIR}/src/main/*.c")
 add_library(parc24 SHARED ${src_main})
 include_directories(parc24 ${PROJECT_SOURCE_DIR}/src/api)
@@ -28,7 +30,7 @@ target_compile_options(parc24 PRIVATE
 	$<$<CXX_COMPILER_ID:MSVC>:/W4 /WX>
 	$<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wno-unused -Werror>
 )
-target_link_libraries(parc24 calp)
+target_link_libraries(parc24 calp ${CMAKE_THREAD_LIBS_INIT})
 target_compile_definitions(parc24 PRIVATE _GNU_SOURCE)
 
 add_library(parc24cov STATIC ${src_main})
@@ -40,7 +42,7 @@ target_compile_options(parc24cov PRIVATE
 	$<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wno-unused -Werror>
 )
 target_compile_options(parc24cov PUBLIC --coverage)
-target_link_libraries(parc24cov calp gcov)
+target_link_libraries(parc24cov calp ${CMAKE_THREAD_LIBS_INIT} gcov)
 target_compile_definitions(parc24cov PRIVATE _GNU_SOURCE)
 
 # Exe
