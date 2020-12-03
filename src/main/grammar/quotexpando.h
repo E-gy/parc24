@@ -54,6 +54,7 @@ struct expando_targets {
 	bool path;
 	bool quot;
 };
+#define expando_targets_all ((struct expando_targets){ .tilde = true, .parvar = true, .arithmetics = true, .command = true, .process = true, .path = true, .quot = true })
 
 Result_T(expando_result, string_mut, string_v);
 #define ExpandoResult struct expando_result

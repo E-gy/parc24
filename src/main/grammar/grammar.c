@@ -302,7 +302,13 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 	if(ast->type == AST_LEAF){
 		const TerminalSymbolId sid = ast->d.leaf.symbolId;
 		if(sid == assignment){
-			//TODO
+			string_mut var = ast->d.leaf.val;
+			string_mut eq = strchr(var, '=');
+			ExpandoResult varv = expando_word(eq+1, expando_targets_all, ctxt);
+			if(!IsOk_T(varv)) return Error_T(travast_result, varv.r.error);
+			*eq = '\0';
+			if(!IsOk(varstore_add(ctxt->vars, var, varv.r.ok))) retclean(Error_T(travast_result, {"failed to add variable to store"}), { *eq = '='; free(varv.r.ok); });
+			*eq = '=';
 			return Ok_T(travast_result, {0});
 		}
 		return Error_T(travast_result, {"AST (leaf) not recognized"});
