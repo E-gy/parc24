@@ -34,13 +34,17 @@ string_mut varstore_get(VarStore t, string var){
 	return trie_get(t, var);
 }
 
-Result varstore_add(VarStore t, string var, string val){
+Result varstore_add_(VarStore t, string var, string_mut val){
 	if(!val) return Error;
-	string_mut vdup = strdup(val);
-	if(!vdup) return Error;
-	Result addr = trie_add(t, var, vdup);
-	if(!IsOk(addr)) free(vdup);
-	return addr;
+	return trie_add(t, var, val);
+}
+
+Result varstore_add(VarStore t, string var, string val){
+	string_mut vdup = val ? strdup(val) : null;
+	if(val && !vdup) return Error;
+	Result r = varstore_add_(t, var, vdup);
+	if(!IsOk(r)) free(vdup);
+	return r;
 }
 
 Result varstore_remove(VarStore store, string var){
