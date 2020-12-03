@@ -1,6 +1,7 @@
 #include "fddio.h"
 
 #include <unistd.h>
+#include "string.h"
 #include "buffer.h"
 
 Result fddio_writestr(fd_t f, string str){
