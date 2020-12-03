@@ -35,3 +35,17 @@ Result argsarrmut_append(ArgsArr_Mut args, string_mut arg){
 	args->args[args->size++] = arg;
 	return Ok;
 }
+
+ArgsArr_Mut argsarrmut_from(string args[]){
+	if(!args) return null;
+	size_t c = 0;
+	for(; args[c]; c++);
+	ArgsArr_Mut a = argsarrmut_new(c);
+	if(!a) return null;
+	for(size_t i = 0; i < c; i++){
+		string_mut strd = strdup(args[i]);
+		if(!strd) retclean(null, {argsarrmut_destroy(a);});
+		argsarrmut_append(a, strd);
+	}
+	return a;
+}
