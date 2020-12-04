@@ -400,17 +400,41 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 		string_mut target;
 		switch(redir){
 			case REDIR_NO: return Ok_T(travast_result, {0});
-			case REDIR_IN_HERE:
-				//TODO
+			case REDIR_IN_HERE: {
+				string s = ast->d.group.children[2]->d.leaf.val;
+				if(assid == redir_in_fromherestring){
+					ExpandoResult wex = expando_word(s, expando_targets_all, ctxt);
+					if(!IsOk_T(wex)) return Error_T(travast_result, wex.r.error);
+					target = wex.r.ok;
+				} else {
+					string ss = capture_word(s);
+					if(!ss) return Error_T(travast_result, {"heredoc delimiter capture failed"});
+					bool expand;
+					if((expand = (s[0] == '\'' || s[0] == '"'))){
+						ExpandoResult esx = expando_word(s, expando_targets_quot, ctxt);
+						if(!IsOk_T(esx)) return Error_T(travast_result, esx.r.error);
+						s = esx.r.ok;
+					}
+					if(strpref("\r\n", ss)) ss += 2;
+					else if(ss[0] == '\n') ss++;
+					if(!(target = buffer_destr(buffer_new_from(ss, strlen(ss)-strlen(s))))) return Error_T(travast_result, {"heredoc capture failed"});
+					if(expand){
+						ExpandoResult tex = expando_word(target, expando_targets_all, ctxt);
+						free(target);
+						if(!IsOk_T(tex)) return Error_T(travast_result, tex.r.error);
+						target = tex.r.ok;
+					}
+				}
 				break;
+			}
 			default: {
-				ExpandoResult wex = expando_word(target = ast->d.group.children[2]->d.leaf.val, expando_targets_all, ctxt);
+				ExpandoResult wex = expando_word(ast->d.group.children[2]->d.leaf.val, expando_targets_all, ctxt);
 				if(!IsOk_T(wex)) return Error_T(travast_result, wex.r.error);
 				target = wex.r.ok;
 				break;
 			} 
 		}
-		return parcontext_uniredir(redir, stream, target, ctxt);
+		retclean(parcontext_uniredir(redir, stream, target, ctxt), {free(target);});
 	}
 	if(gid == redirections){
 		if(ast->d.group.cc == 1) return Ok_T(travast_result, {0});
