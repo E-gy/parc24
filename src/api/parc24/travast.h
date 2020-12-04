@@ -37,7 +37,7 @@ enum redirection {
 	REDIR_INOUT,
 };
 
-TraverseASTResult parcontext_uniredir(enum redirection redir, int stream, string_mut target, ParContext context);
+TraverseASTResult parcontext_uniredir(enum redirection redir, int stream, string target, ParContext context);
 
 TraverseASTResult parcontext_unixec(argsarr args, ParContext context);
 
