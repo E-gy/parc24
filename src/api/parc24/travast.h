@@ -25,6 +25,19 @@ Result_T(travast_result, struct {
 }, string_v);
 #define TraverseASTResult struct travast_result
 
+enum redirection {
+	REDIR_OUT = 0,
+	REDIR_OUT_APPEND,
+	REDIR_OUT_DUP,
+	REDIR_OUT_CLOBBER,
+	REDIR_IN,
+	REDIR_IN_HERE,
+	REDIR_IN_DUP,
+	REDIR_INOUT,
+};
+
+TraverseASTResult parcontext_uniredir(enum redirection redir, int stream, string_mut target, ParContext context);
+
 TraverseASTResult parcontext_unixec(argsarr args, ParContext context);
 
 /**
