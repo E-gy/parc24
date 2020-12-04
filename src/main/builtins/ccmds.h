@@ -1,0 +1,6 @@
+#pragma once
+
+#include <ptypes.h>
+#include <parc24/travast.h>
+
+TraverseASTResult cmd_echo(int argc, argsarr args, ParContext context);
