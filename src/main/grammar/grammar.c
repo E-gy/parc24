@@ -110,6 +110,8 @@ DEF_SYMBOL_TERMINAL_CSTR(redir_in_dup, "<&");
 DEF_SYMBOL_TERMINAL_CSTR(redir_out_ignorenoclobber, ">|");
 DEF_SYMBOL_TERMINAL_CSTR(redir_inout, "<>");
 
+#define redirsymb2type(symb) ( symb == redir_out ? REDIR_OUT : symb == redir_out_append ? REDIR_OUT_APPEND : symb == redir_out_dup ? REDIR_OUT_DUP : symb == redir_out_ignorenoclobber ? REDIR_OUT_CLOBBER : symb == redir_in ? REDIR_IN : symb == redir_in_fromheredoc_1 || symb == redir_in_fromheredoc_2 || symb == redir_in_fromherestring ? REDIR_IN_HERE : symb == redir_in_dup ? REDIR_IN_DUP : symb == redir_inout ? REDIR_INOUT : REDIR_N )
+
 //TODO add more
 DEF_GROUP(redirection,
 	RULE(SYMBOL_G(streamid_opt); SYMBOL_T(redir_out); SYMBOL_T(word));

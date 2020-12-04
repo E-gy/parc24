@@ -26,7 +26,8 @@ Result_T(travast_result, struct {
 #define TraverseASTResult struct travast_result
 
 enum redirection {
-	REDIR_OUT = 0,
+	REDIR_NO = 0,
+	REDIR_OUT,
 	REDIR_OUT_APPEND,
 	REDIR_OUT_DUP,
 	REDIR_OUT_CLOBBER,
