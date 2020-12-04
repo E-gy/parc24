@@ -452,8 +452,10 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 		if(ast->d.group.cc == 1) return traverse_ast(ast->d.group.children[0], ctxt);
 	}
 	if(gid == cmd_fundecl){
-		//TODO
-		return Error_T(travast_result, {"NOT YET IMPLEMENTED"});	
+		string name = ast->d.group.children[1]->d.leaf.val;
+		AST fast = ast->d.group.children[5];
+		if(!IsOk(funcstore_add(ctxt->funcs, name, fast))) return Error_T(travast_result, {"failed to add to function store"});
+		return Ok_T(travast_result, {TRAV_COMPLETED, {.completed = 0}});
 	}
 	//blocks
 	//TODO
