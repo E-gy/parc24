@@ -454,6 +454,7 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 	//simple cmd
 	if(gid == cmd_simple_pref) return traverse_ast(ast->d.group.children[0], ctxt);
 	if(gid == cmd_simple_pref_r){
+		if(ast->d.group.cc == 1) return Ok_T(travast_result, {0});
 		TraverseASTResult r1 = traverse_ast(ast->d.group.children[0], ctxt);
 		if(!IsOk_T(r1)) return r1;
 		return traverse_ast(ast->d.group.children[1], ctxt);
