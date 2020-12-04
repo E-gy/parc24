@@ -328,7 +328,7 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 		TraverseASTResult t1 = traverse_ast(ast->d.group.children[it1], ctxt);
 		if(!IsOk_T(t1)) return t1;
 		if(ast->d.group.children[ir]->d.group.cc == 1) return t1;
-		// if(t1.r.ok.running) exe_waitretcode(t1.r.ok.running);
+		if(t1.r.ok.running) exe_waitretcode(t1.r.ok.running);
 		return traverse_ast(ast->d.group.children[ir], ctxt);
 	}
 	if(gid == cmdlist_l3ext || gid == cmdlist_l3ext_r){
@@ -338,7 +338,7 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 		TraverseASTResult t1 = traverse_ast(ast->d.group.children[it1], ctxt);
 		if(!IsOk_T(t1)) return t1;
 		if(ast->d.group.children[ir]->d.group.cc == 1) return t1;
-		// if(t1.r.ok.running) exe_waitretcode(t1.r.ok.running);
+		if(t1.r.ok.running) exe_waitretcode(t1.r.ok.running);
 		return traverse_ast(ast->d.group.children[ir], ctxt);
 	}
 	//l2: || &&
@@ -351,12 +351,12 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 		AST r = ast->d.group.children[ir];
 		if(r->d.group.cc == 1) return t1;
 		int rc;
-		/*if(t1.r.ok.running){
+		if(t1.r.ok.running){
 			ExeWaitResult wr = exe_waitretcode(t1.r.ok.running);
 			if(!IsOk_T(wr)) return Error_T(travast_result, wr.r.error);
 			rc = wr.r.ok;
 			t1.r.ok.running = null;
-		} else rc = t1.r.ok.completed;*/ rc = 0;
+		} else rc = t1.r.ok.completed;
 		return(r->d.group.children[0]->d.group.children[0]->d.leaf.symbolId == (isexitcodeok(rc) ? vpipvpip : ampamp)) ? t1 : traverse_ast(ast->d.group.children[ir], ctxt);
 	}
 	//l1: |
@@ -497,7 +497,7 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 			argsarrmut_destroy(args);
 			varstore_destroy(c.vars);
 			if(!IsOk_T(rrun)) return Error_T(travast_result, rrun.r.error);
-			return Ok_T(travast_result, { TRAV_WAIT_CHILD, {.child = rrun.r.ok}});
+			return Ok_T(travast_result, {rrun.r.ok, -1, SHRTCT_NO, 0});
 		}
 	}
 	if(gid == cmd_compound){
