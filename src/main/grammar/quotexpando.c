@@ -97,8 +97,8 @@ ExpandoResult expando_expando(Buffer buff, size_t* si, struct expando_targets wh
 			return Error_T(expando_result, pipe.r.error);
 		}
 		struct parcontext cctxt = *context;
-		cctxt.exeopts.stdio.in = cctxt.exeopts.stdio.err = -1;
-		cctxt.exeopts.stdio.out = pipe.r.ok.write;
+		cctxt.exeopts.iostreams[IOSTREAM_STD_OUT] = cctxt.exeopts.iostreams[IOSTREAM_STD_ERR] = -1;
+		cctxt.exeopts.iostreams[IOSTREAM_STD_IN] = pipe.r.ok.write;
 		cctxt.exeopts.background = true;
 		TihsExeResult captr = tihs_exestr(capt, &cctxt);
 		close(pipe.r.ok.write);

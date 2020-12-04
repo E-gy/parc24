@@ -369,9 +369,9 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 		struct parcontext cr = *ctxt;
 		PipeResult pipe = pipe_new();
 		if(!IsOk_T(pipe)) return Error_T(travast_result, pipe.r.error);
-		cl.exeopts.stdio.out = pipe.r.ok.write;
+		cl.exeopts.iostreams[IOSTREAM_STD_OUT] = pipe.r.ok.write;
 		cl.exeopts.background = true;
-		cr.exeopts.stdio.in = pipe.r.ok.read;
+		cr.exeopts.iostreams[IOSTREAM_STD_IN] = pipe.r.ok.read;
 		TraverseASTResult t1 = traverse_ast(ast->d.group.children[it1], &cl);
 		close(pipe.r.ok.write);
 		if(!IsOk_T(t1)){

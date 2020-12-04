@@ -12,12 +12,16 @@ Result_T(pipe_result, pipe_info, string_v);
 
 PipeResult pipe_new(void);
 
+#define IOSTREAM_STD_IN 0
+#define IOSTREAM_STD_OUT 1
+#define IOSTREAM_STD_ERR 2
+
 struct exe_opts {
 	/**
-	 * Files/handles for the 3 standard streams.
+	 * Files/handles the standard streams.
 	 * Default -1.
 	 */
-	struct { fd_t in, out, err; } stdio;
+	fd_t iostreams[10];
 	/**
 	 * if true, detaches all handles to the child (so the returned info _will_ be null) making it unawaitable 
 	 */

@@ -40,9 +40,9 @@ ExeRunResult exe_runa(argsarr args, struct exe_opts opts){
 
 ExeRunResult exe_runs(string_mut cmd, struct exe_opts opts){
 	STARTUPINFO startup = {.dwFlags = STARTF_USESTDHANDLES};
-	if(opts.stdio.in >= 0) fd2handle(opts.stdio.in, startup.hStdInput);
-	if(opts.stdio.out >= 0) fd2handle(opts.stdio.out, startup.hStdOutput);
-	if(opts.stdio.err >= 0) fd2handle(opts.stdio.err, startup.hStdError);
+	if(opts.iostreams[IOSTREAM_STD_IN] >= 0) fd2handle(opts.iostreams[IOSTREAM_STD_IN], startup.hStdInput);
+	if(opts.iostreams[IOSTREAM_STD_OUT] >= 0) fd2handle(opts.iostreams[IOSTREAM_STD_OUT], startup.hStdOutput);
+	if(opts.iostreams[IOSTREAM_STD_ERR] >= 0) fd2handle(opts.iostreams[IOSTREAM_STD_ERR], startup.hStdError);
 	cpr_new(procinf);
 	PROCESS_INFORMATION cpi;
 	bool ok = CreateProcessA(null, cmd, null, null, true, 0, null, null, &startup, &cpi);
