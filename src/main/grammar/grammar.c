@@ -110,7 +110,7 @@ DEF_SYMBOL_TERMINAL_CSTR(redir_in_dup, "<&");
 DEF_SYMBOL_TERMINAL_CSTR(redir_out_ignorenoclobber, ">|");
 DEF_SYMBOL_TERMINAL_CSTR(redir_inout, "<>");
 
-#define redirsymb2type(symb) ( symb == redir_out ? REDIR_OUT : symb == redir_out_append ? REDIR_OUT_APPEND : symb == redir_out_dup ? REDIR_OUT_DUP : symb == redir_out_ignorenoclobber ? REDIR_OUT_CLOBBER : symb == redir_in ? REDIR_IN : symb == redir_in_fromheredoc_1 || symb == redir_in_fromheredoc_2 || symb == redir_in_fromherestring ? REDIR_IN_HERE : symb == redir_in_dup ? REDIR_IN_DUP : symb == redir_inout ? REDIR_INOUT : REDIR_N )
+#define redirsymb2type(symb) ( symb == redir_out ? REDIR_OUT : symb == redir_out_append ? REDIR_OUT_APPEND : symb == redir_out_dup ? REDIR_OUT_DUP : symb == redir_out_ignorenoclobber ? REDIR_OUT_CLOBBER : symb == redir_in ? REDIR_IN : symb == redir_in_fromheredoc_1 || symb == redir_in_fromheredoc_2 || symb == redir_in_fromherestring ? REDIR_IN_HERE : symb == redir_in_dup ? REDIR_IN_DUP : symb == redir_inout ? REDIR_INOUT : REDIR_NO )
 
 //TODO add more
 DEF_GROUP(redirection,
@@ -385,8 +385,32 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 	//sparlkes
 	if(gid == redirection){
 		const TerminalSymbolId assid = ast->d.group.children[1]->d.leaf.symbolId;
-		//TODO
-		return Ok_T(travast_result, {0});
+		int stream;
+		{
+			AST sid = ast->d.group.children[0];
+			if(sid->d.group.cc == 0) stream = -1;
+			else {
+				string_mut ok = null;
+				long ion = strtol(sid->d.group.children[0]->d.leaf.val, &ok, 10);
+				if(!ok || ion < 0 || ion > 2) return Error_T(travast_result, {"invalid IO stream number"});
+				stream = ion;
+			}
+		}
+		enum redirection redir = redirsymb2type(assid);
+		string_mut target;
+		switch(redir){
+			case REDIR_NO: return Ok_T(travast_result, {0});
+			case REDIR_IN_HERE:
+				//TODO
+				break;
+			default: {
+				ExpandoResult wex = expando_word(target = ast->d.group.children[2]->d.leaf.val, expando_targets_all, ctxt);
+				if(!IsOk_T(wex)) return Error_T(travast_result, wex.r.error);
+				target = wex.r.ok;
+				break;
+			} 
+		}
+		return parcontext_uniredir(redir, stream, target, ctxt);
 	}
 	if(gid == redirections){
 		if(ast->d.group.cc == 1) return Ok_T(travast_result, {0});
