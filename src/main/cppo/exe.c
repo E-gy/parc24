@@ -94,9 +94,9 @@ ExeRunResult exe_runa(argsarr args, struct exe_opts opts){
 	}
 	if(cpid == 0){
 		if(opts.background) if(fork() != 0) exit(69);
-		if(opts.stdio.in >= 0) fdup(opts.stdio.in, STDIN_FILENO); else fvoid(STDIN_FILENO);
-		if(opts.stdio.out >= 0) fdup(opts.stdio.out, STDOUT_FILENO); else fvoid(STDOUT_FILENO);
-		if(opts.stdio.err >= 0) fdup(opts.stdio.err, STDERR_FILENO); else fvoid(STDERR_FILENO);
+		if(opts.iostreams[IOSTREAM_STD_IN] >= 0) fdup(opts.iostreams[IOSTREAM_STD_IN], STDIN_FILENO); else fvoid(STDIN_FILENO);
+		if(opts.iostreams[IOSTREAM_STD_OUT] >= 0) fdup(opts.iostreams[IOSTREAM_STD_OUT], STDOUT_FILENO); else fvoid(STDOUT_FILENO);
+		if(opts.iostreams[IOSTREAM_STD_ERR] >= 0) fdup(opts.iostreams[IOSTREAM_STD_ERR], STDERR_FILENO); else fvoid(STDERR_FILENO);
 		execvp(args[0], args);
 		exit(69); //exec failed
 	}	
