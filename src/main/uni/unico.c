@@ -9,6 +9,7 @@
 #include <util/string.h>
 #include <util/null.h>
 #include <util/caste.h>
+#include <util/str2i.h>
 #include <cppo/parallels.h>
 #include <grammar/aliaser.h>
 
@@ -79,10 +80,9 @@ TraverseASTResult parcontext_uniredir(enum redirection redir, int stream, string
 		case REDIR_OUT_DUP:
 		case REDIR_IN_DUP: {
 			if(streq(target, "-")) return close(ctxt->exeopts.iostreams[stream]) < 0 ? Error_T(travast_result, {"failed to close target stream"}) : Ok_T(travast_result, {0});
-			string_mut ok = null;
-			long sn = strtol(target, &ok, 10);
-			if(!ok) return Error_T(travast_result, {"target is not a number"});
-			f = ctxt->exeopts.iostreams[sn];
+			Str2IResult sn = str2i(target);
+			if(!IsOk_T(sn)) return Error_T(travast_result, {"target is not a number"});
+			f = ctxt->exeopts.iostreams[sn.r.ok];
 			//TODO check readable/writeable
 			break;
 		}

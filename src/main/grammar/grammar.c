@@ -4,6 +4,7 @@
 #include <util/null.h>
 #include <util/string.h>
 #include <util/buffer.h>
+#include <util/str2i.h>
 #include <ctype.h>
 
 //what is a word? - whatver that deserves an entire header on its own
@@ -389,9 +390,9 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 			if(sid->d.group.cc == 0) stream = -1;
 			else {
 				string_mut ok = null;
-				long ion = strtol(sid->d.group.children[0]->d.leaf.val, &ok, 10);
-				if(!ok || ion < 0 || ion > 2) return Error_T(travast_result, {"invalid IO stream number"});
-				stream = ion;
+				Str2IResult ion = str2i(sid->d.group.children[0]->d.leaf.val);
+				if(!IsOk_T(ion) || ion.r.ok < 0 || ion.r.ok > 2) return Error_T(travast_result, {"invalid IO stream number"});
+				stream = ion.r.ok;
 			}
 		}
 		enum redirection redir = redirsymb2type(assid);
