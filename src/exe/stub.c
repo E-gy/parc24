@@ -9,6 +9,7 @@
 #include <parc24/context.h>
 #include <tihs/exe.h>
 #include <util/bufferio.h>
+#include <builtins/ccmds.h>
 
 int main(int argc, argsarr args){
 	const ParC24IO io = parc24io_fromstd();
@@ -36,6 +37,15 @@ int main(int argc, argsarr args){
 	CCMDStore ccmds = ccmdstore_new();
 	if(!ccmds){
 		io.log(LL_CRITICAL, "Failed to create ccmds store");
+		return 1;
+	}
+	if(
+		!IsOk(ccmdstore_set(ccmds, "exit", cmd_exit)) ||
+		!IsOk(ccmdstore_set(ccmds, "break", cmd_break)) ||
+		!IsOk(ccmdstore_set(ccmds, "continue", cmd_continue)) ||
+		!IsOk(ccmdstore_set(ccmds, "echo", cmd_echo))
+	){
+		io.log(LL_CRITICAL, "Failed to register builtin ccmds");
 		return 1;
 	}
 	AliasStore aliases = aliastore_new();
