@@ -403,7 +403,7 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 		return traverse_ast(ast->d.group.children[0], ctxt);
 	}
 	//simple cmd
-	if(gid == cmd_simple_pref) return traverse_ast(ast->d.group.children[0]);
+	if(gid == cmd_simple_pref) return traverse_ast(ast->d.group.children[0], ctxt);
 	if(gid == cmd_simple_pref_r){
 		TraverseASTResult r1 = traverse_ast(ast->d.group.children[0], ctxt);
 		if(!IsOk_T(r1)) return r1;
