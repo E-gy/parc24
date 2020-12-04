@@ -6,10 +6,10 @@ extern "C" {
 #include <parc24/travast.h>
 #include <util/null.h>
 
-static TraverseASTResult dummyf1(int argc, argsarr args, ParContext ctxt){ return Ok_T(travast_result, {TRAV_COMPLETED, {.completed=0}}); }
-static TraverseASTResult dummyf2(int argc, argsarr args, ParContext ctxt){ return Ok_T(travast_result, {TRAV_COMPLETED, {.completed=0}}); }
-static TraverseASTResult dummyf3(int argc, argsarr args, ParContext ctxt){ return Ok_T(travast_result, {TRAV_COMPLETED, {.completed=0}}); }
-static TraverseASTResult dummyf4(int argc, argsarr args, ParContext ctxt){ return Ok_T(travast_result, {TRAV_COMPLETED, {.completed=0}}); }
+static TraverseASTResult dummyf1(argsarr args, ParContext ctxt){ return Ok_T(travast_result, {TRAV_COMPLETED, {.completed=0}}); }
+static TraverseASTResult dummyf2(argsarr args, ParContext ctxt){ return Ok_T(travast_result, {TRAV_COMPLETED, {.completed=0}}); }
+static TraverseASTResult dummyf3(argsarr args, ParContext ctxt){ return Ok_T(travast_result, {TRAV_COMPLETED, {.completed=0}}); }
+static TraverseASTResult dummyf4(argsarr args, ParContext ctxt){ return Ok_T(travast_result, {TRAV_COMPLETED, {.completed=0}}); }
 
 }
 
