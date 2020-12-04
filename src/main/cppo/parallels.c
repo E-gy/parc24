@@ -7,6 +7,13 @@
 #include <util/fddio.h>
 #include <unistd.h>
 
+ThreadResult parallels_runf(void* (fun)(void*), void* arg, bool background){
+	pthread_t t;
+	if(pthread_create(&t, null, fun, arg) != 0) return Error_T(parallels_tc_result, {"thread create failed"});
+	if(background && pthread_detach(t) != 0) return Error_T(parallels_tc_result, {"thread detach failed"});
+	return Ok_T(parallels_tc_result, background ? nullthread : t);
+}
+
 struct writestri {
 	fd_t f;
 	string_mut str;
@@ -29,9 +36,7 @@ ThreadResult parallels_writestr(fd_t f, string str, bool background){
 	string_mut strd = strdup(str);
 	if(!i) retclean(Error_T(parallels_tc_result, {"thread args transfer failed"}), { free(i); free(strd); });
 	*i = (struct writestri){f, strd};
-	if(pthread_create(&t, null, writestr_wrap, i) != 0) return Error_T(parallels_tc_result, {"thread create failed"});
-	if(background && pthread_detach(t) != 0) return Error_T(parallels_tc_result, {"thread detach failed"});
-	return Ok_T(parallels_tc_result, background ? nullthread : t);
+	return parallels_runf(writestr_wrap, i, background);
 }
 
 struct readstri {
@@ -54,8 +59,7 @@ ThreadResult parallels_readstr(fd_t f, string_mut* str){
 	RI i = malloc(sizeof(*i));
 	if(!i) return Error_T(parallels_tc_result, {"thread args transfer failed"});
 	*i = (struct readstri){f, str};
-	if(pthread_create(&t, null, readstr_wrap, i) != 0) return Error_T(parallels_tc_result, {"thread create failed"});
-	return Ok_T(parallels_tc_result, t);
+	return parallels_runf(readstr_wrap, i, false);
 }
 
 ThreadWaitResult thread_waitret(thread_t t){

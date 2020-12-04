@@ -6,6 +6,14 @@ Result_T(parallels_tc_result, thread_t, string_v);
 #define ThreadResult struct parallels_tc_result
 
 /**
+ * @param fun @ref 
+ * @param arg @ref
+ * @param background
+ * @return thread 
+ */
+ThreadResult parallels_runf(void* (fun)(void*), void* arg, bool background);
+
+/**
  * @param f @consumes
  * @param str @ref
  * @param background when set, detaches the thread and returns `nullthread`
