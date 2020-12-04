@@ -46,7 +46,6 @@ ExeRunResult exe_runs(string_mut cmd, struct exe_opts opts){
 	cpr_new(procinf);
 	PROCESS_INFORMATION cpi;
 	bool ok = CreateProcessA(null, cmd, null, null, true, 0, null, null, &startup, &cpi);
-	free(cmd);
 	if(!ok) return Error_T(exerun_result, {"CreateProcess failed :("});
 	if(opts.background) CloseHandle(cpi.hProcess);
 	else procinf->ph = cpi.hProcess;
