@@ -7,7 +7,7 @@
 #include <stdlib.h>
 
 TraverseASTResult cmd_exit(argsarr args, ParContext context){
-	int code = -1;
+	int code = context->lastexit;
 	if(args[1]) IfOk_T(str2i(args[1]), c, { code = c; });
 	return Ok_T(travast_result, {TRAV_SHRTCT_EXIT, {.completed = code}});
 }

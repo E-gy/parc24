@@ -331,6 +331,7 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 		if(ast->d.group.children[ir]->d.group.cc == 1) return t1;
 		t1 = parcontext_uniwait(t1);
 		if(!IsOk_T(t1) || travt_is_shrtct(t1.r.ok.type)) return t1;
+		ctxt->lastexit = t1.r.ok.v.completed;
 		return traverse_ast(ast->d.group.children[ir], ctxt);
 	}
 	if(gid == cmdlist_l3ext || gid == cmdlist_l3ext_r){
@@ -342,6 +343,7 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 		if(ast->d.group.children[ir]->d.group.cc == 1) return t1;
 		t1 = parcontext_uniwait(t1);
 		if(!IsOk_T(t1) || travt_is_shrtct(t1.r.ok.type)) return t1;
+		ctxt->lastexit = t1.r.ok.v.completed;
 		return traverse_ast(ast->d.group.children[ir], ctxt);
 	}
 	//l2: || &&
@@ -355,7 +357,7 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 		if(r->d.group.cc == 1) return t1;
 		t1 = parcontext_uniwait(t1);
 		if(!IsOk_T(t1) || travt_is_shrtct(t1.r.ok.type)) return t1;
-		int rc = t1.r.ok.v.completed;
+		int rc = ctxt->lastexit = t1.r.ok.v.completed;
 		return(r->d.group.children[0]->d.group.children[0]->d.leaf.symbolId == (isexitcodeok(rc) ? vpipvpip : ampamp)) ? t1 : traverse_ast(ast->d.group.children[ir], ctxt);
 	}
 	//l1: |

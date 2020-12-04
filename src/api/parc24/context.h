@@ -16,6 +16,7 @@ struct parcontext {
 	/** @ref */ CCMDStore ccmds;
 	/** @ref */ AliasStore aliases;
 	argsarr args;
+	int lastexit;
 	struct exe_opts exeopts;
 	ParC24IO io;
 	Parser parcer;
