@@ -3,12 +3,13 @@ using Catch::Matchers::Equals;
 
 extern "C" {
 #include <parc24/ccmdstore.h>
+#include <parc24/travast.h>
 #include <util/null.h>
 
-static int dummyf1(int argc, argsarr args){ return 0; }
-static int dummyf2(int argc, argsarr args){ return 0; }
-static int dummyf3(int argc, argsarr args){ return 0; }
-static int dummyf4(int argc, argsarr args){ return 0; }
+static TraverseASTResult dummyf1(int argc, argsarr args, ParContext ctxt){ return Ok_T(travast_result, {TRAV_COMPLETED, {.completed=0}}); }
+static TraverseASTResult dummyf2(int argc, argsarr args, ParContext ctxt){ return Ok_T(travast_result, {TRAV_COMPLETED, {.completed=0}}); }
+static TraverseASTResult dummyf3(int argc, argsarr args, ParContext ctxt){ return Ok_T(travast_result, {TRAV_COMPLETED, {.completed=0}}); }
+static TraverseASTResult dummyf4(int argc, argsarr args, ParContext ctxt){ return Ok_T(travast_result, {TRAV_COMPLETED, {.completed=0}}); }
 
 }
 

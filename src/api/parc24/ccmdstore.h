@@ -2,7 +2,11 @@
 
 #include <ptypes.h>
 
-typedef int (*CCMD)(int argc, argsarr args);
+struct travast_result;
+#define TraverseASTResult struct travast_result
+typedef struct parcontext* ParContext;
+
+typedef TraverseASTResult (*CCMD)(int argc, argsarr args, ParContext context);
 
 struct ccmdstore;
 typedef struct ccmdstore* CCMDStore;
