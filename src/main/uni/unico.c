@@ -18,9 +18,7 @@
 
 TraverseASTResult parcontext_unixec(argsarr args, ParContext ctxt){
 	if(!args || !ctxt) return Error_T(travast_result, {"invalid args"});
-	int argc = 0;
-	for(argsarr a = args; *a; a++) argc++;
-	if(argc == 0) return Error_T(travast_result, {"no args given"});
+	if(!args[0]) return Error_T(travast_result, {"no args given"});
 	RealiasResult aliased = realias(cpt2ptr(args), ctxt->aliases);
 	if(!IsOk_T(aliased)) return Error_T(travast_result, aliased.r.error);
 	ArgsArr_Mut argsmuta = aliased.r.ok;
@@ -35,7 +33,7 @@ TraverseASTResult parcontext_unixec(argsarr args, ParContext ctxt){
 	}
 	CCMD ccmd = ccmdstore_get(ctxt->ccmds, args[0]);
 	if(ccmd){
-		TraverseASTResult ccmdr = ccmd(argc, args, ctxt);
+		TraverseASTResult ccmdr = ccmd(args, ctxt);
 		argsarrmut_destroy(argsmuta);
 		return ccmdr;
 	}

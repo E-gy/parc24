@@ -6,7 +6,7 @@ struct travast_result;
 #define TraverseASTResult struct travast_result
 typedef struct parcontext* ParContext;
 
-typedef TraverseASTResult (*CCMD)(int argc, argsarr args, ParContext context);
+typedef TraverseASTResult (*CCMD)(argsarr args, ParContext context);
 
 struct ccmdstore;
 typedef struct ccmdstore* CCMDStore;

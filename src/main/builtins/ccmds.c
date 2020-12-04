@@ -35,6 +35,6 @@ static int cmd_echo_exe(TSPA a){
 
 static threadfwrap_reti(cmd_echo_exe);
 
-TraverseASTResult cmd_echo(int argc, argsarr args, ParContext context){
+TraverseASTResult cmd_echo(argsarr args, ParContext context){
 	return Ok_T(travast_result, { TRAV_COMPLETED, {.completed = 0} });
 }
