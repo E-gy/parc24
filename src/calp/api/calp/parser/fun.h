@@ -11,7 +11,10 @@
 #include <calp/lexer.h>
 #include <calp/ast.h>
 
-Result_T(parse_result, AST, string_v);
+Result_T(parse_result, struct {
+	AST ast;
+	/** @ref */ string end;
+}, string_v);
 #define ParseResult struct parse_result
 
 /**
