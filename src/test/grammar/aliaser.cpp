@@ -14,6 +14,7 @@ SCENARIO("aliaser does the aliasing", "[alias][exe]"){
 	string args2[] = {"hello", "world", null};
 	string args3[] = {"\\hello", "world", null};
 	string args4[] = {"hello brave new", "world", null};
+	string args5[] = {"goodbye", "world", "me", "dear", null};
 	AliasStore aliases = aliastore_new();
 	GIVEN("empty store"){
 		THEN("no replacements can be made"){
@@ -99,6 +100,22 @@ SCENARIO("aliaser does the aliasing", "[alias][exe]"){
 			}, err, { FAIL_FMT("Realias failed with - %s", err.s); });
 			IfElse_T(realias(args3, aliases), a, { REQUIRE(a == nulla); }, err, { FAIL_FMT("Realias failed with - %s", err.s); });
 			IfElse_T(realias(args4, aliases), a, { REQUIRE(a == nulla); }, err, { FAIL_FMT("Realias failed with - %s", err.s); });
+		}
+	}
+	GIVEN("double aliasing command"){
+		CHECK(IsOk(aliastore_add(aliases, "goodbye", "see you later ")));
+		CHECK(IsOk(aliastore_add(aliases, "see", ":wave: ")));
+		CHECK(IsOk(aliastore_add(aliases, "you", ":wave: ")));
+		CHECK(IsOk(aliastore_add(aliases, "world", "dlrow")));
+		CHECK(IsOk(aliastore_add(aliases, "dlrow", "world of thxghts")));
+		THEN("it still manages to do it"){
+			string expected[] = {":wave:", ":wave:", "later", "world", "of", "thxghts", "me", "dear", null};
+			IfElse_T(realias(args5, aliases), args, {
+				REQUIRE(args != nulla);
+				REQUIRE(args->size == 8);
+				for(size_t i = 0; i < args->size; i++) REQUIRE_THAT(args->args[i], Equals(expected[i]));
+				argsarrmut_destroy(args);
+			}, err, { FAIL_FMT("Realias failed with - %s", err.s); });
 		}
 	}
 	aliastore_destroy(aliases);
