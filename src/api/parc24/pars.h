@@ -5,7 +5,10 @@
 
 Parser parcer_defolt_new(void);
 
-Result_T(parce_result, AST, string_v);
+Result_T(parce_result, struct {
+	AST ast;
+	/** @ref */ string end;
+}, string_v);
 #define ParceResult struct parce_result
 
 ParceResult parcer_parse(Parser parcer, string input);

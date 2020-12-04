@@ -25,11 +25,15 @@ TihsExeResult tihs_exeast(AST ast, ParContext ctxt){
 }
 
 TihsExeResult tihs_exestr(string str, ParContext ctxt){
-	IfElse_T(parcer_parse(ctxt->parcer, str), ast, {
-		TihsExeResult exer = tihs_exeast(ast, ctxt);
-		ast_destroy(ast);
-		return exer;
-	}, err, {
-		return Error_T(tihs_exe_result, err);
-	});
+	TihsExeResult exer = Ok_T(tihs_exe_result, 0);
+	while(*str){
+		IfElse_T(parcer_parse(ctxt->parcer, str), ast, {
+			exer = tihs_exeast(ast.ast, ctxt);
+			ast_destroy(ast.ast);
+			str = ast.end;
+		}, err, {
+			return Error_T(tihs_exe_result, err);
+		});
+	}
+	return exer;
 }
