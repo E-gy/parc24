@@ -4,7 +4,10 @@
 #include <tihs/opts.h>
 #include <calp/parser.h>
 
-Result_T(tihs_exe_result, int, string_v);
+Result_T(tihs_exe_result, struct {
+	int code;
+	bool exit;
+}, string_v);
 #define TihsExeResult struct tihs_exe_result
 
 /**

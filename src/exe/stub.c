@@ -59,8 +59,8 @@ int main(int argc, argsarr args){
 			io.log(LL_ERROR, "Execution error - %s", err.s);
 			return 1;
 		});
-		return exer.r.ok;
-	} else while(true){
+		return exer.r.ok.code;
+	} else for(bool exit = false; !exit;){
 		if(isatty(STDIN_FILENO)){ //FIXME shouldn't `io` be used for that..?
 			printf("42sh> ");
 			fflush(stdout);
@@ -70,7 +70,7 @@ int main(int argc, argsarr args){
 			if(!line) return lec;
 			TihsExeResult exer = tihs_exestr(line, &ctxt);
 			IfError_T(exer, err, { io.log(LL_ERROR, "Execution error - %s", err.s); });
-			IfOk_T(exer, ec, { lec = ec; });
+			IfOk_T(exer, ec, { lec = ec.code; exit = ec.exit; });
 		}, err, {
 			io.log(LL_ERROR, "Failed to read from standard input - %s", err.s);
 		});
