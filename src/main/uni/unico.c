@@ -19,7 +19,7 @@
 TraverseASTResult parcontext_unixec(argsarr args, ParContext ctxt){
 	if(!args || !ctxt) return Error_T(travast_result, {"invalid args"});
 	int argc = 0;
-	for(argsarr a = args; a; a++) argc++;
+	for(argsarr a = args; *a; a++) argc++;
 	if(argc == 0) return Error_T(travast_result, {"no args given"});
 	RealiasResult aliased = realias(cpt2ptr(args), ctxt->aliases);
 	if(!IsOk_T(aliased)) return Error_T(travast_result, aliased.r.error);
