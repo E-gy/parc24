@@ -8,11 +8,41 @@
 #include <errno.h>
 #include <util/string.h>
 #include <util/null.h>
+#include <util/caste.h>
 #include <cppo/parallels.h>
+#include <grammar/aliaser.h>
 
 #ifdef _WIN32
 #define O_CLOEXEC 0
 #endif
+
+TraverseASTResult parcontext_unixec(argsarr args, ParContext ctxt){
+	if(!args || !ctxt) return Error_T(travast_result, {"invalid args"});
+	int argc = 0;
+	for(argsarr a = args; a; a++) argc++;
+	if(argc == 0) return Error_T(travast_result, {"no args given"});
+	RealiasResult aliased = realias(cpt2ptr(args), ctxt->aliases);
+	if(!IsOk_T(aliased)) return Error_T(travast_result, aliased.r.error);
+	ArgsArr_Mut argsmuta = aliased.r.ok;
+	if(argsmuta) args = argsmuta->args;
+	Funcmd fun = funcstore_get(ctxt->funcs, args[0]);
+	if(fun){
+		struct parcontext fctxt = *ctxt;
+		fctxt.args = args;
+		TraverseASTResult tfr = traverse_ast(fun, &fctxt);
+		argsarrmut_destroy(argsmuta);
+		return tfr;
+	}
+	CCMD ccmd = ccmdstore_get(ctxt->ccmds, args[0]);
+	if(ccmd){
+		TraverseASTResult ccmdr = ccmd(argc, args, ctxt);
+		argsarrmut_destroy(argsmuta);
+		return ccmdr;
+	}
+	ExeRunResult exe = exe_runa(args, ctxt->exeopts);
+	argsarrmut_destroy(argsmuta);
+	return IsOk_T(exe) ? Ok_T(travast_result, {TRAV_WAIT_CHILD, {.child = exe.r.ok}}) : Error_T(travast_result, exe.r.error);
+}
 
 TraverseASTResult parcontext_uniredir(enum redirection redir, int stream, string target, ParContext ctxt){
 	if(!target || !ctxt) return Error_T(travast_result, {"invalid args"});
