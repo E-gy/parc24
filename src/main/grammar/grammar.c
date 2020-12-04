@@ -358,7 +358,7 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 		t1 = parcontext_uniwait(t1);
 		if(!IsOk_T(t1) || travt_is_shrtct(t1.r.ok.type)) return t1;
 		int rc = ctxt->lastexit = t1.r.ok.v.completed;
-		return(r->d.group.children[0]->d.group.children[0]->d.leaf.symbolId == (isexitcodeok(rc) ? vpipvpip : ampamp)) ? t1 : traverse_ast(ast->d.group.children[ir], ctxt);
+		return(r->d.group.children[0]->d.group.children[0]->d.leaf.symbolId == (isexitcodeok(rc) ? ampamp : vpipvpip)) ? t1 : traverse_ast(ast->d.group.children[ir], ctxt);
 	}
 	//l1: |
 	if(gid == cmdlist_l1 || gid == cmdlist_l1_r){
