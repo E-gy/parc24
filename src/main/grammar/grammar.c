@@ -328,7 +328,8 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 		TraverseASTResult t1 = traverse_ast(ast->d.group.children[it1], ctxt);
 		if(!IsOk_T(t1)) return t1;
 		if(ast->d.group.children[ir]->d.group.cc == 1) return t1;
-		if(t1.r.ok.running) exe_waitretcode(t1.r.ok.running);
+		t1 = parcontext_uniwait(t1);
+		if(!IsOk_T(t1) || travt_is_shrtct(t1.r.ok.type)) return t1;
 		return traverse_ast(ast->d.group.children[ir], ctxt);
 	}
 	if(gid == cmdlist_l3ext || gid == cmdlist_l3ext_r){
@@ -338,7 +339,8 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 		TraverseASTResult t1 = traverse_ast(ast->d.group.children[it1], ctxt);
 		if(!IsOk_T(t1)) return t1;
 		if(ast->d.group.children[ir]->d.group.cc == 1) return t1;
-		if(t1.r.ok.running) exe_waitretcode(t1.r.ok.running);
+		t1 = parcontext_uniwait(t1);
+		if(!IsOk_T(t1) || travt_is_shrtct(t1.r.ok.type)) return t1;
 		return traverse_ast(ast->d.group.children[ir], ctxt);
 	}
 	//l2: || &&
@@ -350,13 +352,9 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 		if(!IsOk_T(t1)) return t1;
 		AST r = ast->d.group.children[ir];
 		if(r->d.group.cc == 1) return t1;
-		int rc;
-		if(t1.r.ok.running){
-			ExeWaitResult wr = exe_waitretcode(t1.r.ok.running);
-			if(!IsOk_T(wr)) return Error_T(travast_result, wr.r.error);
-			rc = wr.r.ok;
-			t1.r.ok.running = null;
-		} else rc = t1.r.ok.completed;
+		t1 = parcontext_uniwait(t1);
+		if(!IsOk_T(t1) || travt_is_shrtct(t1.r.ok.type)) return t1;
+		int rc = t1.r.ok.v.completed;
 		return(r->d.group.children[0]->d.group.children[0]->d.leaf.symbolId == (isexitcodeok(rc) ? vpipvpip : ampamp)) ? t1 : traverse_ast(ast->d.group.children[ir], ctxt);
 	}
 	//l1: |
@@ -493,11 +491,7 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 					if(!IsOk_T(rredir)) return captclean(rredir, {varstore_destroy(c.vars);});
 				}
 			}
-			ExeRunResult rrun = exe_runa(args->args, c.exeopts);
-			argsarrmut_destroy(args);
-			varstore_destroy(c.vars);
-			if(!IsOk_T(rrun)) return Error_T(travast_result, rrun.r.error);
-			return Ok_T(travast_result, {rrun.r.ok, -1, SHRTCT_NO, 0});
+			retclean(parcontext_unixec(args->args, &c), { argsarrmut_destroy(args); varstore_destroy(c.vars); });
 		}
 	}
 	if(gid == cmd_compound){
