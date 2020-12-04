@@ -6,6 +6,7 @@
 #include <util/thread.h>
 #include <stdlib.h>
 #include <util/fddio.h>
+#include <cppo/parallels.h>
 
 struct pakkedi {
 	ArgsArr_Mut args;
@@ -29,12 +30,17 @@ static TSPA pakked_new(argsarr args, ParContext c){
 }
 
 static int cmd_echo_exe(TSPA a){
-	for(size_t i = 0; i < a->args->size; i++) if(!IsOk(fddio_writestr(a->exeopts.iostreams[IOSTREAM_STD_OUT], a->args->args[i]))) return 1;
-	return 0;
+	for(size_t i = 1; i < a->args->size; i++){
+		if(!IsOk(fddio_writestr(a->exeopts.iostreams[IOSTREAM_STD_OUT], a->args->args[i]))) retclean(1, { pakked_destroy(a); });
+		if(!IsOk(fddio_writestr(a->exeopts.iostreams[IOSTREAM_STD_OUT], i < a->args->size-1 ? " " : "\n"))) retclean(1, { pakked_destroy(a); });
+	}
+	retclean(0, { pakked_destroy(a); });
 }
-
 static threadfwrap_reti(cmd_echo_exe);
 
 TraverseASTResult cmd_echo(argsarr args, ParContext context){
-	return Ok_T(travast_result, { TRAV_COMPLETED, {.completed = 0} });
+	TSPA a = pakked_new(args, context);
+	if(!a) return Error_T(travast_result, {"failed to pack up parallels args"});
+	ThreadResult tr = parallels_runf(cmd_echo_exe_wrap, a, context->exeopts.background);
+	return IsOk_T(tr) ? Ok_T(travast_result, {TRAV_WAIT_THREAD, {.thread = tr.r.ok}}) : Error_T(travast_result, tr.r.error);
 }
