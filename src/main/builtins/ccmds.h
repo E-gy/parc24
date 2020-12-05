@@ -8,3 +8,4 @@ TraverseASTResult cmd_break(argsarr args, ParContext context);
 TraverseASTResult cmd_continue(argsarr args, ParContext context);
 
 TraverseASTResult cmd_echo(argsarr args, ParContext context);
+TraverseASTResult cmd_shopt(argsarr args, ParContext context);
