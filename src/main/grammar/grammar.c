@@ -517,6 +517,22 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 		return traverse_ast(ast->d.group.children[cond.r.ok.v.completed == 0 ? 3 : 4], ctxt);
 	}
 	if(gid == blok_do_done) return traverse_ast(ast->d.group.children[1], ctxt);
+	if(gid == blok_while || gid == blok_until){
+		bool brekon = gid != blok_while;
+		TraverseASTResult res = Ok_T(travast_result, {0});
+		do {
+			TraverseASTResult ec = parcontext_uniwait(traverse_ast(ast->d.group.children[1], ctxt));
+			if(!IsOk_T(ec)) return ec;
+			if(travt_is_shrtct(ec.r.ok.type)) return ec; //TODO hmmmm...
+			if(isexitcodeok(ec.r.ok.v.completed) == brekon) break;
+			if(!IsOk_T((res = parcontext_uniwait(traverse_ast(ast->d.group.children[2], ctxt))))) break;
+			if(travt_is_shrtct(res.r.ok.type) && (res.r.ok.type != TRAV_SHRTCT_CONTINUE || res.r.ok.v.shortcut_depth > 1)){
+				if(res.r.ok.type != TRAV_SHRTCT_EXIT) if(--res.r.ok.v.shortcut_depth == 0) res = Ok_T(travast_result, {0});
+				break;
+			}
+		} while(true);
+		return res;
+	}
 	if(gid == blok_for){
 		AST inli = ast->d.group.children[2];
 		if(inli->d.group.cc == 1) return Ok_T(travast_result, {0});
