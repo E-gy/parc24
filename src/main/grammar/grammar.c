@@ -543,5 +543,32 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 		free(varn);
 		return res;
 	}
+	if(gid == blok_case){
+		ExpandoResult matchvr = expando_word(ast->d.group.children[1]->d.leaf.val, expando_targets_all, ctxt);
+		if(!IsOk_T(matchvr)) return Error_T(travast_result, {"failed to resolve matching target"});
+		const string_mut mv = matchvr.r.ok;
+		AST cases = ast->d.group.children[5];
+		AST cc = cases->d.group.children[0];
+		do {
+			ExpandoResult ccp0 = expando_word(cc->d.group.children[1]->d.leaf.val, expando_targets_all, ctxt);
+			if(!IsOk_T(ccp0)) return captclean(Error_T(travast_result, {"failed to expand case pattern"}), {free(mv);});
+			bool ccmatch = streq(mv, ccp0.r.ok); //TODO pattern matching
+			free(ccp0.r.ok);
+			for(AST ccpn = cc->d.group.children[2]; !ccmatch && ccpn->d.group.cc > 1; ccpn = ccpn->d.group.children[2]){
+				ExpandoResult pn = expando_word(ccpn->d.group.children[1]->d.leaf.val, expando_targets_all, ctxt);
+				if(!IsOk_T(ccp0)) return captclean(Error_T(travast_result, {"failed to expand case pattern"}), {free(mv);});
+				ccmatch |= streq(mv, pn.r.ok);
+				free(pn.r.ok);
+			}
+			if(ccmatch){
+				free(mv);
+				return traverse_ast(cc->d.group.children[5], ctxt);
+			}
+			if((cases = cases->d.group.children[cases->d.group.groupId == blok_case_s_rec ? 3 : 1])->d.group.cc <= 1) break;
+			cc = cases->d.group.children[2];
+		} while(true);
+		free(mv);
+		return Ok_T(travast_result, {TRAV_COMPLETED, {.completed = 1}});
+	}
 	return Error_T(travast_result, {"AST (group) not recognized"});
 }
