@@ -522,7 +522,7 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 		if(inli->d.group.cc == 1) return Ok_T(travast_result, {0});
 		AST nvw = inli->d.group.children[2];
 		if(nvw->d.group.cc == 1) return Ok_T(travast_result, {0});
-		const ExpandoResult varnr = expando_word(ast->d.group.children[1], expando_targets_all, ctxt);
+		const ExpandoResult varnr = expando_word(ast->d.group.children[1]->d.leaf.val, expando_targets_all, ctxt);
 		if(!IsOk_T(varnr)) return Error_T(travast_result, {"failed to resolve variable name"});
 		const string_mut varn = varnr.r.ok;
 		TraverseASTResult res = Ok_T(travast_result, {0});
