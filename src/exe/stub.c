@@ -76,12 +76,11 @@ int main(int argc, argsarr args){
 			printf("42sh> ");
 			fflush(stdout);
 		}
-		int lec = 0;
 		IfElse_T(io.readline(), line, {
-			if(!line) return lec;
+			if(!line) return ctxt.lastexit;
 			TihsExeResult exer = tihs_exestr(line, &ctxt);
 			IfError_T(exer, err, { io.log(LL_ERROR, "Execution error - %s", err.s); });
-			IfOk_T(exer, ec, { lec = ec.code; exit = ec.exit; });
+			IfOk_T(exer, ec, { ctxt.lastexit = ec.code; exit = ec.exit; });
 		}, err, {
 			io.log(LL_ERROR, "Failed to read from standard input - %s", err.s);
 		});

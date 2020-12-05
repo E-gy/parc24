@@ -22,7 +22,7 @@ TihsExeResult tihs_exeast(AST ast, ParContext ctxt){
 }
 
 TihsExeResult tihs_exestr(string str, ParContext ctxt){
-	TihsExeResult exer = Ok_T(tihs_exe_result, {0, false});
+	TihsExeResult exer = Ok_T(tihs_exe_result, {ctxt->lastexit, false});
 	while(*str && !exer.r.ok.exit){
 		ctxt->lastexit = exer.r.ok.code;
 		IfElse_T(parcer_parse(ctxt->parcer, str), ast, {
