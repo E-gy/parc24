@@ -5,6 +5,7 @@
 #include <util/string.h>
 #include <util/buffer.h>
 #include <util/str2i.h>
+#include <stdlib.h>
 #include <ctype.h>
 
 //what is a word? - whatver that deserves an entire header on its own
@@ -95,7 +96,7 @@ DEF_GROUP(scol_or_newline, RULE(SYMBOL_T(scol)); RULE(SYMBOL_T(newline)));
 //fd_t
 DEF_SYMBOL_TERMINAL(streamid, {
 	if(!str) return null;
-	string end = null;
+	string_mut end = null;
 	long sid = strtol(str, &end, 10);
 	return sid >= 0 && sid < 10 ? end : null;
 });
