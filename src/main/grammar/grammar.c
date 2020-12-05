@@ -95,7 +95,9 @@ DEF_GROUP(scol_or_newline, RULE(SYMBOL_T(scol)); RULE(SYMBOL_T(newline)));
 //fd_t
 DEF_SYMBOL_TERMINAL(streamid, {
 	if(!str) return null;
-	return *str == '0' || *str == '1' || *str == '2' ? str+1 : null; //TODO more streams support?
+	string end = null;
+	long sid = strtol(str, &end, 10);
+	return sid >= 0 && sid < 10 ? end : null;
 });
 DEF_GOPT(streamid_opt, RULE(SYMBOL_T(streamid)));
 
