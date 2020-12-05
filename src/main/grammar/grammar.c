@@ -274,13 +274,12 @@ DEF_GRAMMAR(tihs24def,
 ); //TODO impatiently waiting for CALP 0.3
 
 #include <calp/parser/build.h>
-#include <util/log.h>
 
 Parser parcer_defolt_new(void){
 	IfElse_T(parser_build(tihs24def()), parser, {
 		return parser;
 	}, err, { //FIXME should _never_ happen - for removal(?)
-		logerrf("Parser construction failed - %s", err.s);
+		// logerrf("Parser construction failed - %s", err.s);
 		return null;
 	});
 }
@@ -571,5 +570,6 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 		free(mv);
 		return Ok_T(travast_result, {TRAV_COMPLETED, {.completed = 1}});
 	}
+	// ctxt->io.log(LL_ERROR, "Failed to recognize group: %s", ast->d.group.group->name);
 	return Error_T(travast_result, {"AST (group) not recognized"});
 }
