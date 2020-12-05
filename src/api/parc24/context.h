@@ -7,6 +7,7 @@
 #include "ccmdstore.h"
 #include "aliastore.h"
 #include "io.h"
+#include "options.h"
 #include <cppo/types.h>
 #include <calp/parser.h>
 
@@ -18,6 +19,7 @@ struct parcontext {
 	argsarr args;
 	int lastexit;
 	struct exe_opts exeopts;
+	struct parc_options parcopts;
 	ParC24IO io;
 	Parser parcer;
 };

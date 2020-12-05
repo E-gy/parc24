@@ -53,7 +53,7 @@ int main(int argc, argsarr args){
 		io.log(LL_CRITICAL, "Failed to create aliases store");
 		return 1;
 	}
-	struct parcontext ctxt = {vars, funcs, ccmds, aliases, opts.args, 0, {{STDIN_FILENO, STDOUT_FILENO, STDERR_FILENO}, false}, io, parcer};
+	struct parcontext ctxt = {vars, funcs, ccmds, aliases, opts.args, 0, {{STDIN_FILENO, STDOUT_FILENO, STDERR_FILENO}, false}, opts.parcopts, io, parcer};
 	if(opts.commandstr || opts.commandfile){
 		string_mut str = opts.commandstr;
 		if(!(str = opts.commandstr)){
