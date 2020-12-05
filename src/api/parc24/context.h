@@ -16,6 +16,7 @@ struct parcontext {
 	/** @ref */ FuncStore funcs;
 	/** @ref */ CCMDStore ccmds;
 	/** @ref */ AliasStore aliases;
+	string currexe;
 	argsarr args;
 	int lastexit;
 	struct exe_opts exeopts;

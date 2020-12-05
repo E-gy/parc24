@@ -27,6 +27,7 @@ TraverseASTResult parcontext_unixec(argsarr args, ParContext ctxt){
 	Funcmd fun = funcstore_get(ctxt->funcs, args[0]);
 	if(fun){
 		struct parcontext fctxt = *ctxt;
+		fctxt.currexe = args[0];
 		fctxt.args = args;
 		TraverseASTResult tfr = traverse_ast(fun, &fctxt);
 		argsarrmut_destroy(argsmuta);
