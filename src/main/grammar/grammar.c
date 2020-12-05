@@ -509,6 +509,12 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 		return Ok_T(travast_result, {TRAV_COMPLETED, {.completed = 0}});
 	}
 	//blocks
-	//TODO
+	if(gid == blok_if || gid == blok_if_else){
+		if(ast->d.group.cc == 1) return Ok_T(travast_result, {0});
+		if(ast->d.group.cc == 2) return traverse_ast(ast->d.group.children[1], ctxt);
+		TraverseASTResult cond = parcontext_uniwait(traverse_ast(ast->d.group.children[1], ctxt));
+		if(!IsOk_T(cond) || travt_is_shrtct(cond.r.ok.type)) return cond;
+		return traverse_ast(ast->d.group.children[cond.r.ok.v.completed == 0 ? 3 : 4], ctxt);
+	}
 	return Error_T(travast_result, {"AST (group) not recognized"});
 }
