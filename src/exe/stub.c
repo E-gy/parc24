@@ -43,7 +43,8 @@ int main(int argc, argsarr args){
 		!IsOk(ccmdstore_set(ccmds, "exit", cmd_exit)) ||
 		!IsOk(ccmdstore_set(ccmds, "break", cmd_break)) ||
 		!IsOk(ccmdstore_set(ccmds, "continue", cmd_continue)) ||
-		!IsOk(ccmdstore_set(ccmds, "echo", cmd_echo))
+		!IsOk(ccmdstore_set(ccmds, "echo", cmd_echo)) ||
+		!IsOk(ccmdstore_set(ccmds, "shopt", cmd_shopt))
 	){
 		io.log(LL_CRITICAL, "Failed to register builtin ccmds");
 		return 1;
@@ -53,7 +54,7 @@ int main(int argc, argsarr args){
 		io.log(LL_CRITICAL, "Failed to create aliases store");
 		return 1;
 	}
-	struct parcontext ctxt = {vars, funcs, ccmds, aliases, opts.args, 0, {{STDIN_FILENO, STDOUT_FILENO, STDERR_FILENO}, false}, opts.parcopts, io, parcer};
+	struct parcontext ctxt = {vars, funcs, ccmds, aliases, opts.args, 0, {{STDIN_FILENO, STDOUT_FILENO, STDERR_FILENO}, false}, &opts.parcopts, io, parcer};
 	if(opts.commandstr || opts.commandfile){
 		string_mut str = opts.commandstr;
 		if(!(str = opts.commandstr)){

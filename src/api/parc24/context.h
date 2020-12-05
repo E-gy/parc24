@@ -19,7 +19,7 @@ struct parcontext {
 	argsarr args;
 	int lastexit;
 	struct exe_opts exeopts;
-	struct parc_options parcopts;
+	ParcOptions parcopts;
 	ParC24IO io;
 	Parser parcer;
 };
