@@ -389,13 +389,12 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 		int stream;
 		{
 			AST sid = ast->d.group.children[0];
-			if(sid->d.group.cc == 0) stream = -1;
-			else {
+			if(sid->d.group.children[0]->d.leaf.symbolId == streamid){
 				string_mut ok = null;
 				Str2IResult ion = str2i(sid->d.group.children[0]->d.leaf.val);
 				if(!IsOk_T(ion) || ion.r.ok < 0 || ion.r.ok > 2) return Error_T(travast_result, {"invalid IO stream number"});
 				stream = ion.r.ok;
-			}
+			} else stream = -1;
 		}
 		enum redirection redir = redirsymb2type(assid);
 		string_mut target;
