@@ -346,6 +346,7 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 		ctxt->lastexit = t1.r.ok.v.completed;
 		return traverse_ast(ast->d.group.children[ir], ctxt);
 	}
+	if(gid == cmdlist_l3ext_opt) return ast->d.group.children[0]->type == AST_GROUP ? traverse_ast(ast->d.group.children[0], ctxt) : Ok_T(travast_result, {0});
 	//l2: || &&
 	if(gid == cmdlist_l2 || gid == cmdlist_l2_r){
 		if(ast->d.group.cc == 1) return Ok_T(travast_result, {0});
