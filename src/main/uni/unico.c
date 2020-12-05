@@ -12,10 +12,32 @@
 #include <util/str2i.h>
 #include <cppo/parallels.h>
 #include <grammar/aliaser.h>
+#include <stdio.h>
 
 #ifdef _WIN32
 #define O_CLOEXEC 0
 #endif
+
+string parcontext_getunivar(ParContext c, string v){
+	if(streq("?", v)){
+		static char hackity[16] = {0};
+		sprintf(hackity, "%i", c->lastexit);
+		return hackity;
+	}
+	IfOk_T(str2i(v), num, {
+		if(num == 0) return c->currexe;
+		if(num > 0 && num-1 < ntarrlen_t(c->args, long)) return c->args[num-1]; 
+	});
+	{
+		string_mut vv = varstore_get(c->vars, v);
+		if(vv) return vv;
+	}
+	{
+		string_mut envv = getenv(v);
+		if(envv) return envv;
+	}
+	return null;
+}
 
 TraverseASTResult parcontext_unixec(argsarr args, ParContext ctxt){
 	if(!args || !ctxt) return Error_T(travast_result, {"invalid args"});
