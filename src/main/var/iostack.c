@@ -166,6 +166,10 @@ Result iosstack_io_dup(IOsStack s, fd_t iodst, fd_t iosrc){
 	return Ok;
 }
 
+bool iosstack_raw_has(IOsStack s, fd_t io){
+	return s && isiok(io) && hasstream(s, io);
+}
+
 fd_t iosstack_raw_get(IOsStack s, fd_t io){
 	if(!s || !isiok(io)) return -1;
 	return getstream(s, io);

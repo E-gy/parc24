@@ -82,6 +82,13 @@ Result iosstack_io_copy(IOsStack stack, fd_t iodst, fd_t iosrc);
 Result iosstack_io_dup(IOsStack stack, fd_t iodst, fd_t iosrc);
 
 /**
+ * @param stack @ref 
+ * @param io [virtual]
+ * @return 
+ */
+bool iosstack_raw_has(IOsStack stack, fd_t io);
+
+/**
  * @unsafe
  * 
  * @param stack @ref 
