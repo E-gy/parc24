@@ -16,9 +16,10 @@
  */
 TihsExeResult tihs_exeast(AST ast, ParContext ctxt){
 	ast_log(ast); //TODO merge(?) tihs options and ParContext
-	TraverseASTResult trr = parcontext_uniwait(traverse_ast(ast, ctxt));
+	TraverseASTResult trr = traverse_ast(ast, ctxt);
+	if(!ctxt->exeopts.background) trr = parcontext_uniwait(trr);
 	if(!IsOk_T(trr)) return Error_T(tihs_exe_result, trr.r.error);
-	return Ok_T(tihs_exe_result, {travt_is_hascode(trr.r.ok.type) ? trr.r.ok.v.completed : 0, trr.r.ok.type == TRAV_SHRTCT_EXIT});
+	return Ok_T(tihs_exe_result, {!ctxt->exeopts.background && travt_is_hascode(trr.r.ok.type) ? trr.r.ok.v.completed : 0, trr.r.ok.type == TRAV_SHRTCT_EXIT});
 }
 
 TihsExeResult tihs_exestr(string str, ParContext ctxt){
