@@ -371,20 +371,18 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 		if(ast->d.group.children[ir]->d.group.cc == 1) return traverse_ast(ast->d.group.children[it1], ctxt);
 		struct parcontext cl = *ctxt;
 		struct parcontext cr = *ctxt;
+		if(!(cl.exeopts.iostreams = iosstack_snapdup(cl.exeopts.iostreams))) return Error_T(travast_result, {"failed to snapshot IO"});
+		if(!(cr.exeopts.iostreams = iosstack_snapdup(cr.exeopts.iostreams))) return Error_T(travast_result, {"failed to snapshot IO"});
 		PipeResult pipe = pipe_new();
 		if(!IsOk_T(pipe)) return Error_T(travast_result, pipe.r.error);
-		cl.exeopts.iostreams[IOSTREAM_STD_OUT] = pipe.r.ok.write;
+		iostack_io_open(cl.exeopts.iostreams, IOSTREAM_STD_OUT, pipe.r.ok.write);
 		cl.exeopts.background = true;
-		cr.exeopts.iostreams[IOSTREAM_STD_IN] = pipe.r.ok.read;
-		TraverseASTResult t1 = traverse_ast(ast->d.group.children[it1], &cl);
-		close(pipe.r.ok.write);
-		if(!IsOk_T(t1)){
-			close(pipe.r.ok.read);
-			return t1;
-		}
-		TraverseASTResult t2 = traverse_ast(ast->d.group.children[ir], &cr);
-		close(pipe.r.ok.read);
-		return t2;
+		iostack_io_open(cr.exeopts.iostreams, IOSTREAM_STD_IN, pipe.r.ok.read);
+		TraverseASTResult ret = traverse_ast(ast->d.group.children[it1], &cl);
+		if(IsOk_T(ret)) ret = traverse_ast(ast->d.group.children[ir], &cr);
+		iosstack_destroy(cl.exeopts.iostreams);
+		iosstack_destroy(cr.exeopts.iostreams);
+		return ret;
 	}
 	//sparlkes
 	if(gid == redirection){
