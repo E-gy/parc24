@@ -17,6 +17,7 @@ typedef struct pakkedi* TSPA;
 static void pakked_destroy(TSPA a){
 	if(!a) return;
 	argsarrmut_destroy(a->args);
+	iosstack_destroy(a->exeopts.iostreams);
 	free(a);
 }
 
@@ -24,7 +25,7 @@ static TSPA pakked_new(argsarr args, ParContext c){
 	if(!args || !c) return null;
 	new(TSPA, p);
 	*p = (struct pakkedi){0};
-	*p = (struct pakkedi){argsarrmut_from(cpt2ptr(args)), c->exeopts};
+	*p = (struct pakkedi){argsarrmut_from(cpt2ptr(args)), { iosstack_snapdup(c->exeopts.iostreams), c->exeopts.background }};
 	if(!p->args) retclean(null, {pakked_destroy(p);});
 	return p;
 }
