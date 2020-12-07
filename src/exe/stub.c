@@ -54,7 +54,15 @@ int main(int argc, argsarr args){
 		io.log(LL_CRITICAL, "Failed to create aliases store");
 		return 1;
 	}
-	struct parcontext ctxt = {vars, funcs, ccmds, aliases, args[0], opts.args, 0, {{STDIN_FILENO, STDOUT_FILENO, STDERR_FILENO}, false}, &opts.parcopts, io, parcer};
+	IOsStack ios = iosstack_new();
+	if(!ios){
+		io.log(LL_CRITICAL, "Failed to create io stack");
+		return 1;
+	}
+	iosstack_raw_set(ios, STDIN_FILENO, STDIN_FILENO);
+	iosstack_raw_set(ios, STDOUT_FILENO, STDOUT_FILENO);
+	iosstack_raw_set(ios, STDERR_FILENO, STDERR_FILENO);
+	struct parcontext ctxt = {vars, funcs, ccmds, aliases, args[0], opts.args, 0, {ios, false}, &opts.parcopts, io, parcer};
 	if(opts.commandstr || opts.commandfile){
 		string_mut str = opts.commandstr;
 		if(!(str = opts.commandstr)){
