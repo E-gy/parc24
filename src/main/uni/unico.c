@@ -51,7 +51,9 @@ TraverseASTResult parcontext_unixec(argsarr args, ParContext ctxt){
 		struct parcontext fctxt = *ctxt;
 		fctxt.currexe = args[0];
 		fctxt.args = args;
+		fctxt.exeopts.iostreams = iosstack_snapdup(fctxt.exeopts.iostreams);
 		TraverseASTResult tfr = traverse_ast(fun, &fctxt);
+		iosstack_destroy(fctxt.exeopts.iostreams);
 		argsarrmut_destroy(argsmuta);
 		return tfr;
 	}
