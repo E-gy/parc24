@@ -164,3 +164,8 @@ Result iosstack_io_dup(IOsStack s, fd_t iodst, fd_t iosrc){
 	return Ok;
 }
 
+Result iosstack_foreach(IOsStack s, Result (*c)(fd_t, fd_t, void*), void* _){
+	if(!s || !c) return Error;
+	for(size_t i = 0; i < MAXSTREAMS; i++) if(hasstream(s, i)) if(!IsOk(c(i, getstream(s, i), _))) return Error;
+	return Ok;
+}

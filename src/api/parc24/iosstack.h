@@ -80,3 +80,11 @@ Result iosstack_io_copy(IOsStack stack, fd_t iodst, fd_t iosrc);
  * @return Result 
  */
 Result iosstack_io_dup(IOsStack stack, fd_t iodst, fd_t iosrc);
+
+/**
+ * @param stack @ref 
+ * @param consumer 
+ * @param _
+ * @return Result 
+ */
+Result iosstack_foreach(IOsStack stack, Result (*consumer)(/** [virtual] */ fd_t io, /** [real] */ fd_t stream, void* _), void* _);
