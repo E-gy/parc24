@@ -125,8 +125,10 @@ static Result iop_revert(IOsStack s, StackOp op){
 	return Ok;
 }
 
+#define isiok(io) (0 <= (io) && (io) < MAXSTREAMS)
+
 Result iostack_io_open(IOsStack s, fd_t io, fd_t rs){
-	if(!s || io < 0 || rs < 0) return Error;
+	if(!s || !isiok(io) || rs < 0) return Error;
 	iop_new_open(op, io, getstream(s, io));
 	if(!op) return Error;
 	setstream(s, io, rs);
@@ -135,7 +137,7 @@ Result iostack_io_open(IOsStack s, fd_t io, fd_t rs){
 }
 
 Result iostack_io_close(IOsStack s, fd_t io){
-	if(!s || io < 0) return Error;
+	if(!s || !isiok(io)) return Error;
 	iop_new_close(op, io, getstream(s, io));
 	if(!op) return Error;
 	remstream(s, io);
@@ -144,7 +146,7 @@ Result iostack_io_close(IOsStack s, fd_t io){
 }
 
 Result iosstack_io_copy(IOsStack s, fd_t iodst, fd_t iosrc){
-	if(!s || iodst < 0 || iosrc < 0) return Error;
+	if(!s || !isiok(iodst) || !isiok(iosrc)) return Error;
 	iop_new_copy(op, iodst, iosrc, getstream(s, iodst));
 	if(!op) return Error;
 	setstream(s, iodst, getstream(s, iosrc));
@@ -153,7 +155,7 @@ Result iosstack_io_copy(IOsStack s, fd_t iodst, fd_t iosrc){
 }
 
 Result iosstack_io_dup(IOsStack s, fd_t iodst, fd_t iosrc){
-	if(!s || iodst < 0 || iosrc < 0) return Error;
+	if(!s || !isiok(iodst) || !isiok(iosrc)) return Error;
 	iop_new_dup(op, iodst, iosrc, getstream(s, iodst));
 	if(!op) return Error;
 	fd_t sio = getstream(s, iosrc);
