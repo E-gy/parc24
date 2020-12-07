@@ -82,11 +82,24 @@ Result iosstack_io_copy(IOsStack stack, fd_t iodst, fd_t iosrc);
 Result iosstack_io_dup(IOsStack stack, fd_t iodst, fd_t iosrc);
 
 /**
+ * @unsafe
+ * 
  * @param stack @ref 
  * @param io [virtual]
  * @return [real] 
  */
-fd_t iosstack_get(IOsStack stack, fd_t io);
+fd_t iosstack_raw_get(IOsStack stack, fd_t io);
+
+/**
+ * @unsafe
+ * 
+ * @safe iff used before any managed operation _and_ `io` is unused _and_ ownership of `stream` is transferred to the stack
+ * 
+ * @param stack @refmut
+ * @param io [virtual]
+ * @param stream [real]
+ */
+void iosstack_raw_set(IOsStack stack, fd_t io, fd_t stream);
 
 /**
  * @param stack @ref 

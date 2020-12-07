@@ -164,9 +164,14 @@ Result iosstack_io_dup(IOsStack s, fd_t iodst, fd_t iosrc){
 	return Ok;
 }
 
-fd_t iosstack_get(IOsStack s, fd_t io){
+fd_t iosstack_raw_get(IOsStack s, fd_t io){
 	if(!s || io < 0) return -1;
 	return getstream(s, io);
+}
+
+void iosstack_raw_set(IOsStack s, fd_t io, fd_t stream){
+	if(!s) return;
+	setstream(s, io, stream);
 }
 
 Result iosstack_foreach(IOsStack s, Result (*c)(fd_t, fd_t, void*), void* _){
