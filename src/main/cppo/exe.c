@@ -28,7 +28,17 @@ struct childprocinf {
 	HANDLE ph;
 };
 
-#define fd2handle(fd, handle) do { intptr_t _h = _get_osfhandle(fd); if(_h < 0) return Error_T(exerun_result, {"File not associated with a stream - can't retrieve handle"}); if(!SetHandleInformation((HANDLE) _h, HANDLE_FLAG_INHERIT, true)) return Error_T(exerun_result, {"Handle set inherit failed"}); handle = (HANDLE) _h; } while(0)
+static Result fd2handle(fd_t io, fd_t stream, STARTUPINFO* inf){
+	if(io != IOSTREAM_STD_IN && io != IOSTREAM_STD_OUT && io != IOSTREAM_STD_ERR) return Ok; //FIXME support more streams on Win?
+	intptr_t _h = _get_osfhandle(stream);
+	if(_h < 0) return Error;
+	if(!SetHandleInformation((HANDLE) _h, HANDLE_FLAG_INHERIT, true)) return Error;
+	*(io == IOSTREAM_STD_IN ? &inf->hStdInput : io == IOSTREAM_STD_OUT ? &inf->hStdOutput : &inf->hStdError) = (HANDLE) _h;
+	return Ok;
+}
+static Result fd2handle_wrap(fd_t io, fd_t stream, void* inf){
+	return fd2handle(io, stream, inf);
+}
 
 ExeRunResult exe_runa(argsarr args, struct exe_opts opts){
 	string_mut cmd = exe_args_join_caste(args, true);
@@ -40,9 +50,7 @@ ExeRunResult exe_runa(argsarr args, struct exe_opts opts){
 
 ExeRunResult exe_runs(string_mut cmd, struct exe_opts opts){
 	STARTUPINFO startup = {.dwFlags = STARTF_USESTDHANDLES};
-	if(opts.iostreams[IOSTREAM_STD_IN] >= 0) fd2handle(opts.iostreams[IOSTREAM_STD_IN], startup.hStdInput);
-	if(opts.iostreams[IOSTREAM_STD_OUT] >= 0) fd2handle(opts.iostreams[IOSTREAM_STD_OUT], startup.hStdOutput);
-	if(opts.iostreams[IOSTREAM_STD_ERR] >= 0) fd2handle(opts.iostreams[IOSTREAM_STD_ERR], startup.hStdError);
+	if(!IsOk(iosstack_foreach(opts.iostreams, fd2handle_wrap, &startup))) return Error_T(exerun_result, {"Passing handles to child failed"});
 	cpr_new(procinf);
 	PROCESS_INFORMATION cpi;
 	bool ok = CreateProcessA(null, cmd, null, null, true, 0, null, null, &startup, &cpi);
@@ -79,9 +87,14 @@ static Result fdremainopenonexec(fd_t fd){
 	if(flags < 0) return Error;
 	flags &= ~FD_CLOEXEC;
 	return fcntl(fd, F_SETFD, flags) < 0 ? Error : Ok;
-} 
+}
 
-#define fdup(fd, fdst) do { if(fd != fdst && dup2(fd, fdst) < 0) return Error_T(exerun_result, {"dup2 failed"}); if(!IsOk(fdremainopenonexec(fdst))) return Error_T(exerun_result, {"Marking fd to remain open on exec failed"}); } while(0)
+static Result fdup(fd_t io, fd_t stream, void* inf){
+	if(dup2(stream, io) < 0) return Error;
+	if(!IsOk(fdremainopenonexec(io))) return Error;
+	return Ok;
+}
+
 #define fvoid(fdst) do { fd_t _devnul = open("/dev/null", O_RDWR); if(_devnul < 0) return Error_T(exerun_result, {"open /dev/null failed"}); if(dup2(_devnul, fdst) < 0) return Error_T(exerun_result, {"dup2 failed"}); close(_devnul); } while(0)
 
 ExeRunResult exe_runa(argsarr args, struct exe_opts opts){
@@ -93,9 +106,10 @@ ExeRunResult exe_runa(argsarr args, struct exe_opts opts){
 	}
 	if(cpid == 0){
 		if(opts.background) if(fork() != 0) exit(69);
-		if(opts.iostreams[IOSTREAM_STD_IN] >= 0) fdup(opts.iostreams[IOSTREAM_STD_IN], STDIN_FILENO); else fvoid(STDIN_FILENO);
-		if(opts.iostreams[IOSTREAM_STD_OUT] >= 0) fdup(opts.iostreams[IOSTREAM_STD_OUT], STDOUT_FILENO); else fvoid(STDOUT_FILENO);
-		if(opts.iostreams[IOSTREAM_STD_ERR] >= 0) fdup(opts.iostreams[IOSTREAM_STD_ERR], STDERR_FILENO); else fvoid(STDERR_FILENO);
+		iosstack_foreach(opts.iostreams, fdup, null);
+		if(!iosstack_raw_has(opts.iostreams, IOSTREAM_STD_IN)) fvoid(STDIN_FILENO);
+		if(!iosstack_raw_has(opts.iostreams, IOSTREAM_STD_OUT)) fvoid(STDOUT_FILENO);
+		if(!iosstack_raw_has(opts.iostreams, IOSTREAM_STD_ERR)) fvoid(STDERR_FILENO);
 		execvp(args[0], args);
 		exit(69); //exec failed
 	}	

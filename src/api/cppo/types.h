@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ptypes.h>
+#include <parc24/iosstack.h>
 
 struct pipe_info {
 	fd_t write;
@@ -17,11 +18,7 @@ PipeResult pipe_new(void);
 #define IOSTREAM_STD_ERR 2
 
 struct exe_opts {
-	/**
-	 * Files/handles the standard streams.
-	 * Default -1.
-	 */
-	fd_t iostreams[10];
+	/** @ref */ IOsStack iostreams;
 	/**
 	 * if true, detaches all handles to the child (so the returned info _will_ be null) making it unawaitable 
 	 */
