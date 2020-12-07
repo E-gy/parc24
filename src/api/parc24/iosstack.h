@@ -83,6 +83,13 @@ Result iosstack_io_dup(IOsStack stack, fd_t iodst, fd_t iosrc);
 
 /**
  * @param stack @ref 
+ * @param io [virtual]
+ * @return [real] 
+ */
+fd_t iosstack_get(IOsStack stack, fd_t io);
+
+/**
+ * @param stack @ref 
  * @param consumer 
  * @param _
  * @return Result 
