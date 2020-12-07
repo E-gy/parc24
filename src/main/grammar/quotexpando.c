@@ -112,7 +112,7 @@ ExpandoResult expando_expando(Buffer buff, size_t* si, struct expando_targets wh
 			close(pipe.r.ok.read);
 			return Error_T(expando_result, captv.r.error);
 		}
-		if(!IsOk(buffer_splice(buff, *si, rei, captv.r.ok->data, captv.r.ok->size))) return Error_T(expando_result, {"captured data splice failed"});
+		if(!IsOk(buffer_splice(buff, *si, *si+rei, captv.r.ok->data, captv.r.ok->size))) return Error_T(expando_result, {"captured data splice failed"});
 		*si += captv.r.ok->size;
 		buffer_destroy(captv.r.ok);
 		return Ok_T(expando_result, null);
