@@ -13,4 +13,4 @@ struct parc_options {
 };
 typedef struct parc_options* ParcOptions;
 
-#define parc_options_default ((struct parc_options){.expand_aliases = true, .sourcepath = true})
+#define parc_options_default ((struct parc_options){false, false, false, false, true, true, false})
