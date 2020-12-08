@@ -17,6 +17,8 @@ enum log_level {
 };
 typedef enum log_level LogLevel;
 
+IOsStack parcio_new_fromstd(void);
+
 /**
  * Write message (to console)
  * 

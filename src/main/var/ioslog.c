@@ -6,6 +6,15 @@
 #include <util/fddio.h>
 #include <util/string.h>
 
+IOsStack parcio_new_fromstd(void){
+	IOsStack ios = iosstack_new();
+	if(!ios) return null;
+	iosstack_raw_set(ios, STDIN_FILENO, STDIN_FILENO);
+	iosstack_raw_set(ios, STDOUT_FILENO, STDOUT_FILENO);
+	iosstack_raw_set(ios, STDERR_FILENO, STDERR_FILENO);
+	return ios;
+}
+
 void parciolog(IOsStack io, enum log_level level, string str, ...){
 	Buffer buff = buffer_new(128);
 	if(!buff) return;
