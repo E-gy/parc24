@@ -42,7 +42,9 @@ void parcioprintf(IOsStack io, enum log_level level, string str, ...){
 }
 
 ParC24IOReadResult parcioread(IOsStack io){
-	return Error_T(parc24io_read_result, {"NOT YET IMPLEMENTED!"});
+	string_mut str;
+	if(!IsOk(fddio_readstr(iosstack_raw_get(io, STDIN_FILENO), &str))) return Error_T(parc24io_read_result, {"failed to read"});
+	return Ok_T(parc24io_read_result, str);
 }
 
 /*static void std_write(LogLevel level, string message, ...){
