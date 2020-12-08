@@ -371,17 +371,17 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 		if(ast->d.group.children[ir]->d.group.cc == 1) return traverse_ast(ast->d.group.children[it1], ctxt);
 		struct parcontext cl = *ctxt;
 		struct parcontext cr = *ctxt;
-		if(!(cl.exeopts.iostreams = iosstack_snapdup(cl.exeopts.iostreams))) return Error_T(travast_result, {"failed to snapshot IO"});
-		if(!(cr.exeopts.iostreams = iosstack_snapdup(cr.exeopts.iostreams))) return Error_T(travast_result, {"failed to snapshot IO"});
+		if(!(cl.ios = iosstack_snapdup(cl.ios))) return Error_T(travast_result, {"failed to snapshot IO"});
+		if(!(cr.ios = iosstack_snapdup(cr.ios))) return Error_T(travast_result, {"failed to snapshot IO"});
 		PipeResult pipe = pipe_new();
 		if(!IsOk_T(pipe)) return Error_T(travast_result, pipe.r.error);
-		iostack_io_open(cl.exeopts.iostreams, IOSTREAM_STD_OUT, pipe.r.ok.write);
-		cl.exeopts.background = true;
-		iostack_io_open(cr.exeopts.iostreams, IOSTREAM_STD_IN, pipe.r.ok.read);
+		iostack_io_open(cl.ios, IOSTREAM_STD_OUT, pipe.r.ok.write);
+		cl.exeback = true;
+		iostack_io_open(cr.ios, IOSTREAM_STD_IN, pipe.r.ok.read);
 		TraverseASTResult ret = traverse_ast(ast->d.group.children[it1], &cl);
 		if(IsOk_T(ret)) ret = traverse_ast(ast->d.group.children[ir], &cr);
-		iosstack_destroy(cl.exeopts.iostreams);
-		iosstack_destroy(cr.exeopts.iostreams);
+		iosstack_destroy(cl.ios);
+		iosstack_destroy(cr.ios);
 		return ret;
 	}
 	//sparlkes
@@ -473,16 +473,16 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 			if(words == 0) return Error_T(travast_result, {"don't know what to do with a command without words"}); //FIXME
 			struct parcontext c = *ctxt;
 			c.vars = varstore_clone(c.vars);
-			iosstack_push(c.exeopts.iostreams);
+			iosstack_push(c.ios);
 			#undef cleanup
-			#define cleanup { iosstack_pop(c.exeopts.iostreams); varstore_destroy(c.vars); }
+			#define cleanup { iosstack_pop(c.ios); varstore_destroy(c.vars); }
 			for(AST ar = ast->d.group.children[0]; ar->d.group.cc > 1; ar = ar->d.group.children[1]){
 				TraverseASTResult rass = traverse_ast(ar->d.group.children[0]->d.group.children[0], &c);
 				if(!IsOk_T(rass)) return captclean(rass, cleanup);
 			}
 			ArgsArr_Mut args = argsarrmut_new(words);
 			#undef cleanup
-			#define cleanup { argsarrmut_destroy(args); iosstack_pop(c.exeopts.iostreams); varstore_destroy(c.vars); }
+			#define cleanup { argsarrmut_destroy(args); iosstack_pop(c.ios); varstore_destroy(c.vars); }
 			if(!args) return captclean(Error_T(travast_result, {"args construction failed"}), cleanup);
 			if(c0->type == AST_LEAF){
 				ExpandoResult expr = expando_word(c0->d.leaf.val, (struct expando_targets){ .tilde = true, .parvar = true, .arithmetics = true, .command = true, .process = true, .path = true, .quot = true }, &c);
