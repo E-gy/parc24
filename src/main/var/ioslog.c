@@ -5,6 +5,7 @@
 #include <util/buffer_printf.h>
 #include <util/fddio.h>
 #include <util/string.h>
+#include <cppo/types.h>
 
 IOsStack parcio_new_fromstd(void){
 	IOsStack ios = iosstack_new();
@@ -25,7 +26,7 @@ void parciolog(IOsStack io, enum log_level level, string str, ...){
 	va_end(args);
 	if(!IsOk(prr)){ buffer_destroy(buff); return; }
 	if(!IsOk(buffer_append_str(buff, "\n"))){ buffer_destroy(buff); return; }
-	fddio_writestr(iosstack_raw_get(io, level >= LL_ERROR ? STDERR_FILENO : STDOUT_FILENO), buff->data);
+	fddio_writestr(iosstack_raw_get(io, level >= LL_ERROR ? IOSTREAM_STD_ERR : IOSTREAM_STD_OUT), buff->data);
 	buffer_destroy(buff);
 }
 
@@ -37,13 +38,13 @@ void parcioprintf(IOsStack io, enum log_level level, string str, ...){
 	Result prr = buffer_vprintf(buff, str, args);
 	va_end(args);
 	if(!IsOk(prr)){ buffer_destroy(buff); return; }
-	fddio_writestr(iosstack_raw_get(io, level >= LL_ERROR ? STDERR_FILENO : STDOUT_FILENO), buff->data);
+	fddio_writestr(iosstack_raw_get(io, level >= LL_ERROR ? IOSTREAM_STD_ERR : IOSTREAM_STD_OUT), buff->data);
 	buffer_destroy(buff);
 }
 
 ParC24IOReadResult parcioread(IOsStack io){
 	string_mut str;
-	if(!IsOk(fddio_readstr(iosstack_raw_get(io, STDIN_FILENO), &str))) return Error_T(parc24io_read_result, {"failed to read"});
+	if(!IsOk(fddio_readstr(iosstack_raw_get(io, IOSTREAM_STD_IN), &str))) return Error_T(parc24io_read_result, {"failed to read"});
 	return Ok_T(parc24io_read_result, str);
 }
 
