@@ -96,4 +96,5 @@ int main(int argc, argsarr args){
 	funcstore_destroy(funcs);
 	varstore_destroy(vars);
 	parser_destroy(parcer);
+	iosstack_destroy(ios);
 }
