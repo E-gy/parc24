@@ -37,7 +37,7 @@ void parcioprintf(IOsStack io, enum log_level level, string str, ...){
 	Result prr = buffer_vprintf(buff, str, args);
 	va_end(args);
 	if(!IsOk(prr)){ buffer_destroy(buff); return; }
-	fddio_writestr(iosstack_raw_get(io, STDOUT_FILENO), buff->data);
+	fddio_writestr(iosstack_raw_get(io, level >= LL_ERROR ? STDERR_FILENO : STDOUT_FILENO), buff->data);
 	buffer_destroy(buff);
 }
 
