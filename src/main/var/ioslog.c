@@ -57,9 +57,9 @@ ParC24IOReadResult parcioread(IOsStack io){
 	vfprintf(level >= LL_ERROR ? stderr : stdout, message, vargs);
 	va_end(vargs);
 	fputc('\n', level >= LL_ERROR ? stderr : stdout);
-}
+}*/
 
-static ParC24IOReadResult std_read(void){
+ParC24IOReadResult parcio_derp_std_read(void){
 	Buffer line = buffer_new(1024);
 	char buff[256] = {'\0'};
 	while(true){
@@ -86,4 +86,4 @@ static ParC24IOReadResult std_read(void){
 		buff[0] = '\0';
 	}
 	return Ok_T(parc24io_read_result, buffer_destr(line));
-}*/
+}

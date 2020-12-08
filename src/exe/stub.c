@@ -11,6 +11,8 @@
 #include <util/bufferio.h>
 #include <builtins/ccmds.h>
 
+ParC24IOReadResult parcio_derp_std_read(void);
+
 int main(int argc, argsarr args){
 	IOsStack ios = parcio_new_fromstd();
 	if(!ios){
@@ -80,7 +82,7 @@ int main(int argc, argsarr args){
 			printf("42sh> ");
 			fflush(stdout);
 		}
-		IfElse_T(parcioread(ios), line, {
+		IfElse_T(parcio_derp_std_read(), line, {
 			if(!line) return ctxt.lastexit;
 			TihsExeResult exer = tihs_exestr(line, &ctxt);
 			IfError_T(exer, err, { parciolog(ios, LL_ERROR, "Execution error - %s", err.s); });
