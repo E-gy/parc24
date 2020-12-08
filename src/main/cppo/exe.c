@@ -3,8 +3,9 @@
 
 #include <stdlib.h>
 #include <util/null.h>
+#include <parc24/iosstack.h>
 
-#define cpr_new(var) ChildProcessInfo var = opts.background ? null : malloc(sizeof(*var)); if(!var && !opts.background) return Error_T(exerun_result, {"Process info allocation failed"})
+#define cpr_new(var) ChildProcessInfo var = background ? null : malloc(sizeof(*var)); if(!var && !background) return Error_T(exerun_result, {"Process info allocation failed"})
 
 #ifdef _WIN32
 
@@ -40,22 +41,22 @@ static Result fd2handle_wrap(fd_t io, fd_t stream, void* inf){
 	return fd2handle(io, stream, inf);
 }
 
-ExeRunResult exe_runa(argsarr args, struct exe_opts opts){
+ExeRunResult exe_runa(argsarr args, IOsStack iostreams, bool background){
 	string_mut cmd = exe_args_join_caste(args, true);
 	if(!cmd) return Error_T(exerun_result, {"Args join failed"});
-	ExeRunResult rr = exe_runs(cmd, opts);
+	ExeRunResult rr = exe_runs(cmd, iostreams, background);
 	free(cmd);
 	return rr;
 }
 
-ExeRunResult exe_runs(string_mut cmd, struct exe_opts opts){
+ExeRunResult exe_runs(string_mut cmd, IOsStack iostreams, bool background){
 	STARTUPINFO startup = {.dwFlags = STARTF_USESTDHANDLES};
-	if(!IsOk(iosstack_foreach(opts.iostreams, fd2handle_wrap, &startup))) return Error_T(exerun_result, {"Passing handles to child failed"});
+	if(!IsOk(iosstack_foreach(iostreams, fd2handle_wrap, &startup))) return Error_T(exerun_result, {"Passing handles to child failed"});
 	cpr_new(procinf);
 	PROCESS_INFORMATION cpi;
 	bool ok = CreateProcessA(null, cmd, null, null, true, 0, null, null, &startup, &cpi);
 	if(!ok) return Error_T(exerun_result, {"CreateProcess failed :("});
-	if(opts.background) CloseHandle(cpi.hProcess);
+	if(background) CloseHandle(cpi.hProcess);
 	else procinf->ph = cpi.hProcess;
 	CloseHandle(cpi.hThread);
 	return Ok_T(exerun_result, procinf);
@@ -97,7 +98,7 @@ static Result fdup(fd_t io, fd_t stream, void* inf){
 
 #define fvoid(fdst) do { fd_t _devnul = open("/dev/null", O_RDWR); if(_devnul < 0) return Error_T(exerun_result, {"open /dev/null failed"}); if(dup2(_devnul, fdst) < 0) return Error_T(exerun_result, {"dup2 failed"}); close(_devnul); } while(0)
 
-ExeRunResult exe_runa(argsarr args, struct exe_opts opts){
+ExeRunResult exe_runa(argsarr args, IOsStack iostreams, bool background){
 	cpr_new(procinf);
 	pid_t cpid = fork();
 	if(cpid < 0){
@@ -105,25 +106,25 @@ ExeRunResult exe_runa(argsarr args, struct exe_opts opts){
 		return Error_T(exerun_result, {"fork failed"});
 	}
 	if(cpid == 0){
-		if(opts.background) if(fork() != 0) exit(69);
-		iosstack_foreach(opts.iostreams, fdup, null);
-		if(!iosstack_raw_has(opts.iostreams, IOSTREAM_STD_IN)) fvoid(STDIN_FILENO);
-		if(!iosstack_raw_has(opts.iostreams, IOSTREAM_STD_OUT)) fvoid(STDOUT_FILENO);
-		if(!iosstack_raw_has(opts.iostreams, IOSTREAM_STD_ERR)) fvoid(STDERR_FILENO);
+		if(background) if(fork() != 0) exit(69);
+		iosstack_foreach(iostreams, fdup, null);
+		if(!iosstack_raw_has(iostreams, IOSTREAM_STD_IN)) fvoid(STDIN_FILENO);
+		if(!iosstack_raw_has(iostreams, IOSTREAM_STD_OUT)) fvoid(STDOUT_FILENO);
+		if(!iosstack_raw_has(iostreams, IOSTREAM_STD_ERR)) fvoid(STDERR_FILENO);
 		execvp(args[0], args);
 		exit(69); //exec failed
 	}	
-	if(opts.background){
+	if(background){
 		int cstatus;
 		if(waitpid(cpid, &cstatus, 0) < 0) return Error_T(exerun_result, {"wait failed"});
 	} else procinf->pid = cpid;
 	return Ok_T(exerun_result, procinf);
 }
 
-ExeRunResult exe_runs(string_mut cmd, struct exe_opts opts){
+ExeRunResult exe_runs(string_mut cmd, IOsStack iostreams, bool background){
 	ArgsArr_Mut args = exe_args_split(cmd);
 	if(!args) return Error_T(exerun_result, {"Args new failed"});
-	ExeRunResult rr = exe_runa(args->args, opts);
+	ExeRunResult rr = exe_runa(args->args, iostreams, background);
 	argsarrmut_destroy(args);
 	return rr;
 }
