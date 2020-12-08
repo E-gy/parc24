@@ -25,6 +25,17 @@ typedef enum log_level LogLevel;
  * @param str @ref message
  */
 void parciolog(IOsStack io, enum log_level level, string str, ...);
+/**
+ * Same as log, but without the fancy.
+ * 
+ * Message is print-formatted as is - without newline or level prefix.
+ * Levels error and above are printed to error stream.
+ * 
+ * @param io @ref
+ * @param level 
+ * @param str @ref
+ */
+void parcioprintf(IOsStack io, enum log_level level, string str, ...);
 
 Result_T(parc24io_read_result, string_mut, string_v);
 #define ParC24IOReadResult struct parc24io_read_result
