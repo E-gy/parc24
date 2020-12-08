@@ -1,7 +1,6 @@
 #pragma once
 
 #include <ptypes.h>
-#include <parc24/iosstack.h>
 
 struct pipe_info {
 	fd_t write;
@@ -16,14 +15,6 @@ PipeResult pipe_new(void);
 #define IOSTREAM_STD_IN 0
 #define IOSTREAM_STD_OUT 1
 #define IOSTREAM_STD_ERR 2
-
-struct exe_opts {
-	/** @ref */ IOsStack iostreams;
-	/**
-	 * if true, detaches all handles to the child (so the returned info _will_ be null) making it unawaitable 
-	 */
-	bool background;
-};
 
 struct childprocinf;
 typedef struct childprocinf* ChildProcessInfo;
