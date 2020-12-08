@@ -97,11 +97,11 @@ ExpandoResult expando_expando(Buffer buff, size_t* si, struct expando_targets wh
 			return Error_T(expando_result, pipe.r.error);
 		}
 		struct parcontext cctxt = *context;
-		if(!(cctxt.exeopts.iostreams = iosstack_snapdup(cctxt.exeopts.iostreams))) return Error_T(expando_result, {"failed to snapshot IO"});
-		iostack_io_close(cctxt.exeopts.iostreams, IOSTREAM_STD_IN);
-		iostack_io_close(cctxt.exeopts.iostreams, IOSTREAM_STD_ERR);
-		iostack_io_open(cctxt.exeopts.iostreams, IOSTREAM_STD_OUT, pipe.r.ok.write);
-		cctxt.exeopts.background = true;
+		if(!(cctxt.ios = iosstack_snapdup(cctxt.ios))) return Error_T(expando_result, {"failed to snapshot IO"});
+		iostack_io_close(cctxt.ios, IOSTREAM_STD_IN);
+		iostack_io_close(cctxt.ios, IOSTREAM_STD_ERR);
+		iostack_io_open(cctxt.ios, IOSTREAM_STD_OUT, pipe.r.ok.write);
+		cctxt.exeback = true;
 		TihsExeResult captr = tihs_exestr(capt, &cctxt);
 		close(pipe.r.ok.write);
 		free(capt);
