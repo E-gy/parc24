@@ -5,6 +5,7 @@ extern "C" {
 #include <tihs/opts.h>
 #include <util/null.h>
 #include <parc24/ioslog.h>
+#include <parc24/iosstack.h>
 }
 
 SCENARIO("deciding where to read from", "[opts][parse][tihs]"){
@@ -89,4 +90,5 @@ SCENARIO("deciding where to read from", "[opts][parse][tihs]"){
 			}
 		}
 	}
+	iosstack_destroy(ios);
 }
