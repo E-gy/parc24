@@ -5,8 +5,8 @@
 #include <util/argsarr_mut.h>
 #include <util/thread.h>
 #include <stdlib.h>
-#include <util/fddio.h>
 #include <cppo/parallels.h>
+#include <parc24/ioslog.h>
 
 struct pakkedi {
 	ArgsArr_Mut args;
@@ -31,11 +31,7 @@ static TSPA pakked_new(argsarr args, ParContext c){
 }
 
 static int cmd_echo_exe(TSPA a){
-	for(size_t i = 1; i < a->args->size; i++){
-		if(!IsOk(fddio_writestr(iosstack_raw_get(a->ios, IOSTREAM_STD_OUT), a->args->args[i]))) retclean(1, { pakked_destroy(a); });
-		if(i < a->args->size-1) if(!IsOk(fddio_writestr(iosstack_raw_get(a->ios, IOSTREAM_STD_OUT), " "))) retclean(1, { pakked_destroy(a); });
-	}
-	if(!IsOk(fddio_writestr(iosstack_raw_get(a->ios, IOSTREAM_STD_OUT), "\n"))) retclean(1, { pakked_destroy(a); });
+	for(size_t i = 1; i < a->args->size; i++) parcioprintf(a->ios, LL_INFO, "%s%s", a->args->args[i], i < a->args->size-1 ? " " : "\n");
 	retclean(0, { pakked_destroy(a); });
 }
 static threadfwrap_reti(cmd_echo_exe);
