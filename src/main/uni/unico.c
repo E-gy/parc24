@@ -51,9 +51,9 @@ TraverseASTResult parcontext_unixec(argsarr args, ParContext ctxt){
 		struct parcontext fctxt = *ctxt;
 		fctxt.currexe = args[0];
 		fctxt.args = args;
-		fctxt.exeopts.iostreams = iosstack_snapdup(fctxt.exeopts.iostreams);
+		fctxt.ios = iosstack_snapdup(fctxt.ios);
 		TraverseASTResult tfr = traverse_ast(fun, &fctxt);
-		iosstack_destroy(fctxt.exeopts.iostreams);
+		iosstack_destroy(fctxt.ios);
 		argsarrmut_destroy(argsmuta);
 		return tfr;
 	}
@@ -63,7 +63,7 @@ TraverseASTResult parcontext_unixec(argsarr args, ParContext ctxt){
 		argsarrmut_destroy(argsmuta);
 		return ccmdr;
 	}
-	ExeRunResult exe = exe_runa(args, ctxt->exeopts);
+	ExeRunResult exe = exe_runa(args, ctxt->ios, ctxt->exeback);
 	argsarrmut_destroy(argsmuta);
 	return IsOk_T(exe) ? Ok_T(travast_result, {TRAV_WAIT_CHILD, {.child = exe.r.ok}}) : Error_T(travast_result, exe.r.error);
 }
@@ -71,7 +71,7 @@ TraverseASTResult parcontext_unixec(argsarr args, ParContext ctxt){
 TraverseASTResult parcontext_uniredir(enum redirection redir, int stream, string target, ParContext ctxt){
 	if(!target || !ctxt) return Error_T(travast_result, {"invalid args"});
 	if(stream < 0) stream = redir < REDIR_IN ? IOSTREAM_STD_OUT : IOSTREAM_STD_IN;
-	const int maxstreams = sizeof(ctxt->exeopts.iostreams)/sizeof(fd_t);
+	const int maxstreams = sizeof(ctxt->ios)/sizeof(fd_t);
 	if(stream >= maxstreams) return Error_T(travast_result, {"stream # outside of supported bounds"});
 	const bool noclobber = false;//FIXME use tihs options
 	fd_t f = -1;
@@ -104,10 +104,10 @@ TraverseASTResult parcontext_uniredir(enum redirection redir, int stream, string
 		}
 		case REDIR_OUT_DUP:
 		case REDIR_IN_DUP: {
-			if(streq(target, "-")) return !IsOk(iostack_io_close(ctxt->exeopts.iostreams, stream)) ? Error_T(travast_result, {"failed to close target stream"}) : Ok_T(travast_result, {0});
+			if(streq(target, "-")) return !IsOk(iostack_io_close(ctxt->ios, stream)) ? Error_T(travast_result, {"failed to close target stream"}) : Ok_T(travast_result, {0});
 			Str2IResult sn = str2i(target);
 			if(!IsOk_T(sn)) return Error_T(travast_result, {"target is not a number"});
-			if(!IsOk(iosstack_io_dup(ctxt->exeopts.iostreams, stream, sn.r.ok))) return Error_T(travast_result, {"failed to dup stream"});
+			if(!IsOk(iosstack_io_dup(ctxt->ios, stream, sn.r.ok))) return Error_T(travast_result, {"failed to dup stream"});
 			//TODO check readable/writeable
 			break;
 		}
@@ -118,7 +118,7 @@ TraverseASTResult parcontext_uniredir(enum redirection redir, int stream, string
 			return Error_T(travast_result, {"unknown redirection"});
 	}
 	if(f < 0) return Error_T(travast_result, {"failed to open redirection target"});
-	if(!IsOk(iostack_io_open(ctxt->exeopts.iostreams, stream, f))) return Error_T(travast_result, {"failed to open redirection stream"});
+	if(!IsOk(iostack_io_open(ctxt->ios, stream, f))) return Error_T(travast_result, {"failed to open redirection stream"});
 	return Ok_T(travast_result, {0});
 }
 
