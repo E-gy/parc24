@@ -8,7 +8,7 @@
 
 #define tihsopts_default ((struct tihsopts){.parcopts = parc_options_default})
 
-#define printopt(opts, opt, io) do { if(printshopt == 1) io.log(LL_INFO, "shopt %s %s", (opts).opt ? "-s" : "-u", #opt); else if(printshopt == 2) io.log(LL_INFO, "%s	%s", #opt, (opts).opt ? "on" : "off"); } while(0)
+#define printopt(opts, opt, io) do { if(printshopt == 1) parciolog(io, LL_INFO, "shopt %s %s", (opts).opt ? "-s" : "-u", #opt); else if(printshopt == 2) parciolog(io, LL_INFO, "%s	%s", #opt, (opts).opt ? "on" : "off"); } while(0)
 
 #define switchsetopt(opts, name, v, unknoclo) do { \
 		if(streq("dotglob", name)) (opts).dotglob = v; \
@@ -43,7 +43,7 @@
 		((opts).xpg_echo || !ntarrcontainsopt(only, "xpg_echo")) \
 	)
 
-TihsOptsParseResult tihsopts_parse(argsarr args, ParC24IO io){
+TihsOptsParseResult tihsopts_parse(argsarr args, IOsStack io){
 	if(!args) return Error_T(tihsopts_parse_result, {"Args array invalid"});
 	struct tihsopts opts = tihsopts_default;
 	for(; *args && strpref("--", *args); args++){
@@ -59,9 +59,9 @@ TihsOptsParseResult tihsopts_parse(argsarr args, ParC24IO io){
 		} else if(streq("-s", *args)) readfromstdin = true;
 		else if(streq("-O", *args) || streq("+O", *args)){
 			bool setto = **args == '+' ? false : true;
-			if(!(printshopt = !*++args ? 1+!!setto : 0)) switchsetopt(opts.parcopts, *args, setto, { io.log(LL_ERROR, "shopt: %s: invalid shell option name", *args); });
+			if(!(printshopt = !*++args ? 1+!!setto : 0)) switchsetopt(opts.parcopts, *args, setto, { parciolog(io, LL_ERROR, "shopt: %s: invalid shell option name", *args); });
 			else args--;
-		} else io.log(LL_ERROR, "%s: invalid option", *args);
+		} else parciolog(io, LL_ERROR, "%s: invalid option", *args);
 	}
 	if(printshopt) printopts(opts.parcopts, 0, io, false ? args : null);
 	if(!(opts.commandstr || readfromstdin) && *args) opts.commandfile = *args;
@@ -91,19 +91,19 @@ TraverseASTResult cmd_shopt(argsarr args, ParContext ctxt){
 			if(printshopt < 0) printshopt = 1;
 			break;
 		default:
-			ctxt->io.log(LL_WARN, "%s: unknown option '%c'", args[0], c);
+			parciolog(ctxt->ios, LL_WARN, "%s: unknown option '%c'", args[0], c);
 			break;
 	}
 	const size_t opts = optind-1;
 	const bool hasopts = opts+1 < argc;
 	if(printshopt < 0 && !hasopts) printshopt = 2;
 	if(set && unset){
-		ctxt->io.log(LL_ERROR, "%s: cannot set and unset shell options simultaneously", args[0]);
+		parciolog(ctxt->ios, LL_ERROR, "%s: cannot set and unset shell options simultaneously", args[0]);
 		return Ok_T(travast_result, {TRAV_COMPLETED, {.completed = 1}});
 	}
 	const bool suent = set || unset;
 	const bool setto = set ? true : false;
-	if(suent && hasopts) for(size_t i = opts+1; i < argc; i++) switchsetopt(*ctxt->parcopts, args[i], setto, { ctxt->io.log(LL_ERROR, "%s: %s: invalid shell option name", args[0], args[i]); return Ok_T(travast_result, {TRAV_COMPLETED, {.completed = 1}}); });
-	if(printshopt) printopts(*ctxt->parcopts, !hasopts && suent ? setto ? 1 : -1 : 0, ctxt->io, hasopts ? args+opts+1 : null);
+	if(suent && hasopts) for(size_t i = opts+1; i < argc; i++) switchsetopt(*ctxt->parcopts, args[i], setto, { parciolog(ctxt->ios, LL_ERROR, "%s: %s: invalid shell option name", args[0], args[i]); return Ok_T(travast_result, {TRAV_COMPLETED, {.completed = 1}}); });
+	if(printshopt) printopts(*ctxt->parcopts, !hasopts && suent ? setto ? 1 : -1 : 0, ctxt->ios, hasopts ? args+opts+1 : null);
 	return Ok_T(travast_result, {TRAV_COMPLETED, {.completed = suent || optsallenabled(*ctxt->parcopts, args+opts+1) ? 0 : 1}});
 }
