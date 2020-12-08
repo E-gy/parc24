@@ -10,9 +10,9 @@
 IOsStack parcio_new_fromstd(void){
 	IOsStack ios = iosstack_new();
 	if(!ios) return null;
-	iosstack_raw_set(ios, STDIN_FILENO, STDIN_FILENO);
-	iosstack_raw_set(ios, STDOUT_FILENO, STDOUT_FILENO);
-	iosstack_raw_set(ios, STDERR_FILENO, STDERR_FILENO);
+	iosstack_raw_set(ios, IOSTREAM_STD_IN, IOSTREAM_STD_IN);
+	iosstack_raw_set(ios, IOSTREAM_STD_OUT, IOSTREAM_STD_OUT);
+	iosstack_raw_set(ios, IOSTREAM_STD_ERR, IOSTREAM_STD_ERR);
 	return ios;
 }
 
