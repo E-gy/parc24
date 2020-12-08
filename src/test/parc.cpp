@@ -12,6 +12,10 @@ extern "C" {
 #include <builtins/ccmds.h>
 #include <cppo.h>
 #include <cppo/parallels.h>
+
+struct parc_options parcodef(){
+	return parc_options_default;
+}
 }
 
 struct parctesting {
@@ -22,7 +26,7 @@ struct parctesting {
 };
 
 #define initectxt() __extension__({ \
-		struct parc_options parcopts = parc_options_default; \
+		struct parc_options parcopts = parcodef(); \
 		auto p0r = pipe_new(), p1r = pipe_new(), p2r = pipe_new(); \
 		if(!IsOk_T(p0r) || !IsOk_T(p1r) || !IsOk_T(p2r)) FAIL("failed to create pipes"); \
 		IOsStack ios = iosstack_new(); \
