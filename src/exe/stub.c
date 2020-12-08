@@ -2,7 +2,7 @@
 #include <ptypes.h>
 #include <unistd.h>
 #include <stdio.h>
-#include <parc24/io.h>
+#include <parc24/ioslog.h>
 #include <tihs/opts.h>
 #include <parc24/pars.h>
 #include <parc24/var_store.h>
@@ -12,31 +12,35 @@
 #include <builtins/ccmds.h>
 
 int main(int argc, argsarr args){
-	const ParC24IO io = parc24io_fromstd();
-	TihsOptsParseResult optpars = tihsopts_parse_caste(args+1, io);
+	IOsStack ios = parcio_new_fromstd();
+	if(!ios){
+		fprintf(stderr, "[SUPERCRITICAL] Failed to create io stack\n");
+		return 1;
+	}
+	TihsOptsParseResult optpars = tihsopts_parse_caste(args+1, ios);
 	IfError_T(optpars, err, {
-		io.log(LL_CRITICAL, "Failed to parse arguments - %s", err.s);
+		parciolog(ios, LL_CRITICAL, "Failed to parse arguments - %s", err.s);
 		return 1;
 	});
 	struct tihsopts opts = optpars.r.ok;
 	const Parser parcer = parcer_defolt_new();
 	if(!parcer){
-		io.log(LL_CRITICAL, "Failed to initalize parser. Report logs to CALP, thx.");
+		parciolog(ios, LL_CRITICAL, "Failed to initalize parser. Report logs to CALP, thx.");
 		return 1;
 	}
 	VarStore vars = varstore_new();
 	if(!vars){
-		io.log(LL_CRITICAL, "Failed to create variables store");
+		parciolog(ios, LL_CRITICAL, "Failed to create variables store");
 		return 1;
 	}
 	FuncStore funcs = funcstore_new();
 	if(!funcs){
-		io.log(LL_CRITICAL, "Failed to create functions store");
+		parciolog(ios, LL_CRITICAL, "Failed to create functions store");
 		return 1;
 	}
 	CCMDStore ccmds = ccmdstore_new();
 	if(!ccmds){
-		io.log(LL_CRITICAL, "Failed to create ccmds store");
+		parciolog(ios, LL_CRITICAL, "Failed to create ccmds store");
 		return 1;
 	}
 	if(
@@ -46,36 +50,28 @@ int main(int argc, argsarr args){
 		!IsOk(ccmdstore_set(ccmds, "echo", cmd_echo)) ||
 		!IsOk(ccmdstore_set(ccmds, "shopt", cmd_shopt))
 	){
-		io.log(LL_CRITICAL, "Failed to register builtin ccmds");
+		parciolog(ios, LL_CRITICAL, "Failed to register builtin ccmds");
 		return 1;
 	}
 	AliasStore aliases = aliastore_new();
 	if(!ccmds){
-		io.log(LL_CRITICAL, "Failed to create aliases store");
+		parciolog(ios, LL_CRITICAL, "Failed to create aliases store");
 		return 1;
 	}
-	IOsStack ios = iosstack_new();
-	if(!ios){
-		io.log(LL_CRITICAL, "Failed to create io stack");
-		return 1;
-	}
-	iosstack_raw_set(ios, STDIN_FILENO, STDIN_FILENO);
-	iosstack_raw_set(ios, STDOUT_FILENO, STDOUT_FILENO);
-	iosstack_raw_set(ios, STDERR_FILENO, STDERR_FILENO);
-	struct parcontext ctxt = {vars, funcs, ccmds, aliases, args[0], opts.args, 0, {ios, false}, &opts.parcopts, io, parcer};
+	struct parcontext ctxt = {vars, funcs, ccmds, aliases, ios, args[0], opts.args, 0, false, &opts.parcopts, parcer};
 	if(opts.commandstr || opts.commandfile){
 		string_mut str = opts.commandstr;
 		if(!(str = opts.commandstr)){
 			BufferResult buff = buffer_from_file(opts.commandfile);
 			IfError_T(buff, err, {
-				io.log(LL_ERROR, "Failed to read file - %s", err.s);
+				parciolog(ios, LL_ERROR, "Failed to read file - %s", err.s);
 				return 1;
 			});
 			str = buffer_destr(buff.r.ok);
 		}
 		TihsExeResult exer = tihs_exestr(str, &ctxt);
 		IfError_T(exer, err, {
-			io.log(LL_ERROR, "Execution error - %s", err.s);
+			parciolog(ios, LL_ERROR, "Execution error - %s", err.s);
 			return 1;
 		});
 		return exer.r.ok.code;
@@ -84,13 +80,13 @@ int main(int argc, argsarr args){
 			printf("42sh> ");
 			fflush(stdout);
 		}
-		IfElse_T(io.readline(), line, {
+		IfElse_T(parcioread(ios), line, {
 			if(!line) return ctxt.lastexit;
 			TihsExeResult exer = tihs_exestr(line, &ctxt);
-			IfError_T(exer, err, { io.log(LL_ERROR, "Execution error - %s", err.s); });
+			IfError_T(exer, err, { parciolog(ios, LL_ERROR, "Execution error - %s", err.s); });
 			IfOk_T(exer, ec, { ctxt.lastexit = ec.code; exit = ec.exit; });
 		}, err, {
-			io.log(LL_ERROR, "Failed to read from standard input - %s", err.s);
+			parciolog(ios, LL_ERROR, "Failed to read from standard input - %s", err.s);
 		});
 	}
 	aliastore_destroy(aliases);
