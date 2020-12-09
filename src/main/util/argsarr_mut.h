@@ -28,6 +28,13 @@ void argsarrmut_destroy(ArgsArr_Mut args);
 Result argsarrmut_append(ArgsArr_Mut args, string_mut arg);
 
 /**
+ * @param args @refmut 
+ * @param add @consumes
+ * @return Result 
+ */
+Result argsarrmut_appendnom(ArgsArr_Mut args, ArgsArr_Mut add);
+
+/**
  * @param args @ref 
  * @return @produces mutable args 
  */
