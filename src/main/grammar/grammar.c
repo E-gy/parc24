@@ -497,8 +497,7 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 			if(c0->type == AST_LEAF){
 				ExpandoResult expra = expando_word(c0->d.leaf.val, (struct expando_targets){ .tilde = true, .parvar = true, .arithmetics = true, .command = true, .process = true, .path = true, .quot = true }, &c);
 				if(!IsOk_T(expra)) return captclean(Error_T(travast_result, {"command word expando failed"}), cleanup);
-				arrmuttake1(expr, expra.r.ok, cleanup);
-				if(!IsOk(argsarrmut_append(args, expr))) return captclean(Error_T(travast_result, {"command word expando failed"}), cleanup);
+				if(!IsOk(argsarrmut_appendnom(args, expra.r.ok))) return captclean(Error_T(travast_result, {"command word expando failed"}), cleanup);
 			} else {
 				TraverseASTResult rredir = traverse_ast(c0, &c);
 				if(!IsOk_T(rredir)) return captclean(rredir, cleanup);
@@ -507,8 +506,7 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 				for(AST elr = ast->d.group.children[2]; elr->d.group.cc > 1; elr = elr->d.group.children[1]) if(elr->d.group.children[0]->d.group.children[0]->type == AST_LEAF){
 					ExpandoResult expra = expando_word(elr->d.group.children[0]->d.group.children[0]->d.leaf.val, (struct expando_targets){ .tilde = true, .parvar = true, .arithmetics = true, .command = true, .process = true, .path = true, .quot = true }, &c);
 					if(!IsOk_T(expra)) return captclean(Error_T(travast_result, {"command word expando failed"}), cleanup);
-					arrmuttake1(expr, expra.r.ok, cleanup);
-					if(!IsOk(argsarrmut_append(args, expr))) return captclean(Error_T(travast_result, {"command word expando failed"}), cleanup);
+					if(!IsOk(argsarrmut_appendnom(args, expra.r.ok))) return captclean(Error_T(travast_result, {"command word expando failed"}), cleanup);
 				} else {
 					TraverseASTResult rredir = traverse_ast(elr->d.group.children[0]->d.group.children[0], &c);
 					if(!IsOk_T(rredir)) return captclean(rredir, cleanup);
