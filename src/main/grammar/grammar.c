@@ -17,7 +17,7 @@ DEF_SYMBOL_TERMINAL(assignment, {
 	if(!str) return null;
 	for(; *str && *str != '='; str++) if(strchr(AWSEPS, *str)) return null;
 	if(*str++ != '=') return null;
-	return isblank(*str) ? str : capture_word(str);
+	return !*str || isblank(*str) ? str : capture_word(str);
 });
 DEF_SYMBOL_TERMINAL(heredoc, {
 	if(!str) return null;
@@ -310,7 +310,7 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 			string_mut var = ast->d.leaf.val;
 			string_mut eq = strchr(var, '=');
 			*eq = '\0';
-			if(isblank(eq[1])){
+			if(!eq[1]){
 				if(!IsOk(varstore_add(ctxt->vars, var, ""))) retclean(Error_T(travast_result, {"failed to add variable to store"}), { *eq = '='; });
 			} else {
 				ExpandoResult varv = expando_word(eq+1, expando_targets_all, ctxt);
