@@ -171,7 +171,9 @@ ExpandoResult expando_word(string str, struct expando_targets what, ParContext c
 			buffer_delete(buff, i-1, i);
 		} else i++;
 	}
-	return Ok_T(expando_result, buffer_destr(buff));
+	ArgsArr_Mut args = argsarrmut_new(1);
+	argsarrmut_append(args, buffer_destr(buff));
+	return Ok_T(expando_result, args);
 }
 
 #undef s
