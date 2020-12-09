@@ -1,4 +1,5 @@
 #include <catch2ext.hpp>
+#include <sstream>
 using Catch::Matchers::Equals;
 
 extern "C" {
@@ -53,6 +54,45 @@ struct parctesting {
 		parser_destroy(context.ctxt.parcer); \
 		iosstack_destroy(context.ctxt.ios); \
 	} while(0)
+
+SCENARIO("variables assignments", "[variables][full stack][parc]"){
+	auto ctxt = initectxt();
+	string_mut output;
+	auto outread = parallels_readstr(ctxt.stdout_r, &output);
+	if(!IsOk_T(outread)) FAIL("output read setup failed");
+	WHEN("assigning a value"){
+		auto exer = tihs_exestr("VAR=apache", &ctxt.ctxt);
+		REQUIRE(IsOk_T(exer));
+		THEN("the value is stored"){
+			REQUIRE_THAT(varstore_get(ctxt.ctxt.vars, "VAR"), Equals("apache"));
+		}
+	}
+	WHEN("assigning an empty value"){
+		auto exer = tihs_exestr("VAR=", &ctxt.ctxt);
+		REQUIRE(IsOk_T(exer));
+		THEN("the empty is stored"){
+			REQUIRE_THAT(varstore_get(ctxt.ctxt.vars, "VAR"), Equals(""));
+		}
+	}
+	WHEN("assigning multiple values"){
+		auto v1 = GENERATE("grr", "woof", "", "kkk");
+		auto v2 = GENERATE("grr", "woof", "", "kkk");
+		auto v3 = GENERATE("grr", "woof", "", "kkk");
+		std::ostringstream strs;
+		strs << "V1=" << v1 << " V2=" << v2 << " V3=" << v3;
+		std::string str = strs.str();
+		auto exer = tihs_exestr(str.c_str(), &ctxt.ctxt);
+		THEN("the values are stored"){
+			REQUIRE_THAT(varstore_get(ctxt.ctxt.vars, "V1"), Equals(v1));
+			REQUIRE_THAT(varstore_get(ctxt.ctxt.vars, "V2"), Equals(v2));
+			REQUIRE_THAT(varstore_get(ctxt.ctxt.vars, "V3"), Equals(v3));
+		}
+	}
+	destrctxt(ctxt); //we're done executing things - flush all outputs so we can check them
+	if(!IsOk_T(exethread_waitretcode(outread.r.ok))) FAIL("output read wait failed");
+	REQUIRE_THAT(output, Equals(""));
+	free(output);
+}
 
 SCENARIO("echo does the echo", "[echo][full stack][parc]"){
 	auto ctxt = initectxt();
