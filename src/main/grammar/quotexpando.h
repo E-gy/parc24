@@ -8,6 +8,7 @@
 
 #include <ptypes.h>
 #include <parc24/context.h>
+#include <util/argsarr_mut.h>
 
 #define capture_isquotstart(str) (str && (str[0] == '\'' || str[0] == '"'))
 #define capture_isexpandostart(str) (str && (str[0] == '`' || strpref("$(", str)))
@@ -58,7 +59,7 @@ struct expando_targets {
 #define expando_targets_quot ((struct expando_targets){.quot=true})
 #define expando_targets_parc ((struct expando_targets){.parvar=true, .arithmetics = true, .command = true})
 
-Result_T(expando_result, string_mut, string_v);
+Result_T(expando_result, ArgsArr_Mut, string_v);
 #define ExpandoResult struct expando_result
 
 /**
