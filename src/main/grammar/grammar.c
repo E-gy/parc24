@@ -302,6 +302,7 @@ ParseResult parcer_parse(Parser p, string str){
 
 #define isexitcodeok(c) ((c&0xFF) != 0)
 
+#define arrmuttake1(var, arr, clenup) if(!arr || arr->size != 1) retclean(Error_T(travast_result, {"expected a word to expand to one word"}), { argsarrmut_destroy(arr); clenup }); string_mut var = arr->args[0]; arr->args[0] = null; argsarrmut_destroy(arr)
 
 TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 	if(ast->type == AST_LEAF){
@@ -313,9 +314,10 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 			if(!eq[1]){
 				if(!IsOk(varstore_add(ctxt->vars, var, ""))) retclean(Error_T(travast_result, {"failed to add variable to store"}), { *eq = '='; });
 			} else {
-				ExpandoResult varv = expando_word(eq+1, expando_targets_all, ctxt);
-				if(!IsOk_T(varv)) return Error_T(travast_result, varv.r.error);
-				if(!IsOk(varstore_add_(ctxt->vars, var, varv.r.ok))) retclean(Error_T(travast_result, {"failed to add variable to store"}), { *eq = '='; free(varv.r.ok); });
+				ExpandoResult varva = expando_word(eq+1, expando_targets_all, ctxt);
+				if(!IsOk_T(varva)) return Error_T(travast_result, varva.r.error);
+				arrmuttake1(varv, varva.r.ok, {});
+				if(!IsOk(varstore_add_(ctxt->vars, var, varv))) retclean(Error_T(travast_result, {"failed to add variable to store"}), { *eq = '='; free(varv); });
 			}
 			*eq = '=';
 			return Ok_T(travast_result, {0});
@@ -408,34 +410,38 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 			case REDIR_IN_HERE: {
 				string s = ast->d.group.children[2]->d.leaf.val;
 				if(assid == redir_in_fromherestring){
-					ExpandoResult wex = expando_word(s, expando_targets_all, ctxt);
-					if(!IsOk_T(wex)) return Error_T(travast_result, wex.r.error);
-					target = wex.r.ok;
+					ExpandoResult wexa = expando_word(s, expando_targets_all, ctxt);
+					if(!IsOk_T(wexa)) return Error_T(travast_result, wexa.r.error);
+					arrmuttake1(wex, wexa.r.ok, {});
+					target = wex;
 				} else {
 					string ss = capture_word(s);
 					if(!ss) return Error_T(travast_result, {"heredoc delimiter capture failed"});
 					bool expand;
 					if((expand = (s[0] == '\'' || s[0] == '"'))){
-						ExpandoResult esx = expando_word(s, expando_targets_quot, ctxt);
-						if(!IsOk_T(esx)) return Error_T(travast_result, esx.r.error);
-						s = esx.r.ok;
+						ExpandoResult esxa = expando_word(s, expando_targets_quot, ctxt);
+						if(!IsOk_T(esxa)) return Error_T(travast_result, esxa.r.error);
+						arrmuttake1(esx, esxa.r.ok, {});
+						s = esx;
 					}
 					if(strpref("\r\n", ss)) ss += 2;
 					else if(ss[0] == '\n') ss++;
 					if(!(target = buffer_destr(buffer_new_from(ss, strlen(ss)-strlen(s))))) return Error_T(travast_result, {"heredoc capture failed"});
 					if(expand){
-						ExpandoResult tex = expando_word(target, expando_targets_all, ctxt);
+						ExpandoResult texa = expando_word(target, expando_targets_all, ctxt);
 						free(target);
-						if(!IsOk_T(tex)) return Error_T(travast_result, tex.r.error);
-						target = tex.r.ok;
+						if(!IsOk_T(texa)) return Error_T(travast_result, texa.r.error);
+						arrmuttake1(tex, texa.r.ok, {});
+						target = tex;
 					}
 				}
 				break;
 			}
 			default: {
-				ExpandoResult wex = expando_word(ast->d.group.children[2]->d.leaf.val, expando_targets_all, ctxt);
-				if(!IsOk_T(wex)) return Error_T(travast_result, wex.r.error);
-				target = wex.r.ok;
+				ExpandoResult wexa = expando_word(ast->d.group.children[2]->d.leaf.val, expando_targets_all, ctxt);
+				if(!IsOk_T(wexa)) return Error_T(travast_result, wexa.r.error);
+				arrmuttake1(wex, wexa.r.ok, {});
+				target = wex;
 				break;
 			} 
 		}
@@ -489,16 +495,20 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 			#define cleanup { argsarrmut_destroy(args); iosstack_pop(c.ios); varstore_destroy(c.vars); }
 			if(!args) return captclean(Error_T(travast_result, {"args construction failed"}), cleanup);
 			if(c0->type == AST_LEAF){
-				ExpandoResult expr = expando_word(c0->d.leaf.val, (struct expando_targets){ .tilde = true, .parvar = true, .arithmetics = true, .command = true, .process = true, .path = true, .quot = true }, &c);
-				if(!IsOk_T(expr) || !IsOk(argsarrmut_append(args, expr.r.ok))) return captclean(Error_T(travast_result, {"command word expando failed"}), cleanup);
+				ExpandoResult expra = expando_word(c0->d.leaf.val, (struct expando_targets){ .tilde = true, .parvar = true, .arithmetics = true, .command = true, .process = true, .path = true, .quot = true }, &c);
+				if(!IsOk_T(expra)) return captclean(Error_T(travast_result, {"command word expando failed"}), cleanup);
+				arrmuttake1(expr, expra.r.ok, cleanup);
+				if(!IsOk(argsarrmut_append(args, expr))) return captclean(Error_T(travast_result, {"command word expando failed"}), cleanup);
 			} else {
 				TraverseASTResult rredir = traverse_ast(c0, &c);
 				if(!IsOk_T(rredir)) return captclean(rredir, cleanup);
 			}
 			{
 				for(AST elr = ast->d.group.children[2]; elr->d.group.cc > 1; elr = elr->d.group.children[1]) if(elr->d.group.children[0]->d.group.children[0]->type == AST_LEAF){
-					ExpandoResult expr = expando_word(elr->d.group.children[0]->d.group.children[0]->d.leaf.val, (struct expando_targets){ .tilde = true, .parvar = true, .arithmetics = true, .command = true, .process = true, .path = true, .quot = true }, &c);
-					if(!IsOk_T(expr) || !IsOk(argsarrmut_append(args, expr.r.ok))) return captclean(Error_T(travast_result, {"command word expando failed"}), cleanup);
+					ExpandoResult expra = expando_word(elr->d.group.children[0]->d.group.children[0]->d.leaf.val, (struct expando_targets){ .tilde = true, .parvar = true, .arithmetics = true, .command = true, .process = true, .path = true, .quot = true }, &c);
+					if(!IsOk_T(expra)) return captclean(Error_T(travast_result, {"command word expando failed"}), cleanup);
+					arrmuttake1(expr, expra.r.ok, cleanup);
+					if(!IsOk(argsarrmut_append(args, expr))) return captclean(Error_T(travast_result, {"command word expando failed"}), cleanup);
 				} else {
 					TraverseASTResult rredir = traverse_ast(elr->d.group.children[0]->d.group.children[0], &c);
 					if(!IsOk_T(rredir)) return captclean(rredir, cleanup);
@@ -550,13 +560,14 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 		if(nvw->d.group.cc == 1) return Ok_T(travast_result, {0});
 		const ExpandoResult varnr = expando_word(ast->d.group.children[1]->d.leaf.val, expando_targets_all, ctxt);
 		if(!IsOk_T(varnr)) return Error_T(travast_result, {"failed to resolve variable name"});
-		const string_mut varn = varnr.r.ok;
+		arrmuttake1(varn, varnr.r.ok, {});
 		TraverseASTResult res = Ok_T(travast_result, {0});
 		do {
-			ExpandoResult nv = expando_word(nvw->d.group.children[0]->d.leaf.val, expando_targets_all, ctxt);
-			if(!IsOk_T(nv)){ res = Error_T(travast_result, {"in list element expando failed"}); break; }
-			Result varadr = varstore_add(ctxt->vars, varn, nv.r.ok);
-			free(nv.r.ok); 
+			ExpandoResult nva = expando_word(nvw->d.group.children[0]->d.leaf.val, expando_targets_all, ctxt);
+			if(!IsOk_T(nva)){ res = Error_T(travast_result, {"in list element expando failed"}); break; }
+			arrmuttake1(nv, nva.r.ok, {});
+			Result varadr = varstore_add(ctxt->vars, varn, nv);
+			free(nv); 
 			if(IsOk(varadr)){ res = Error_T(travast_result, {"varstore add failed"}); break; }
 			if(!IsOk_T((res = parcontext_uniwait(res)))) break;
 			if(travt_is_shrtct(res.r.ok.type)) if(res.r.ok.type != TRAV_SHRTCT_CONTINUE || res.r.ok.v.shortcut_depth > 1){
@@ -570,21 +581,23 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 		return res;
 	}
 	if(gid == blok_case){
-		ExpandoResult matchvr = expando_word(ast->d.group.children[1]->d.leaf.val, expando_targets_all, ctxt);
-		if(!IsOk_T(matchvr)) return Error_T(travast_result, {"failed to resolve matching target"});
-		const string_mut mv = matchvr.r.ok;
+		ExpandoResult matchvra = expando_word(ast->d.group.children[1]->d.leaf.val, expando_targets_all, ctxt);
+		if(!IsOk_T(matchvra)) return Error_T(travast_result, {"failed to resolve matching target"});
+		arrmuttake1(mv, matchvra.r.ok, {});
 		AST cases = ast->d.group.children[5];
 		AST cc = cases->d.group.children[0];
 		do {
-			ExpandoResult ccp0 = expando_word(cc->d.group.children[1]->d.leaf.val, expando_targets_all, ctxt);
-			if(!IsOk_T(ccp0)) return captclean(Error_T(travast_result, {"failed to expand case pattern"}), {free(mv);});
-			bool ccmatch = streq(mv, ccp0.r.ok); //TODO pattern matching
-			free(ccp0.r.ok);
+			ExpandoResult ccp0a = expando_word(cc->d.group.children[1]->d.leaf.val, expando_targets_all, ctxt);
+			if(!IsOk_T(ccp0a)) return captclean(Error_T(travast_result, {"failed to expand case pattern"}), {free(mv);});
+			arrmuttake1(ccp0, ccp0a.r.ok, {});
+			bool ccmatch = streq(mv, ccp0); //TODO pattern matching
+			free(ccp0);
 			for(AST ccpn = cc->d.group.children[2]; !ccmatch && ccpn->d.group.cc > 1; ccpn = ccpn->d.group.children[2]){
-				ExpandoResult pn = expando_word(ccpn->d.group.children[1]->d.leaf.val, expando_targets_all, ctxt);
-				if(!IsOk_T(ccp0)) return captclean(Error_T(travast_result, {"failed to expand case pattern"}), {free(mv);});
-				ccmatch |= streq(mv, pn.r.ok);
-				free(pn.r.ok);
+				ExpandoResult pna = expando_word(ccpn->d.group.children[1]->d.leaf.val, expando_targets_all, ctxt);
+				if(!IsOk_T(pna)) return captclean(Error_T(travast_result, {"failed to expand case pattern"}), {free(mv);});
+				arrmuttake1(pn, pna.r.ok, {free(mv);});
+				ccmatch |= streq(mv, pn);
+				free(pn);
 			}
 			if(ccmatch){
 				free(mv);
