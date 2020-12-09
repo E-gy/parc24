@@ -17,7 +17,7 @@ DEF_SYMBOL_TERMINAL(assignment, {
 	if(!str) return null;
 	for(; *str && *str != '='; str++) if(strchr(AWSEPS, *str)) return null;
 	if(*str++ != '=') return null;
-	return capture_word(str);
+	return isblank(*str) ? str : capture_word(str);
 });
 DEF_SYMBOL_TERMINAL(heredoc, {
 	if(!str) return null;
@@ -309,10 +309,14 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 		if(sid == assignment){
 			string_mut var = ast->d.leaf.val;
 			string_mut eq = strchr(var, '=');
-			ExpandoResult varv = expando_word(eq+1, expando_targets_all, ctxt);
-			if(!IsOk_T(varv)) return Error_T(travast_result, varv.r.error);
 			*eq = '\0';
-			if(!IsOk(varstore_add(ctxt->vars, var, varv.r.ok))) retclean(Error_T(travast_result, {"failed to add variable to store"}), { *eq = '='; free(varv.r.ok); });
+			if(isblank(eq[1])){
+				if(!IsOk(varstore_add(ctxt->vars, var, ""))) retclean(Error_T(travast_result, {"failed to add variable to store"}), { *eq = '='; });
+			} else {
+				ExpandoResult varv = expando_word(eq+1, expando_targets_all, ctxt);
+				if(!IsOk_T(varv)) return Error_T(travast_result, varv.r.error);
+				if(!IsOk(varstore_add_(ctxt->vars, var, varv.r.ok))) retclean(Error_T(travast_result, {"failed to add variable to store"}), { *eq = '='; free(varv.r.ok); });
+			}
 			*eq = '=';
 			return Ok_T(travast_result, {0});
 		}
