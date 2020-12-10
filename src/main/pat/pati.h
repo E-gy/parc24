@@ -29,7 +29,7 @@ void auto_destroy(State a);
 /**
  * @param a @refmut 
  */
-void auto_negate(State a);
+Result auto_negate(State a);
 
 /**
  * @param a1 @ref 
