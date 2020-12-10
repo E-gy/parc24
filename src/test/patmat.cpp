@@ -59,4 +59,20 @@ SCENARIO("baseline automata", "[patterns]"){
 		}
 		auto_destroy(a);
 	}
+	GIVEN("automaton accepting only letters 'd','e', or 'f'"){
+		State a = patstate_new(false);
+		State acc = patstate_new(true);
+		patstate_tradd(a, patransition_new('e', acc));
+		patstate_tradd(a, patransition_new('f', acc));
+		patstate_tradd(a, patransition_new('d', acc));
+		THEN("said single char strings are accepted"){
+			auto str = GENERATE("d", "e", "f");
+			REQUIRE(auto_test(a, str));
+		}
+		THEN("everything else is rejected"){
+			auto str = GENERATE("j", "", "efvsgvd", "-", "*", "-+533ge w4r 544", " ");
+			REQUIRE(!auto_test(a, str));
+		}
+		auto_destroy(a);
+	}
 }
