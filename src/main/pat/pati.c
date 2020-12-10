@@ -143,7 +143,6 @@ static State auto_merge_(State s1, State s2, Merger* mergers, bool aor){
 	if(!merger) retclean(null, {patstate_destroy(merged);});
 	merger->next = *mergers;
 	*mergers = merger;
-	#define cleanup {patransition_destroy(t3);patstate_destroy(merged);}
 	Transition t1 = s1 ? s1->transitions : null;
 	Transition t2 = s2 ? s2->transitions : null;
 	Transition* t3 = &merged->transitions;
