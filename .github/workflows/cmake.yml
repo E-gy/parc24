@@ -39,7 +39,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: memcheck-logs
-        path: build/Testing/**/MemoryChecker.*.log
+        path: ${{runner.workspace}}/build/Testing/**/MemoryChecker.*.log
     - name: Generate Coverage
       working-directory: ${{runner.workspace}}/build
       shell: bash
