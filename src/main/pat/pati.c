@@ -75,25 +75,27 @@ void auto_destroy(State a){
 }
 
 static Result auto_negate_(State s, Encounter* es, State* sinka){
-	if(!s) return;
-	for(Encounter e = *es; e; e = e->next) if(e->s == s) return;
+	if(!s) return Ok;
+	for(Encounter e = *es; e; e = e->next) if(e->s == s) return Ok;
 	Encounter e = encounter_new(s, *es);
 	if(!e) return Error;
 	*es = e;
 	s->accepting = !s->accepting;
-	for(Transition t = s->transitions; t; t = t->next) auto_negate_(t->to, es, sinka);
-	if(s->defolt) auto_negate_(s->defolt, es, sinka);
-	else {
+	for(Transition t = s->transitions; t; t = t->next) if(!IsOk(auto_negate_(t->to, es, sinka))) return Error;
+	if(s->defolt){
+		if(!IsOk(auto_negate_(s->defolt, es, sinka))) return Error;
+	} else {
 		if(!*sinka){
 			if(!(*sinka = patstate_new(true))) return Error;;
 			(*sinka)->defolt = *sinka;
 		}
 		s->defolt = *sinka;
 	}
+	return Ok;
 }
 
 Result auto_negate(State a){
-	if(!a) return;
+	if(!a) return Error;
 	Encounter es = null;
 	State sinka = null;
 	Result nr = auto_negate_(a, &es, &sinka);
