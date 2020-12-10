@@ -137,15 +137,15 @@ static Merger merger_destroy(Merger m){
 static State auto_merge_(State s1, State s2, Merger* mergers, bool aor){
 	if(!s1 && !s2) return null;
 	for(Merger m = *mergers; m; m = m->next) if(m->s1 == s1 && m->s2 == s2) return m->sr;
-	State merged = patstate_new(aor ? s1->accepting || s2->accepting : s1->accepting && s2->accepting);
+	State merged = patstate_new(aor ? (s1 && s1->accepting) || (s2 && s2->accepting) : (s1 && s1->accepting) && (s2 && s2->accepting));
 	if(!merged) return null;
 	Merger merger = merger_new(s1, s2, merged);
 	if(!merger) retclean(null, {patstate_destroy(merged);});
 	merger->next = *mergers;
 	*mergers = merger;
 	#define cleanup {patransition_destroy(t3);patstate_destroy(merged);}
-	Transition t1 = s1->transitions;
-	Transition t2 = s2->transitions;
+	Transition t1 = s1 ? s1->transitions : null;
+	Transition t2 = s2 ? s2->transitions : null;
 	while(t1 && t2){
 		Transition t3;
 		if(t1->c == t2->c){
@@ -153,23 +153,23 @@ static State auto_merge_(State s1, State s2, Merger* mergers, bool aor){
 			t1 = t1->next;
 			t2 = t2->next;
 		} else if(t1->c < t2->c){
-			t3 = patransition_new(t1->c, auto_merge_(t1->to, s2->defolt, mergers, aor));
+			t3 = patransition_new(t1->c, auto_merge_(t1->to, s2 ? s2->defolt : null, mergers, aor));
 			t1 = t1->next;
 		} else {
-			t3 = patransition_new(t2->c, auto_merge_(s1->defolt, t2->to, mergers, aor));
+			t3 = patransition_new(t2->c, auto_merge_(s1 ? s1->defolt : null, t2->to, mergers, aor));
 			t2 = t2->next;
 		}
 		if(!IsOk(patstate_tradd(merged, t3))) retclean(null, cleanup);
 	}
 	for(; t1; t1 = t1->next){
-		Transition t3 = patransition_new(t1->c, auto_merge_(t1->to, s2->defolt, mergers, aor));
+		Transition t3 = patransition_new(t1->c, auto_merge_(t1->to, s2 ? s2->defolt : null, mergers, aor));
 		if(!IsOk(patstate_tradd(merged, t3))) retclean(null, cleanup);
 	}
 	for(; t2; t2 = t2->next){
-		Transition t3 = patransition_new(t2->c, auto_merge_(s1->defolt, t2->to, mergers, aor));
+		Transition t3 = patransition_new(t2->c, auto_merge_(s1 ? s1->defolt : null, t2->to, mergers, aor));
 		if(!IsOk(patstate_tradd(merged, t3))) retclean(null, cleanup);
 	}
-	if(s1->defolt || s2->defolt) if(!(merged->defolt = auto_merge_(s1->defolt, s2->defolt, mergers, aor))) retclean(null, {patstate_destroy(merged);});
+	if((s1 && s1->defolt) || (s2 && s2->defolt)) if(!(merged->defolt = auto_merge_(s1 ? s1->defolt : null, s2 ? s2->defolt : null, mergers, aor))) retclean(null, {patstate_destroy(merged);});
 	return merged;
 }
 
