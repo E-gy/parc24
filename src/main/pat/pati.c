@@ -55,7 +55,7 @@ static Encounter encounter_destroy(Encounter e){
 	if(!e) return null;
 	Encounter next = e->next;
 	free(e);
-	return e->next;
+	return next;
 }
 
 static void auto_destroy_(State s, Encounter* es){
@@ -83,9 +83,6 @@ static void auto_negate_(State s, Encounter* es){
 	auto_negate(s->defolt);
 }
 
-/**
- * @param a @refmut 
- */
 void auto_negate(State a){
 	if(!a) return;
 	Encounter es = null;
