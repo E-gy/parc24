@@ -34,6 +34,12 @@ jobs:
       working-directory: ${{runner.workspace}}/build
       shell: bash
       run: ctest -C $BUILD_TYPE -T memcheck --overwrite MemoryCheckCommandOptions="--leak-check=full --error-exitcode=100" --output-on-failure 
+    - name: On Test Failure report memcheck logs
+      if: ${{ failure() }}
+      uses: actions/upload-artifact@v2
+      with:
+        name: memcheck-logs
+        path: build/Testing/**/MemoryChecker.*.log
     - name: Generate Coverage
       working-directory: ${{runner.workspace}}/build
       shell: bash
