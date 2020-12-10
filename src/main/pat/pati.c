@@ -171,3 +171,11 @@ State auto_merge(State a1, State a2, bool aor){
 	for(; mergers; mergers = merger_destroy(mergers));
 	return merged;
 }
+
+bool auto_test(State a, string str){
+	if(!a || !str) return false;
+	if(!*str) return a->accepting;
+	const char c = *str;
+	for(Transition t = a->transitions; t && t->c <= c; t = t->next) if(t->c == c) return auto_test(t->to, str+1);
+	return auto_test(a->defolt, str+1);
+}

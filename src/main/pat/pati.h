@@ -38,3 +38,10 @@ void auto_negate(State a);
  * @return State 
  */
 State auto_merge(State a1, State a2, bool aor);
+
+/**
+ * @param a @ref 
+ * @param str @ref
+ * @return 
+ */
+bool auto_test(State a, string str);
