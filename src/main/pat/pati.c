@@ -105,21 +105,27 @@ Result auto_negate(State a){
 
 typedef struct amerger* Merger;
 struct amerger {
-	/** @ref */ State s1;
-	/** @ref */ State s2;
 	/** @ref */ State sr;
 	Merger next;
+	/** @ref */ State s[];
 };
 
 /**
- * @param s1 @ref 
- * @param s2 @ref
  * @param sr @ref
  * @return @produces Merger 
  */
-static Merger merger_new(State s1, State s2, State sr){
-	new(Merger, m);
-	*m = (struct amerger){s1, s2, sr, null};
+static Merger merger_new(State sr, size_t msc){
+	Merger m = malloc(sizeof(*m) + msc*sizeof(State));
+	if(!m) return null;
+	*m = (struct amerger){sr, null};
+	return m;
+}
+
+static Merger merger_new2(State s1, State s2, State sr){
+	Merger m = merger_new(sr, 2);
+	if(!m) return null;
+	m->s[0] = s1;
+	m->s[1] = s2;
 	return m;
 }
 
@@ -136,11 +142,11 @@ static Merger merger_destroy(Merger m){
 
 static State auto_merge_(State s1, State s2, Merger* mergers, bool aor){
 	if(!s1 && !s2) return null;
-	for(Merger m = *mergers; m; m = m->next) if(m->s1 == s1 && m->s2 == s2) return m->sr;
+	for(Merger m = *mergers; m; m = m->next) if(m->s[0] == s1 && m->s[1] == s2) return m->sr;
 	State merged = patstate_new(aor ? (s1 && s1->accepting) || (s2 && s2->accepting) : (s1 && s1->accepting) && (s2 && s2->accepting));
 	if(!merged) return null;
 	#define cleanup {patstate_destroy(merged);}
-	Merger merger = merger_new(s1, s2, merged);
+	Merger merger = merger_new2(s1, s2, merged);
 	if(!merger) retclean(null, cleanup);
 	merger->next = *mergers;
 	*mergers = merger;
