@@ -290,7 +290,7 @@ Parser parcer_defolt_new(void){
 #include <calp/parser/fun.h>
 #include <calp/lexer.h>
 
-#define space_comments_skippity(str) for(; *str && (isspace(*str) || *str == '#') && *str != '\n' && *str != '\r'; str++) if(*str == '#') for(; *str && *str != '\n'; str++)
+#define space_comments_skippity(str) for(; *str && (isspace(*str) || *str == '#') && *str != '\n' && *str != '\r'; str++) if(*str == '#'){ for(; *str && *str != '\n'; str++); if(!*str) str--; }
 
 static LexerResult lexer_spacebegone_withcomments(string str, SelfLexingToken tok){
 	if(!str) return Error_T(lexer_result, {"Invalid input - null string"});
