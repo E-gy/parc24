@@ -216,3 +216,155 @@ SCENARIO("automata operations", "[patterns]"){
 		auto_destroy(a3);
 	}
 }
+
+extern "C" {
+#include <parc24/options.h>
+#include <parc24/patterns.h>
+}
+
+SCENARIO("standard patterns", "[patterns]"){
+	struct parc_options opts = parc_options_default;
+	PatternCompiler compiler = patcomp_new();
+	if(!compiler) FAIL("failed to initialize compiler");
+	GIVEN("/a/"){
+		THEN("pattern compiles"){
+			IfElse_T(pattern_compile(compiler, "a", opts), p, {
+				AND_THEN("pattern matches"){
+					REQUIRE(pattern_test(p, "a"));
+					REQUIRE(!pattern_test(p, "b"));
+					REQUIRE(!pattern_test(p, "c"));
+					REQUIRE(!pattern_test(p, ""));
+					REQUIRE(!pattern_test(p, "dvfsvgfdrf"));
+				}
+				pattern_destroy(p);
+			}, err, { FAIL_FMT("Pattern compilation failed: %s", err.s); });
+		}
+	}
+	GIVEN("/abc/"){
+		THEN("pattern compiles"){
+			IfElse_T(pattern_compile(compiler, "abc", opts), p, {
+				AND_THEN("pattern matches"){
+					REQUIRE(pattern_test(p, "abc"));
+					REQUIRE(!pattern_test(p, "akc"));
+					REQUIRE(!pattern_test(p, "azc"));
+					REQUIRE(!pattern_test(p, "a"));
+					REQUIRE(!pattern_test(p, "b"));
+					REQUIRE(!pattern_test(p, "c"));
+					REQUIRE(!pattern_test(p, ""));
+					REQUIRE(!pattern_test(p, "dvfsvgfdrf"));
+				}
+				pattern_destroy(p);
+			}, err, { FAIL_FMT("Pattern compilation failed: %s", err.s); });
+		}
+	}
+	GIVEN("/a?c/"){
+		THEN("pattern compiles"){
+			IfElse_T(pattern_compile(compiler, "a?c", opts), p, {
+				AND_THEN("pattern matches"){
+					REQUIRE(pattern_test(p, "abc"));
+					REQUIRE(pattern_test(p, "akc"));
+					REQUIRE(pattern_test(p, "azc"));
+					REQUIRE(!pattern_test(p, "a"));
+					REQUIRE(!pattern_test(p, "b"));
+					REQUIRE(!pattern_test(p, "c"));
+					REQUIRE(!pattern_test(p, ""));
+					REQUIRE(!pattern_test(p, "dvfsvgfdrf"));
+					REQUIRE(!pattern_test(p, "a/c"));
+				}
+				pattern_destroy(p);
+			}, err, { FAIL_FMT("Pattern compilation failed: %s", err.s); });
+		}
+	}
+	GIVEN("/a*c/"){
+		THEN("pattern compiles"){
+			IfElse_T(pattern_compile(compiler, "a*c", opts), p, {
+				AND_THEN("pattern matches"){
+					REQUIRE(pattern_test(p, "abc"));
+					REQUIRE(pattern_test(p, "akc"));
+					REQUIRE(pattern_test(p, "azc"));
+					REQUIRE(pattern_test(p, "ac"));
+					REQUIRE(pattern_test(p, "aaaaaacccccc"));
+					REQUIRE(pattern_test(p, "a oh hello there ## nyeh! c"));
+					REQUIRE(!pattern_test(p, "a"));
+					REQUIRE(!pattern_test(p, "b"));
+					REQUIRE(!pattern_test(p, "c"));
+					REQUIRE(!pattern_test(p, ""));
+					REQUIRE(!pattern_test(p, "dvfsvgfdrf"));
+					REQUIRE(!pattern_test(p, "a/c"));
+					REQUIRE(!pattern_test(p, "a old mcdonald / found mcdonalds or smthn c"));
+				}
+				pattern_destroy(p);
+			}, err, { FAIL_FMT("Pattern compilation failed: %s", err.s); });
+		}
+	}
+	GIVEN("/a[a-z]c/"){
+		THEN("pattern compiles"){
+			IfElse_T(pattern_compile(compiler, "a[a-z]c", opts), p, {
+				AND_THEN("pattern matches"){
+					REQUIRE(pattern_test(p, "abc"));
+					REQUIRE(pattern_test(p, "akc"));
+					REQUIRE(pattern_test(p, "azc"));
+					REQUIRE(!pattern_test(p, "aZc"));
+					REQUIRE(!pattern_test(p, "aEc"));
+					REQUIRE(!pattern_test(p, "a-c"));
+					REQUIRE(!pattern_test(p, "a.c"));
+					REQUIRE(!pattern_test(p, "a0c"));
+					REQUIRE(!pattern_test(p, "a"));
+					REQUIRE(!pattern_test(p, "b"));
+					REQUIRE(!pattern_test(p, "c"));
+					REQUIRE(!pattern_test(p, ""));
+					REQUIRE(!pattern_test(p, "dvfsvgfdrf"));
+					REQUIRE(!pattern_test(p, "a/c"));
+				}
+				pattern_destroy(p);
+			}, err, { FAIL_FMT("Pattern compilation failed: %s", err.s); });
+		}
+	}
+	GIVEN("/a[^a-z]c/"){
+		THEN("pattern compiles"){
+			IfElse_T(pattern_compile(compiler, "a[^a-z]c", opts), p, {
+				AND_THEN("pattern matches"){
+					REQUIRE(!pattern_test(p, "abc"));
+					REQUIRE(!pattern_test(p, "akc"));
+					REQUIRE(!pattern_test(p, "azc"));
+					REQUIRE(pattern_test(p, "aZc"));
+					REQUIRE(pattern_test(p, "aEc"));
+					REQUIRE(pattern_test(p, "a-c"));
+					REQUIRE(pattern_test(p, "a.c"));
+					REQUIRE(pattern_test(p, "a0c"));
+					REQUIRE(!pattern_test(p, "a"));
+					REQUIRE(!pattern_test(p, "b"));
+					REQUIRE(!pattern_test(p, "c"));
+					REQUIRE(!pattern_test(p, ""));
+					REQUIRE(!pattern_test(p, "dvfsvgfdrf"));
+					REQUIRE(!pattern_test(p, "a/c"));
+				}
+				pattern_destroy(p);
+			}, err, { FAIL_FMT("Pattern compilation failed: %s", err.s); });
+		}
+	}
+	GIVEN("/a[[:alpha:]]c/"){
+		THEN("pattern compiles"){
+			IfElse_T(pattern_compile(compiler, "a[[:alpha:]]c", opts), p, {
+				AND_THEN("pattern matches"){
+					REQUIRE(pattern_test(p, "abc"));
+					REQUIRE(pattern_test(p, "akc"));
+					REQUIRE(pattern_test(p, "azc"));
+					REQUIRE(pattern_test(p, "aZc"));
+					REQUIRE(pattern_test(p, "aEc"));
+					REQUIRE(!pattern_test(p, "a-c"));
+					REQUIRE(!pattern_test(p, "a.c"));
+					REQUIRE(!pattern_test(p, "a0c"));
+					REQUIRE(!pattern_test(p, "a"));
+					REQUIRE(!pattern_test(p, "b"));
+					REQUIRE(!pattern_test(p, "c"));
+					REQUIRE(!pattern_test(p, ""));
+					REQUIRE(!pattern_test(p, "dvfsvgfdrf"));
+					REQUIRE(!pattern_test(p, "a/c"));
+				}
+				pattern_destroy(p);
+			}, err, { FAIL_FMT("Pattern compilation failed: %s", err.s); });
+		}
+	}
+	patcomp_destroy(compiler);
+}
