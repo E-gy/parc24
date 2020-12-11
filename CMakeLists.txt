@@ -32,7 +32,7 @@ target_compile_options(parc24 PRIVATE
 	$<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wno-unused -Werror -pedantic>
 )
 target_link_libraries(parc24 calp ${CMAKE_THREAD_LIBS_INIT})
-target_compile_definitions(parc24 PRIVATE)
+target_compile_definitions(parc24 PRIVATE _GNU_SOURCE)
 
 add_library(parc24cov STATIC ${src_main})
 include_directories(parc24cov ${PROJECT_SOURCE_DIR}/src/api)
@@ -44,7 +44,7 @@ target_compile_options(parc24cov PRIVATE
 )
 target_compile_options(parc24cov PUBLIC --coverage)
 target_link_libraries(parc24cov calp ${CMAKE_THREAD_LIBS_INIT} gcov)
-target_compile_definitions(parc24cov PRIVATE)
+target_compile_definitions(parc24cov PRIVATE _GNU_SOURCE)
 
 # Exe
 
