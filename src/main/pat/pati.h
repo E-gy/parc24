@@ -40,6 +40,13 @@ Result auto_negate(State a);
 State auto_merge(State a1, State a2, bool aor);
 
 /**
+ * @param a1 @ref 
+ * @param a2 @ref 
+ * @return State 
+ */
+State auto_concat(State a1, State a2);
+
+/**
  * @param a @ref 
  * @param str @ref
  * @return 

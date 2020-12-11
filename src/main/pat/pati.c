@@ -209,6 +209,70 @@ static Merger merger_adds(Merger m, State as){
 	return nm;
 }
 
+/**
+ * @param s1 @ref 
+ * @param a2 @ref
+ * @param s @consumes
+ * @param mergers @refmut
+ * @return 
+ */
+static State auto_concat_(State s1, State a2, Merger s, Merger* mergers){
+	{
+		Merger m = mergers_find(mergers, s);
+		if(m){
+			merger_destroy(s);
+			return m->sr;
+		}
+	}
+	bool accepting = false;
+	for(size_t i = 0; i < s->sc && !accepting; i++) if(s->s[i] != s1) accepting |= s->s[i]->accepting;
+	const State merged = patstate_new(accepting);
+	if(!merged) return null;
+	const Merger merger = s1 && s1->accepting ? merger_adds(s, a2) : s;
+	if(!merger) retclean(null, {patstate_destroy(merged);});
+	merger->sr = merged;
+	merger->next = *mergers;
+	*mergers = merger;
+	size_t s1i = 0;
+	for(; s1i < merger->sc && merger->s[s1i] != s1; s1i++);
+	Transition* ts = calloc(merger->sc, sizeof(*ts));
+	if(!ts) retclean(null, {patstate_destroy(merged);});
+	for(size_t i = 0; i < merger->sc; i++) ts[i] = merger->s[i]->transitions;
+	Transition* tr = &merged->transitions;
+	for(unsigned char c = 0; c < 128; c++){
+		State ns1 = null;
+		Merger nss = merger_new(null, 0);
+		for(size_t i = 0; i < merger->sc; i++) if(ts[i] && ts[i]->c == c) nss = merger_adds(nss, i == s1i ? (ns1 = ts[i]->to) : ts[i]->to);
+		if(nss->sc == 0){
+			merger_destroy(nss);
+			continue;
+		}
+		for(size_t i = 0; i < merger->sc; i++) if(ts[i] && ts[i]->c == c) ts[i] = ts[i]->next; else if(merger->s[i]->defolt) nss = merger_adds(nss, i == s1i ? (ns1 = merger->s[i]->defolt) : merger->s[i]->defolt);
+		if(!(*tr = patransition_new(c, auto_concat_(ns1, a2, nss, mergers)))) retclean(null, { merger_destroy(nss); free(ts); patstate_destroy(merged); });
+		tr = &((*tr)->next);
+	}
+	{
+		State ns1 = null;
+		Merger dsm = merger_new(null, 0);
+		for(size_t i = 0; i < merger->sc; i++) if(merger->s[i]->defolt) dsm = merger_adds(dsm, i == s1i ? (ns1 = merger->s[i]->defolt) : merger->s[i]->defolt);
+		if(dsm->sc > 0) merged->defolt = auto_concat_(ns1, a2, dsm, mergers); else merger_destroy(dsm);
+	}
+	free(ts);
+	return merged;
+}
+
+State auto_concat(State a1, State a2){
+	if(!a1) return a2;
+	if(!a2) return a1;
+	Merger mergers = null;
+	Merger m0 = merger_new(null, 1);
+	if(!m0) return null;
+	m0->s[0] = a1;
+	State concatenated = auto_concat_(a1, a2, m0, &mergers);
+	for(; mergers; mergers = merger_destroy(mergers));
+	return concatenated;
+}
+
 bool auto_test(State a, string str){
 	if(!a || !str) return false;
 	if(!*str) return a->accepting;
