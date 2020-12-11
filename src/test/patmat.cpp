@@ -116,6 +116,39 @@ SCENARIO("automata operations", "[patterns]"){
 		}
 		auto_destroy(a);
 	}
+	GIVEN("an automaton accepting 'a' and one accepting 'b'"){
+		State a = patstate_new(false);
+		patstate_tradd(a, patransition_new('a', patstate_new(true)));
+		REQUIRE(auto_test(a, "a"));
+		REQUIRE(!auto_test(a, "b"));
+		REQUIRE(!auto_test(a, ""));
+		REQUIRE(!auto_test(a, "aaa"));
+		REQUIRE(!auto_test(a, "bbb"));
+		REQUIRE(!auto_test(a, "ab"));
+		REQUIRE(!auto_test(a, "ba"));
+		State b = patstate_new(false);
+		patstate_tradd(b, patransition_new('b', patstate_new(true)));
+		REQUIRE(auto_test(b, "b"));
+		REQUIRE(!auto_test(b, "a"));
+		REQUIRE(!auto_test(b, ""));
+		REQUIRE(!auto_test(b, "aaa"));
+		REQUIRE(!auto_test(b, "bbb"));
+		REQUIRE(!auto_test(a, "ab"));
+		REQUIRE(!auto_test(a, "ba"));
+		THEN("the concatenation only accepts 'ab'"){
+			State ab = auto_concat(a, b);
+			REQUIRE(auto_test(ab, "ab"));
+			REQUIRE(!auto_test(ab, "a"));
+			REQUIRE(!auto_test(ab, "b"));
+			REQUIRE(!auto_test(ab, ""));
+			REQUIRE(!auto_test(ab, "aaa"));
+			REQUIRE(!auto_test(ab, "bbb"));
+			REQUIRE(!auto_test(ab, "ba"));
+			auto_destroy(ab);
+		}
+		auto_destroy(b);
+		auto_destroy(a);
+	}
 	GIVEN("an automaton accepting 3 letter words, and an automaton accepting words made only of 'a's"){
 		State a3 = patstate_new(false);
 		((a3->defolt = patstate_new(false))->defolt = patstate_new(false))->defolt = patstate_new(true);
