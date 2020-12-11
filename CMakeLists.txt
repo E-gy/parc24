@@ -77,7 +77,7 @@ file(GLOB_RECURSE src_test "${PROJECT_SOURCE_DIR}/src/test/*.h" "${PROJECT_SOURC
 add_executable(tests ${src_test})
 target_compile_options(tests PRIVATE
 	$<$<CXX_COMPILER_ID:MSVC>:/W4 /WX>
-	$<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wno-unused -Wno-missing-field-initializers -Werror -pedantic>
+	$<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wno-unused -Wno-missing-field-initializers -Werror>
 )
 
 # Catch2 from Fetch works properly, so 
