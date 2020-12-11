@@ -241,5 +241,6 @@ static PatCompResult patravast(AST ast, bool doublestar){
 		if(!a) retclean(Error_T(patcomp_result, {"failed to concatenate elements"}), { auto_destroy(a2r.r.ok); auto_destroy(a1r.r.ok); });
 		return Ok_T(patcomp_result, a);
 	}
+	if(gid == entry) return patravast(ast->d.group.children[0], doublestar);
 	return Error_T(patcomp_result, {"AST (group) not recognized"});
 }
