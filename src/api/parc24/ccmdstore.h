@@ -4,7 +4,10 @@
 
 struct travast_result;
 #define TraverseASTResult struct travast_result
+#ifndef _PARCONTEXT_TDEF
+#define _PARCONTEXT_TDEF
 typedef struct parcontext* ParContext;
+#endif
 
 typedef TraverseASTResult (*CCMD)(argsarr args, ParContext context);
 

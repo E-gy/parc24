@@ -10,7 +10,10 @@
 
 #include <ptypes.h>
 
+#ifndef _IOSSTACK_TDEF
+#define _IOSSTACK_TDEF
 typedef struct iosstack* IOsStack;
+#endif
 
 enum log_level {
 	LL_DEBUG = 0, LL_INFO, LL_WARN, LL_ERROR, LL_CRITICAL,
