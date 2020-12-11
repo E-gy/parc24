@@ -34,7 +34,7 @@ static int cmd_echo_exe(TSPA a){
 	for(size_t i = 1; i < a->args->size; i++) parcioprintf(a->ios, LL_INFO, "%s%s", a->args->args[i], i < a->args->size-1 ? " " : "\n");
 	retclean(0, { pakked_destroy(a); });
 }
-static threadfwrap_reti(cmd_echo_exe);
+static threadfwrap_reti(cmd_echo_exe)
 
 TraverseASTResult cmd_echo(argsarr args, ParContext context){
 	TSPA a = pakked_new(args, context);

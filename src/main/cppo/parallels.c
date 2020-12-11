@@ -27,7 +27,7 @@ static int writestr(WI i){
 	free(i);
 	return ok;
 }
-static threadfwrap_reti(writestr);
+static threadfwrap_reti(writestr)
 
 ThreadResult parallels_writestr(fd_t f, string str, bool background){
 	if(f < 0 || !str) return Error_T(parallels_tc_result, {"invalid args"});
@@ -51,7 +51,7 @@ static int readstr(RI i){
 	free(i);
 	return ok;
 }
-static threadfwrap_reti(readstr);
+static threadfwrap_reti(readstr)
 
 ThreadResult parallels_readstr(fd_t f, string_mut* str){
 	if(f < 0 || !str) return Error_T(parallels_tc_result, {"invalid args"});
