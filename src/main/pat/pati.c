@@ -187,7 +187,7 @@ State auto_merge(State a1, State a2, bool aor){
 
 static Merger mergers_find(Merger* mergers, Merger liek){
 	if(!mergers || !liek) return null;
-	for(Merger m = *mergers; m; m = m->next) if(m->sc == liek->sc && !memcmp(m->s, liek->s, m->sc)) return m;
+	for(Merger m = *mergers; m; m = m->next) if(m->sc == liek->sc && !memcmp(m->s, liek->s, m->sc*sizeof(State))) return m;
 	return null;
 }
 
@@ -216,23 +216,22 @@ static Merger merger_adds(Merger m, State as){
  * @param mergers @refmut
  * @return 
  */
-static State auto_concat_(State s1, State a2, Merger s, Merger* mergers){
+static State auto_concat_(State s1, State a2, Merger merger, Merger* mergers){
+	if(!(merger = s1 && s1->accepting ? merger_adds(merger, a2) : merger)) return null;
 	{
-		Merger m = mergers_find(mergers, s);
+		Merger m = mergers_find(mergers, merger);
 		if(m){
-			merger_destroy(s);
+			merger_destroy(merger);
 			return m->sr;
 		}
 	}
-	bool accepting = false;
-	for(size_t i = 0; i < s->sc && !accepting; i++) if(s->s[i] != s1) accepting |= s->s[i]->accepting;
-	const State merged = patstate_new(accepting);
-	if(!merged) return null;
-	const Merger merger = s1 && s1->accepting ? merger_adds(s, a2) : s;
-	if(!merger) retclean(null, {patstate_destroy(merged);});
-	merger->sr = merged;
 	merger->next = *mergers;
 	*mergers = merger;
+	bool accepting = false;
+	for(size_t i = 0; i < merger->sc && !accepting; i++) if(merger->s[i] != s1) accepting |= merger->s[i]->accepting;
+	const State merged = patstate_new(accepting);
+	if(!merged) return null;
+	merger->sr = merged;
 	size_t s1i = 0;
 	for(; s1i < merger->sc && merger->s[s1i] != s1; s1i++);
 	Transition* ts = calloc(merger->sc, sizeof(*ts));
