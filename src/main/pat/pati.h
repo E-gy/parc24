@@ -22,14 +22,16 @@ State patstate_new(bool accepting);
 void patstate_destroy(State s);
 Result patstate_tradd(State s, Transition t);
 
+typedef State Automaton;
+
 /**
  * @param a @consumes 
  */
-void auto_destroy(State a);
+void auto_destroy(Automaton a);
 /**
  * @param a @refmut 
  */
-Result auto_negate(State a);
+Result auto_negate(Automaton a);
 
 /**
  * @param a1 @ref 
@@ -37,18 +39,18 @@ Result auto_negate(State a);
  * @param aor 
  * @return State 
  */
-State auto_merge(State a1, State a2, bool aor);
+Automaton auto_merge(Automaton a1, Automaton a2, bool aor);
 
 /**
  * @param a1 @ref 
  * @param a2 @ref 
  * @return State 
  */
-State auto_concat(State a1, State a2);
+Automaton auto_concat(Automaton a1, Automaton a2);
 
 /**
  * @param a @ref 
  * @param str @ref
  * @return 
  */
-bool auto_test(State a, string str);
+bool auto_test(Automaton a, string str);
