@@ -183,6 +183,12 @@ State auto_merge(State a1, State a2, bool aor){
 	return merged;
 }
 
+static Merger mergers_find(Merger* mergers, Merger liek){
+	if(!mergers || !liek) return null;
+	for(Merger m = *mergers; m; m = m->next) if(m->sc == liek->sc && !memcmp(m->s, liek->s, m->sc)) return m;
+	return null;
+}
+
 bool auto_test(State a, string str){
 	if(!a || !str) return false;
 	if(!*str) return a->accepting;
