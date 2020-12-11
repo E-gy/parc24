@@ -23,7 +23,7 @@ VarStore varstore_new(void){
 }
 
 void varstore_destroy(VarStore t){
-	return trie_destroy(t);
+	trie_destroy(t);
 }
 
 VarStore varstore_clone(VarStore store){

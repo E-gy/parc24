@@ -23,7 +23,7 @@ AliasStore aliastore_new(void){
 }
 
 void aliastore_destroy(AliasStore t){
-	return trie_destroy(t);
+	trie_destroy(t);
 }
 
 AliasStore aliastore_clone(AliasStore store){
