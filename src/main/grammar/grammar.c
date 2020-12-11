@@ -288,10 +288,23 @@ Parser parcer_defolt_new(void){
 }
 
 #include <calp/parser/fun.h>
-#include <calp/lexers.h>
+#include <calp/lexer.h>
+
+#define space_comments_skippity(str) for(; *str && (isspace(*str) || *str == '#') && *str != '\n' && *str != '\r'; str++) if(*str == '#') for(; *str && *str != '\n'; str++)
+
+static LexerResult lexer_spacebegone_withcomments(string str, SelfLexingToken tok){
+	if(!str) return Error_T(lexer_result, {"Invalid input - null string"});
+	space_comments_skippity(str);
+	string nom = tok(str);
+	if(!nom) return Error_T(lexer_result, {"Token refused to eat"});
+	string next = nom;
+	space_comments_skippity(next);
+	return Ok_T(lexer_result, {str, nom, next});
+}
+
 
 ParseResult parcer_parse(Parser p, string str){
-	return parser_parse(p, lexer_spacebegone, str, &entry);
+	return parser_parse(p, lexer_spacebegone_withcomments, str, &entry);
 }
 
 #include <parc24/travast.h>
