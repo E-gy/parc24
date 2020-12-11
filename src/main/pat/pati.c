@@ -1,6 +1,8 @@
 #include "pati.h"
 
 #include <util/null.h>
+#include <util/string.h>
+#include <util/caste.h>
 #include <stdlib.h>
 
 Transition patransition_new(char c, State to){
@@ -187,6 +189,24 @@ static Merger mergers_find(Merger* mergers, Merger liek){
 	if(!mergers || !liek) return null;
 	for(Merger m = *mergers; m; m = m->next) if(m->sc == liek->sc && !memcmp(m->s, liek->s, m->sc)) return m;
 	return null;
+}
+
+/**
+ * @param m @consumes 
+ * @param as @ref
+ * @return Merger 
+ */
+static Merger merger_adds(Merger m, State as){
+	if(!m || !as) return m;
+	size_t i = 0;
+	for(; i < m->sc && ptr2ull(m->s[i]) < ptr2ull(as); i++);
+	if(i < m->sc && m->s[i] == as) return m;
+	Merger nm = realloc(m, sizeof(*nm) + (m->sc+1)*(sizeof(State)));
+	if(!nm) return null;
+	memmove(nm->s+i+1, nm->s+i, (nm->sc-i)*sizeof(State));
+	nm->sc++;
+	nm->s[i] = as;
+	return nm;
 }
 
 bool auto_test(State a, string str){
