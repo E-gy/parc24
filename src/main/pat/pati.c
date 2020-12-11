@@ -107,6 +107,7 @@ typedef struct amerger* Merger;
 struct amerger {
 	/** @ref */ State sr;
 	Merger next;
+	size_t sc;
 	/** @ref */ State s[];
 };
 
@@ -117,7 +118,7 @@ struct amerger {
 static Merger merger_new(State sr, size_t msc){
 	Merger m = malloc(sizeof(*m) + msc*sizeof(State));
 	if(!m) return null;
-	*m = (struct amerger){sr, null};
+	*m = (struct amerger){sr, null, msc};
 	return m;
 }
 
