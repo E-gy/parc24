@@ -1,7 +1,7 @@
 #include <calp/parser/fun.h>
 
 #include "internals.h"
-#include <calp/util/buffer.h>
+#include <calp/util/string.h>
 #include <calp/util/log.h>
 
 Result_T(parspreresult, AST, string_v);
@@ -65,7 +65,7 @@ static ParsPreResult parser_makast(Parser p, Lexer l, Symbol symb, string* str){
 	switch(symb->type){
 		case SYMBOL_TYPE_TERM: {
 			IfElse_T(l(*str, symb->val.term.id), ok, {
-				AST ret = ast_new_leaf(symb, buffer_destr(buffer_new_from(ok.start, ok.end-ok.start)));
+				AST ret = ast_new_leaf(symb, strndup(ok.start, ok.end-ok.start));
 				if(!ret) return Error_T(parspreresult, {"[INTERNAL] AST leaf construction failed"});
 				*str = ok.next;
 				return Ok_T(parspreresult, ret);
