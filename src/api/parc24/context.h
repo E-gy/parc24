@@ -8,6 +8,7 @@
 #include "aliastore.h"
 #include "iosstack.h"
 #include "options.h"
+#include "patterns.h"
 #include <cppo/types.h>
 #include <calp/parser.h>
 
@@ -17,6 +18,7 @@ struct parcontext {
 	/** @ref */ CCMDStore ccmds;
 	/** @ref */ AliasStore aliases;
 	/** @ref */ IOsStack ios;
+	/** @ref */ PatternCompiler patcomp;
 	string currexe;
 	argsarr args;
 	int lastexit;
