@@ -4,6 +4,7 @@ Include(FetchContent)
 
 project(parc24 VERSION 0.0.1)
 set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_EXTENSIONS OFF)
 
 # hmmm
 # include(CheckPIESupported)
