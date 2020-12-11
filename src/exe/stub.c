@@ -60,7 +60,12 @@ int main(int argc, argsarr args){
 		parciolog(ios, LL_CRITICAL, "Failed to create aliases store");
 		return 1;
 	}
-	struct parcontext ctxt = {vars, funcs, ccmds, aliases, ios, args[0], opts.args, 0, false, &opts.parcopts, parcer};
+	PatternCompiler patco = patcomp_new();
+	if(!patco){
+		parciolog(ios, LL_CRITICAL, "Failed to create aliases store");
+		return 1;
+	}
+	struct parcontext ctxt = {vars, funcs, ccmds, aliases, ios, patco, args[0], opts.args, 0, false, &opts.parcopts, parcer};
 	if(opts.commandstr || opts.commandfile){
 		string_mut str = opts.commandstr;
 		if(!(str = opts.commandstr)){
@@ -91,6 +96,7 @@ int main(int argc, argsarr args){
 			parciolog(ios, LL_ERROR, "Failed to read from standard input - %s", err.s);
 		});
 	}
+	patcomp_destroy(patco);
 	aliastore_destroy(aliases);
 	ccmdstore_destroy(ccmds);
 	funcstore_destroy(funcs);
