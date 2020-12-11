@@ -189,6 +189,29 @@ SCENARIO("automata operations", "[patterns]"){
 			}
 			auto_destroy(aAa);
 		}
+		THEN("the concatenation accepts words of 3 arbitrary letters followed by 'a's /...a+/"){
+			State a3aa = auto_concat(a3, aa);
+			REQUIRE(auto_test(a3aa, "aaaa"));
+			REQUIRE(auto_test(a3aa, "abba"));
+			REQUIRE(auto_test(a3aa, "???aaaaaaaaa"));
+			REQUIRE(auto_test(a3aa, "+-aaaaa"));
+			REQUIRE(!auto_test(a3aa, "aaa"));
+			REQUIRE(!auto_test(a3aa, "a"));
+			REQUIRE(!auto_test(a3aa, "grrrrrrr"));
+			REQUIRE(!auto_test(a3aa, "grrraaaaaa"));
+			auto_destroy(a3aa);
+		}
+		THEN("the concatenation accepts words of 'a's followed by 3 arbitrary letters /a+.../"){
+			State aaa3 = auto_concat(aa, a3);
+			REQUIRE(auto_test(aaa3, "aaaa"));
+			REQUIRE(auto_test(aaa3, "abba"));
+			REQUIRE(auto_test(aaa3, "aaaaaaaabba"));
+			REQUIRE(!auto_test(aaa3, "aaa"));
+			REQUIRE(!auto_test(aaa3, "a"));
+			REQUIRE(!auto_test(aaa3, "grrrrrrr"));
+			REQUIRE(!auto_test(aaa3, "aaaaaarrrrq"));
+			auto_destroy(aaa3);
+		}
 		auto_destroy(aa);
 		auto_destroy(a3);
 	}
