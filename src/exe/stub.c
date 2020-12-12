@@ -31,8 +31,8 @@ int main(int argc, argsarr args){
 		return 1;
 	}
 	VarStore vars = varstore_new();
-	if(!vars){
-		parciolog(ios, LL_CRITICAL, "Failed to create variables store");
+	if(!vars || !IsOk(varstore_add(vars, "IFS", " \t\n"))){
+		parciolog(ios, LL_CRITICAL, "Failed to initialize variables store");
 		return 1;
 	}
 	FuncStore funcs = funcstore_new();
