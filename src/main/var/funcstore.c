@@ -18,7 +18,7 @@ FuncStore funcstore_new(void){
 }
 
 void funcstore_destroy(FuncStore t){
-	return trie_destroy(t);
+	trie_destroy(t);
 }
 
 FuncStore funcstore_clone(FuncStore store){

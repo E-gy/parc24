@@ -26,7 +26,10 @@ struct parcontext {
 	ParcOptions parcopts;
 	Parser parcer;
 };
+#ifndef _PARCONTEXT_TDEF
+#define _PARCONTEXT_TDEF
 typedef struct parcontext* ParContext;
+#endif
 
 /**
  * @param context @ref

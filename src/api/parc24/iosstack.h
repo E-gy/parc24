@@ -3,7 +3,10 @@
 #include <ptypes.h>
 
 struct iosstack;
+#ifndef _IOSSTACK_TDEF
+#define _IOSSTACK_TDEF
 typedef struct iosstack* IOsStack;
+#endif
 
 /**
  * @return @produces stack 

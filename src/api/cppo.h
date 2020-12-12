@@ -1,7 +1,10 @@
 #pragma once
 
 #include <cppo/types.h>
+#ifndef _IOSSTACK_TDEF
+#define _IOSSTACK_TDEF
 typedef struct iosstack* IOsStack;
+#endif
 
 /**
  * @param args @ref

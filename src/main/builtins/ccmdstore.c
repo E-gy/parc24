@@ -21,7 +21,7 @@ CCMDStore ccmdstore_new(void){
 }
 
 void ccmdstore_destroy(CCMDStore s){
-	return trie_destroy(s);
+	trie_destroy(s);
 }
 
 CCMD ccmdstore_get(CCMDStore s, string cmd){

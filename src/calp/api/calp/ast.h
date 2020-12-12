@@ -22,7 +22,7 @@ struct ast {
 			/** @ref */ GroupId groupId;
 			/** @ref */ Group group;
 			size_t cc;
-			AST children[];
+			AST children[1];
 		} group;
 		struct {
 			/** @ref */ TerminalSymbolId symbolId;
