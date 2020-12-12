@@ -93,3 +93,34 @@ ArgsArr_Mut exe_args_split(string cmd){
 	}
 	return args;
 }
+
+#ifdef _WIN32
+
+#include <stdlib.h>
+
+string user_get_home(string user){
+	return getenv("USERPROFILE");
+}
+
+#else
+
+#include <unistd.h>
+#include <pwd.h>
+
+string user_get_home(string user){
+	uid_t uid = getuid();
+	if(user){
+		while(true){
+			passwd* entry = getpwent();
+			if(!entry) break;
+			if(streq(entry->pw_name, user)){
+				uid = entry->pw_uid;
+				break;
+			}
+		}
+		endpwent();
+	}
+	return getpwuid(uid)->pw_dir;
+}
+
+#endif

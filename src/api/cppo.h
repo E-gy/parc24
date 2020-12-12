@@ -27,3 +27,9 @@ ExeWaitResult exe_waitretcode(ChildProcessInfo proc);
  * @param thread
  */
 ExeWaitResult exethread_waitretcode(thread_t thread);
+
+/**
+ * @param @ref @nullable user 
+ * @return @ref string 
+ */
+string user_get_home(string user);
