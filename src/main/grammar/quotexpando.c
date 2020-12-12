@@ -138,11 +138,12 @@ ExpandoResult expando_variable(Buffer buff, size_t* si, struct expando_targets w
 	if(esi){
 		string_mut varn = buffer_destr(buffer_new_from(str+esi, eei-esi));
 		if(!varn) return Error_T(expando_result, {"buffer capture failed"});
-		string varv = parcontext_getunivar(context, varn);
+		struct getvarv varv = parcontext_getunivar(context, varn);
 		free(varn);
-		if(!varv) varv = "";
-		if(!IsOk(buffer_splice_str(buff, *si, (*si)+rei, varv))) return Error_T(expando_result, {"variable value splice failed"});
-		*si += strlen(varv);
+		if(!varv.v.ref) varv.v.ref = "";
+		if(!IsOk(buffer_splice_str(buff, *si, (*si)+rei, varv.v.ref))) retclean(Error_T(expando_result, {"variable value splice failed"}), {if(varv.copy) free(varv.v.copy);});
+		*si += strlen(varv.v.ref);
+		if(varv.copy) free(varv.v.copy);
 		return Ok_T(expando_result, null);
 	}
 	return Error_T(expando_result, {"not a variable"});
