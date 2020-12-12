@@ -21,6 +21,9 @@ DEF_SYMBOL_TERMINAL_1xCHAR(brakr,']')
 DEF_SYMBOL_TERMINAL(achar, {
 	return *str ? str+1 : null;
 })
+DEF_SYMBOL_TERMINAL(achar_clr, {
+	return *str && *str != '[' && *str != ']' ? str+1 : null;
+})
 
 //[::]
 
@@ -46,6 +49,10 @@ DEF_GROUP(acharoesc,
 	RULE(SYMBOL_T(bkslsh); SYMBOL_T(achar));
 	RULE(SYMBOL_T(achar))
 )
+DEF_GROUP(achar_clr_oesc,
+	RULE(SYMBOL_T(bkslsh); SYMBOL_T(achar_clr));
+	RULE(SYMBOL_T(achar_clr))
+)
 
 // []
 
@@ -65,7 +72,7 @@ DEF_GROUP(clr_el,
 	RULE(SYMBOL_T(clas_upper));
 	RULE(SYMBOL_T(clas_word));
 	RULE(SYMBOL_T(clas_xdigit));
-	RULE(SYMBOL_G(acharoesc))
+	RULE(SYMBOL_G(achar_clr_oesc))
 )
 
 DEF_SYMBOL_TERMINAL(s0, { return str ? str : null; });
@@ -94,6 +101,7 @@ DEF_GROUP(entry, RULE(SYMBOL_G(pat_els); SYMBOL_T(eoi)))
 
 DEF_GRAMMAR(pattern_simple,
 	GROUP(acharoesc);
+	GROUP(achar_clr_oesc);
 	GROUP(clr_el);
 	GROUP(clr_neg);
 	GROUP(clr_els);
@@ -164,7 +172,7 @@ static PatCompResult patravast(AST ast, bool doublestar){
 			s1->defolt = s2;
 			return Ok_T(patcomp_result, s1);
 		}
-		if(sid == achar){
+		if(sid == achar || sid == achar_clr){
 			State s1 = patstate_new(false);
 			State s2 = patstate_new(true);
 			if(!s1 || !s2) retclean(Error_T(patcomp_result, {"failed to create states"}), { patstate_destroy(s1); patstate_destroy(s2); });
@@ -188,7 +196,7 @@ static PatCompResult patravast(AST ast, bool doublestar){
 		return Error_T(patcomp_result, {"AST (leaf) not recognized"});
 	}
 	const GroupId gid = ast->d.group.groupId;
-	if(gid == acharoesc) return patravast(ast->d.group.children[ast->d.group.cc-1], doublestar);
+	if(gid == acharoesc || gid == achar_clr_oesc) return patravast(ast->d.group.children[ast->d.group.cc-1], doublestar);
 	if(gid == clr_el){
 		switch(ast->d.group.cc){
 			case 3: {
