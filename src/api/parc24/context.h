@@ -34,7 +34,7 @@ struct getvarv {
 	union {
 		/** @ref */ string ref;
 		string_mut copy;
-	};
+	} v;
 };
 
 /**
