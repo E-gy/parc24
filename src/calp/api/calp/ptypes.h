@@ -12,7 +12,11 @@
 #include <stddef.h>
 #include <stdbool.h>
 
+#ifdef __GNUC__
 #define ATTR_UNUSED __attribute__ ((unused))
+#else 
+#define ATTR_UNUSED
+#endif
 
 typedef bool Result;
 #define Ok false
