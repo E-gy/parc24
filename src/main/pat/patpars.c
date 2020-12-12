@@ -74,7 +74,7 @@ DEF_SYMBOL_TERMINAL(s0, { return str ? str : null; });
 
 DEF_GOPT(clr_neg, RULE(SYMBOL_T(excl)); RULE(SYMBOL_T(caret)))
 
-DEF_GKLEENE(clr_els, SYMBOL_G(clr_el);)
+DEF_GKLEENE(clr_els, SYMBOL_G(clr_el))
 DEF_GROUP(clre, RULE(SYMBOL_T(brakl); SYMBOL_G(clr_neg); SYMBOL_G(clr_el); SYMBOL_G(clr_els); SYMBOL_T(brakr)))
 
 
