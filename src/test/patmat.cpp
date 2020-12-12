@@ -332,12 +332,12 @@ SCENARIO("standard patterns", "[patterns]"){
 					REQUIRE(pattern_test(p, "a-c"));
 					REQUIRE(pattern_test(p, "a.c"));
 					REQUIRE(pattern_test(p, "a0c"));
+					REQUIRE(pattern_test(p, "a/c"));
 					REQUIRE(!pattern_test(p, "a"));
 					REQUIRE(!pattern_test(p, "b"));
 					REQUIRE(!pattern_test(p, "c"));
 					REQUIRE(!pattern_test(p, ""));
 					REQUIRE(!pattern_test(p, "dvfsvgfdrf"));
-					REQUIRE(!pattern_test(p, "a/c"));
 				}
 				pattern_destroy(p);
 			}, err, { FAIL_FMT("Pattern compilation failed: %s", err.s); });
