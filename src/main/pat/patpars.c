@@ -1,8 +1,3 @@
-#include "pati.h"
-
-#define _PATTERN_DEF
-typedef Automaton Pattern;
-
 #include "patpars.h"
 
 #include <calp/grammar/define.h>
@@ -75,7 +70,7 @@ DEF_GROUP(clr_el,
 	RULE(SYMBOL_G(achar_clr_oesc))
 )
 
-DEF_SYMBOL_TERMINAL(s0, { return str ? str : null; });
+DEF_SYMBOL_TERMINAL(s0, { return str ? str : null; })
 #define DEF_GKLEENE(name, r0symbols) DEF_GROUP(name, RULE(r0symbols; SYMBOL_G(name)); RULE(SYMBOL_T(s0)))
 #define DEF_GOPT(name, rules) DEF_GROUP(name, rules; RULE(SYMBOL_T(s0)))
 
