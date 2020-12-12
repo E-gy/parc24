@@ -128,7 +128,7 @@ ExpandoResult expando_expando(Buffer buff, size_t* si, struct expando_targets wh
 	return Error_T(expando_result, {"not an expandable"});
 }
 
-ExpandoResult expando_variable(Buffer buff, size_t* si, struct expando_targets what, ParContext context){
+ExpandoResult expando_variable(Buffer buff, size_t* si, ATTR_UNUSED struct expando_targets what, ParContext context){
 	size_t esi = 0, eei, rei;
 	if(strpref("${", str)){
 		string ent = capture_variable(str);
@@ -155,7 +155,7 @@ ExpandoResult expando_variable(Buffer buff, size_t* si, struct expando_targets w
 	return Error_T(expando_result, {"not a variable"});
 }
 
-ExpandoResult expando_tilde(Buffer buff, size_t* si, struct expando_targets what, ParContext context){
+ExpandoResult expando_tilde(Buffer buff, size_t* si, ATTR_UNUSED struct expando_targets what, ParContext context){
 	if(strpref("~+", str) || strpref("~-", str)){
 		struct getvarv varv = parcontext_getunivar(context, strpref("~+", str) ? "PWD" : "OLDPWD");
 		if(!varv.v.ref) varv.v.ref = "";

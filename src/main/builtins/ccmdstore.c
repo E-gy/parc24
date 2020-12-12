@@ -10,7 +10,7 @@ typedef Trie CCMDStore;
 #include <util/null.h>
 #include <util/string.h>
 
-static void ccmd_destroy(CCMD ccmd){}
+static void ccmd_destroy(ATTR_UNUSED CCMD ccmd){}
 
 CCMDStore ccmdstore_new(void){
 	return trie_new(ccmd_destroy);

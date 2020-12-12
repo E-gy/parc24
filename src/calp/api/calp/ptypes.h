@@ -12,6 +12,8 @@
 #include <stddef.h>
 #include <stdbool.h>
 
+#define ATTR_UNUSED __attribute__ ((unused))
+
 typedef bool Result;
 #define Ok false
 #define Error true
@@ -24,8 +26,8 @@ typedef bool Result;
 #define IsOk_T(resultt) IsOk(resultt.result)
 #define IsNotOk_T(resultt) IsNotOk(resultt.result)
 #define IfOk_T(result, var, closure) do{ __typeof__(result) _r = result; if(IsOk_T(_r)){ __typeof__(_r.r.ok) var = _r.r.ok; closure } }while(0)
-#define IfError_T(result, var, closure) do{ __typeof__(result) _r = result; if(IsNotOk_T(_r)){ __typeof__(_r.r.error) var = _r.r.error; closure } }while(0)
-#define IfElse_T(result, vok, clok, verr, clerr) do{ __typeof__(result) _r = result; if(IsOk_T(_r)){ __typeof__(_r.r.ok) vok = _r.r.ok; clok } else { __typeof__(_r.r.error) verr = _r.r.error; clerr } }while(0)
+#define IfError_T(result, var, closure) do{ __typeof__(result) _r = result; if(IsNotOk_T(_r)){ ATTR_UNUSED __typeof__(_r.r.error) var = _r.r.error; closure } }while(0)
+#define IfElse_T(result, vok, clok, verr, clerr) do{ __typeof__(result) _r = result; if(IsOk_T(_r)){ __typeof__(_r.r.ok) vok = _r.r.ok; clok } else { ATTR_UNUSED __typeof__(_r.r.error) verr = _r.r.error; clerr } }while(0)
 #define OrElse_T(result, els) __extension__({ __typeof__(result) _r = result; IsOk_T(result) ? result.r.ok : els; })
 
 typedef const char* string;

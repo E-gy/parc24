@@ -13,7 +13,7 @@
 
 ParC24IOReadResult parcio_derp_std_read(void);
 
-int main(int argc, argsarr args){
+int main(ATTR_UNUSED int argc, argsarr args){
 	IOsStack ios = parcio_new_fromstd();
 	if(!ios){
 		fprintf(stderr, "[SUPERCRITICAL] Failed to create io stack\n");

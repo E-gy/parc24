@@ -98,7 +98,7 @@ ArgsArr_Mut exe_args_split(string cmd){
 
 #include <stdlib.h>
 
-string user_get_home(string user){
+string user_get_home(ATTR_UNUSED string user){
 	return getenv("USERPROFILE");
 }
 
