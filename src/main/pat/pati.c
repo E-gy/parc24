@@ -88,7 +88,7 @@ static Result auto_negate_(State s, Encounter* es, State* sinka){
 		if(!IsOk(auto_negate_(s->defolt, es, sinka))) return Error;
 	} else {
 		if(!*sinka){
-			if(!(*sinka = patstate_new(true))) return Error;;
+			if(!(*sinka = patstate_new(true))) return Error;
 			(*sinka)->defolt = *sinka;
 		}
 		s->defolt = *sinka;
