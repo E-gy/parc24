@@ -49,6 +49,8 @@ int main(int argc, argsarr args){
 		!IsOk(ccmdstore_set(ccmds, "exit", cmd_exit)) ||
 		!IsOk(ccmdstore_set(ccmds, "break", cmd_break)) ||
 		!IsOk(ccmdstore_set(ccmds, "continue", cmd_continue)) ||
+		!IsOk(ccmdstore_set(ccmds, "alias", cmd_alias)) ||
+		!IsOk(ccmdstore_set(ccmds, "unalias", cmd_unalias)) ||
 		!IsOk(ccmdstore_set(ccmds, "echo", cmd_echo)) ||
 		!IsOk(ccmdstore_set(ccmds, "shopt", cmd_shopt))
 	){
