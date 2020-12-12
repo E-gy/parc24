@@ -22,7 +22,7 @@ DEF_SYMBOL_TERMINAL(achar_clr, {
 
 //[::]
 
-#define DEF_SYMBOL_TERMINAL_CLASS(clasname) DEF_SYMBOL_TERMINAL(clas_##clasname, { return str && strpref("[:"#clasname":]", str) ? str + (sizeof("[:"#clasname":]")/sizeof(char)) : null; })
+#define DEF_SYMBOL_TERMINAL_CLASS(clasname) DEF_SYMBOL_TERMINAL(clas_##clasname, { return str && strpref("[:"#clasname":]", str) ? str + (sizeof("[:"#clasname":]")/sizeof(char) - 1) : null; })
 DEF_SYMBOL_TERMINAL_CLASS(alnum)
 DEF_SYMBOL_TERMINAL_CLASS(alpha)
 DEF_SYMBOL_TERMINAL_CLASS(ascii)
@@ -42,7 +42,7 @@ DEF_SYMBOL_TERMINAL_CLASS(xdigit)
 
 DEF_GROUP(acharoesc,
 	RULE(SYMBOL_T(bkslsh); SYMBOL_T(achar));
-	RULEp(-100, SYMBOL_T(achar))
+	RULEp(-100, SYMBOL_T(achar_clr))
 )
 DEF_GROUP(achar_clr_oesc,
 	RULE(SYMBOL_T(bkslsh); SYMBOL_T(achar));
@@ -196,32 +196,32 @@ static PatCompResult patravast(AST ast, bool doublestar){
 		switch(ast->d.group.cc){
 			case 3: {
 				unsigned char crfrom = ast->d.group.children[0]->d.leaf.val[0];
-				unsigned char crto = ast->d.group.children[0]->d.leaf.val[1];
+				unsigned char crto = ast->d.group.children[2]->d.leaf.val[0];
 				if(crto < crfrom) return Ok_T(patcomp_result, null);
 				State s1 = patstate_new(false);
 				State s2 = patstate_new(true);
 				if(!s1 || !s2) retclean(Error_T(patcomp_result, {"failed to create states"}), { patstate_destroy(s1); patstate_destroy(s2); });
-				for(unsigned char c = crfrom; c < crto; c++) if(!IsOk(patstate_tradd(s1, patransition_new(c, s2)))) retclean(Error_T(patcomp_result, {"failed to add transition"}), { patstate_destroy(s1); patstate_destroy(s2); });
+				for(unsigned char c = crfrom; c <= crto; c++) if(!IsOk(patstate_tradd(s1, patransition_new(c, s2)))) retclean(Error_T(patcomp_result, {"failed to add transition"}), { patstate_destroy(s1); patstate_destroy(s2); });
 				return Ok_T(patcomp_result, s1);
 			}
 			case 1: return patravast(ast->d.group.children[0], doublestar);
 			default: break;
 		}
 	}
-	if(gid == clr_els){
+	if(gid == clre){
 		bool negate = ast->d.group.children[1]->d.group.children[0]->d.leaf.symbolId != s0;
 		PatCompResult ce0 = patravast(ast->d.group.children[2], doublestar);
 		if(!IsOk_T(ce0)) return ce0;
 		Automaton a = ce0.r.ok;
-		for(AST ne = ast->d.group.children[3]; ne->d.group.cc > 1; ne = ne->d.group.children[2]){
-			PatCompResult nep = patravast(ne, doublestar);
+		for(AST ne = ast->d.group.children[3]; ne->d.group.cc > 1; ne = ne->d.group.children[1]){
+			PatCompResult nep = patravast(ne->d.group.children[0], doublestar);
 			if(!IsOk_T(nep)) retclean(nep, { auto_destroy(a); });
 			Automaton na = auto_merge(a, nep.r.ok, true);
 			auto_destroy(a);
 			if(!na) return Error_T(patcomp_result, {"failed to unite class elements"});
 			a = na;
 		}
-		if(negate && !auto_negate(a)) retclean(Error_T(patcomp_result, {"failed to negate class"}), { auto_destroy(a); });
+		if(negate && !IsOk(auto_negate(a))) retclean(Error_T(patcomp_result, {"failed to negate class"}), { auto_destroy(a); });
 		return Ok_T(patcomp_result, a);
 	}
 	if(gid == pat_el) return patravast(ast->d.group.children[0], doublestar);
