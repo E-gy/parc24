@@ -5,7 +5,7 @@
 
 PatternCompiler patcomp_new(void){
 	new(PatternCompiler, c);
-	*c = (struct pattern_compiler){patpars_new(), null /*TODO*/};
+	*c = (struct pattern_compiler){patpars_new(), patpars_ext_new()};
 	return c;
 }
 
@@ -18,10 +18,6 @@ void patcomp_destroy(PatternCompiler pc){
 
 void pattern_destroy(Pattern p){
 	auto_destroy(p);
-}
-
-PatCompResult pattern_parse_ext(Parser parser, string str, bool doublestar){
-	return Error_T(patcomp_result, {"UNIMPLEMENTED"});
 }
 
 PatCompResult pattern_compile(PatternCompiler pc, string pat, struct parc_options opts){
