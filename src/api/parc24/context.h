@@ -29,9 +29,17 @@ struct parcontext {
 typedef struct parcontext* ParContext;
 #endif
 
+struct getvarv {
+	bool copy;
+	union {
+		/** @ref */ string ref;
+		string_mut copy;
+	};
+};
+
 /**
  * @param context @ref
  * @param variable @ref 
- * @return @ref value
+ * @return @produces value
  */
-string parcontext_getunivar(ParContext context, string variable);
+struct getvarv parcontext_getunivar(ParContext context, string variable);
