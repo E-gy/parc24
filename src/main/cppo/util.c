@@ -111,7 +111,7 @@ string user_get_home(string user){
 	uid_t uid = getuid();
 	if(user){
 		while(true){
-			passwd* entry = getpwent();
+			struct passwd* entry = getpwent();
 			if(!entry) break;
 			if(streq(entry->pw_name, user)){
 				uid = entry->pw_uid;
