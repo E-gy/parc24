@@ -130,7 +130,9 @@ PatCompResult pattern_parse(Parser parser, string str, bool doublestar){
 	if(!parser || !str) return Error_T(patcomp_result, {"invalid input"});
 	ParseResult past = parser_parse(parser, lexer0, str, entry);
 	if(!IsOk_T(past)) return Error_T(patcomp_result, past.r.error);
-	return patravast(past.r.ok.ast, doublestar);
+	PatCompResult pat = patravast(past.r.ok.ast, doublestar);
+	ast_destroy(past.r.ok);
+	return pat;
 }
 
 #include <ctype.h>
