@@ -136,6 +136,7 @@ PatCompResult pattern_parse(Parser parser, string str, bool doublestar){
 }
 
 #include <ctype.h>
+int char_isword(int c);
 
 static PatCompResult posixchaclamkpat(int (*predicate)(int)){
 	if(!predicate) return Error_T(patcomp_result, {"invalid char class predicate"});
@@ -188,7 +189,7 @@ static PatCompResult patravast(AST ast, bool doublestar){
 		if(sid == clas_punct) return posixchaclamkpat(ispunct);
 		if(sid == clas_space) return posixchaclamkpat(isspace);
 		if(sid == clas_upper) return posixchaclamkpat(isupper);
-		// if(sid == clas_word) return posixchaclamkpat(isword); TODO
+		if(sid == clas_word) return posixchaclamkpat(char_isword);
 		if(sid == clas_xdigit) return posixchaclamkpat(isxdigit);
 		return Error_T(patcomp_result, {"AST (leaf) not recognized"});
 	}
