@@ -12,31 +12,34 @@
 #include <util/str2i.h>
 #include <cppo/parallels.h>
 #include <grammar/aliaser.h>
-#include <stdio.h>
+#include <util/buffer_printf.h>
 
 #ifdef _WIN32
 #define O_CLOEXEC 0
 #endif
 
-string parcontext_getunivar(ParContext c, string v){
+#define varvref(v) ((struct getvarv){false, {.ref = v}})
+#define varvcopy(v) ((struct getvarv){true, {.copy = v}})
+
+struct getvarv parcontext_getunivar(ParContext c, string v){
 	if(streq("?", v)){
-		static char hackity[16] = {0};
-		sprintf(hackity, "%i", c->lastexit);
-		return hackity;
+		Buffer buff = buffer_new(16);
+		buffer_printf(buff, "%i", c->lastexit);
+		return varvcopy(buffer_destr(buff));
 	}
 	IfOk_T(str2i(v), num, {
-		if(num == 0) return c->currexe;
-		if(num > 0 && num-1 < ntarrlen_t(c->args, long)) return c->args[num-1]; 
+		if(num == 0) return varvref(c->currexe);
+		if(num > 0 && num-1 < ntarrlen_t(c->args, long)) return varvref(c->args[num-1]); 
 	});
 	{
 		string_mut vv = varstore_get(c->vars, v);
-		if(vv) return vv;
+		if(vv) return varvref(vv);
 	}
 	{
 		string_mut envv = getenv(v);
-		if(envv) return envv;
+		if(envv) return varvref(envv);
 	}
-	return null;
+	return varvref(null);
 }
 
 TraverseASTResult parcontext_unixec(argsarr args, ParContext ctxt){
