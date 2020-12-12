@@ -13,6 +13,7 @@
 #define capture_isquotstart(str) (str && (str[0] == '\'' || str[0] == '"'))
 #define capture_isexpandostart(str) (str && (str[0] == '`' || strpref("$(", str)))
 #define capture_isvariablestart(str) (str && (str[0] == '$'))
+#define capture_istildestart(str) (str && (str[0] == '~'))
 
 /**
  * Attempts to capture quoted subword

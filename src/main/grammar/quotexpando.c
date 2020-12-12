@@ -17,6 +17,7 @@
 ExpandoResult expando_quot(Buffer buff, size_t* si, struct expando_targets what, ParContext context);
 ExpandoResult expando_expando(Buffer buff, size_t* si, struct expando_targets what, ParContext context);
 ExpandoResult expando_variable(Buffer buff, size_t* si, struct expando_targets what, ParContext context);
+ExpandoResult expando_tilde(Buffer buff, size_t* si, struct expando_targets what, ParContext context);
 
 ExpandoResult expando_quot(Buffer buff, size_t* si, struct expando_targets what, ParContext context){
 	if(str[0] == '\''){
@@ -48,6 +49,10 @@ ExpandoResult expando_quot(Buffer buff, size_t* si, struct expando_targets what,
 				if(capture_isvariablestart(s)){
 					IfError_T(expando_variable(buff, &i, what, context), err, { return Error_T(expando_result, err); });
 					break;
+				} else
+				if(capture_istildestart(s)){
+					IfError_T(expando_tilde(buff, &i, what, context), err, { return Error_T(expando_result, err); });
+					break;
 				} else if(strpref("\\$", s) || strpref("\\`", s) || strpref("\\\"", s) || strpref("\\\\", s) || strpref("\\\n", s)){
 					buffer_delete(buff, (*si)+i, (*si)+i+1);
 					i++;
@@ -68,6 +73,7 @@ ExpandoResult expando_expando(Buffer buff, size_t* si, struct expando_targets wh
 			if(capture_isquotstart(s) && !isescaped(s, str)) IfError_T(expando_quot(buff, &i, what, context), err, { return Error_T(expando_result, err); });
 			else if(capture_isexpandostart(s) && !isescaped(s, str)) IfError_T(expando_expando(buff, &i, what, context), err, { return Error_T(expando_result, err); });
 			else if(capture_isvariablestart(s) && !isescaped(s, str)) IfError_T(expando_variable(buff, &i, what, context), err, { return Error_T(expando_result, err); });
+			else if(capture_istildestart(s) && !isescaped(s, str)) IfError_T(expando_tilde(buff, &i, what, context), err, { return Error_T(expando_result, err); });
 			else {
 				if(!isescaped(s, str)) bal += *s == '(' ? 1 : *s == ')' ? -1 : 0;
 				i++;
@@ -149,6 +155,29 @@ ExpandoResult expando_variable(Buffer buff, size_t* si, struct expando_targets w
 	return Error_T(expando_result, {"not a variable"});
 }
 
+ExpandoResult expando_tilde(Buffer buff, size_t* si, struct expando_targets what, ParContext context){
+	if(strpref("~+", str) || strpref("~-", str)){
+		struct getvarv varv = parcontext_getunivar(context, strpref("~+", str) ? "PWD" : "OLDPWD");
+		if(!varv.v.ref) varv.v.ref = "";
+		if(!IsOk(buffer_splice_str(buff, *si, (*si)+2, varv.v.ref))) retclean(Error_T(expando_result, {"variable value splice failed"}), {if(varv.copy) free(varv.v.copy);});
+		*si += strlen(varv.v.ref);
+		if(varv.copy) free(varv.v.copy);
+		return Ok_T(expando_result, null);
+	}
+	if(strpref("~", str)){
+		//TODO user name
+		string vhome = varstore_get(context->vars, "HOME");
+		if(!vhome) vhome = getenv("HOME");
+		if(!vhome) vhome = user_get_home(null);
+		if(vhome){
+			if(!IsOk(buffer_splice_str(buff, *si, (*si)+1, vhome))) return Error_T(expando_result, {"variable value splice failed"});
+			*si += strlen(vhome);
+		}
+		return Ok_T(expando_result, null);
+	}
+	return Error_T(expando_result, {"not a tilde expression"});
+}
+
 #undef s
 #undef str
 
@@ -163,6 +192,7 @@ ExpandoResult expando_word(string str, struct expando_targets what, ParContext c
 		if(capture_isquotstart(s) && !isescaped(s, str)) IfError_T(expando_quot(buff, &i, what, context), err, { return Error_T(expando_result, err); });
 		else if(capture_isexpandostart(s) && !isescaped(s, str)) IfError_T(expando_expando(buff, &i, what, context), err, { return Error_T(expando_result, err); });
 		else if(capture_isvariablestart(s) && !isescaped(s, str)) IfError_T(expando_variable(buff, &i, what, context), err, { return Error_T(expando_result, err); });
+		else if(capture_istildestart(s) && !isescaped(s, str)) IfError_T(expando_tilde(buff, &i, what, context), err, { return Error_T(expando_result, err); });
 		else if(s[0] == '\\'){
 			i++;
 			if(!s){
