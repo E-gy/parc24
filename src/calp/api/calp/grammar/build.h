@@ -14,12 +14,12 @@
  * @param name @ref
  * @returns @produces symbol
  */
-Symbol symbol_new_term(TerminalSymbolId term, string name);
+Symbol symbol_new_term(TerminalSymbolId term, string name, int priority);
 /**
  * @param group @ref
  * @returns @produces symbol
  */
-Symbol symbol_new_group(GroupId group);
+Symbol symbol_new_group(GroupId group, int priority);
 
 /**
  * @param symbol @consumes
@@ -32,7 +32,7 @@ typedef struct ruleb* RuleBuilder;
 /**
  * @returns @produces builder
  */
-RuleBuilder ruleb_new();
+RuleBuilder ruleb_new(int priority);
 /**
  * @param builder @refmut
  * @param symbol @consumes
@@ -52,7 +52,7 @@ typedef struct groupb* GroupBuilder;
  * @param name @ref
  * @returns @produces builder
  */
-GroupBuilder groupb_new(GroupId id, string name);
+GroupBuilder groupb_new(GroupId id, string name, int priority);
 /**
  * @param builder @refmut
  * @param rule @consumes

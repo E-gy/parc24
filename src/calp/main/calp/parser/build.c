@@ -18,7 +18,7 @@ static PBFResult parser_build_firsts(Grammar gr, EntitiesMap m, EntityInfo gi){
 			if(!fnni) return Error_T(pbf_result, {"Invalid state - entity not in map .~."});
 			switch(fnni->type){
 				case SYMB_TERM:
-					if(!fnni->nullable && FirstList_add(gi->i.group.firsts, fnni, r) != Ok) return Error_T(pbf_result, {"First list add element failed"});
+					if(!fnni->nullable && FirstList_add(gi->i.group.firsts, fnni, r, g->priority + r->priority + fnni->i.term.symbol->priority) != Ok) return Error_T(pbf_result, {"First list add element failed"});
 					break;
 				case SYMB_GROUP: {
 					if(fnni->i.group.group == g){
@@ -28,7 +28,7 @@ static PBFResult parser_build_firsts(Grammar gr, EntitiesMap m, EntityInfo gi){
 					}
 					PBFResult bfr = parser_build_firsts(gr, m, fnni);
 					if(!IsOk_T(bfr)) return bfr;
-					for(FirstListElement cpfl = fnni->i.group.firsts->first; cpfl; cpfl = cpfl->next) if(FirstList_add(gi->i.group.firsts, cpfl->symbol, r) != Ok) return Error_T(pbf_result, {"First list add element failed"});
+					for(FirstListElement cpfl = fnni->i.group.firsts->first; cpfl; cpfl = cpfl->next) if(FirstList_add(gi->i.group.firsts, cpfl->symbol, r, g->priority + r->priority + cpfl->priority) != Ok) return Error_T(pbf_result, {"First list add element failed"});
 					break;
 				}
 				default: break;

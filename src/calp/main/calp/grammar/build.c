@@ -4,15 +4,15 @@
 #include <stdlib.h>
 #include <calp/util/null.h>
 
-Symbol symbol_new_term(TerminalSymbolId term, string name){
+Symbol symbol_new_term(TerminalSymbolId term, string name, int priority){
 	new(Symbol, tok);
-	*tok = (struct symbol){ SYMBOL_TYPE_TERM, {.term = {term, name}}, null };
+	*tok = (struct symbol){ SYMBOL_TYPE_TERM, priority, {.term = {term, name}}, null };
 	return tok;
 }
 
-Symbol symbol_new_group(GroupId group){
+Symbol symbol_new_group(GroupId group, int priority){
 	new(Symbol, tok);
-	*tok = (struct symbol){ SYMBOL_TYPE_GROUP, {.group = {group}}, null };
+	*tok = (struct symbol){ SYMBOL_TYPE_GROUP, priority, {.group = {group}}, null };
 	return tok;
 }
 
@@ -24,11 +24,12 @@ void symbol_destroy(Symbol s){
 struct ruleb {
 	Symbol first;
 	Symbol last;
+	int priority;
 };
 
-RuleBuilder ruleb_new(){
+RuleBuilder ruleb_new(int priority){
 	new(RuleBuilder, b);
-	*b = (struct ruleb){null, null};
+	*b = (struct ruleb){null, null, priority};
 	return b;
 }
 
@@ -45,7 +46,7 @@ Rule ruleb_uild(RuleBuilder b){
 	new(Rule, r);
 	size_t sc = 0;
 	for(Symbol s = b->first; s; s = s->next) sc++;
-	*r = (struct rule){b->first, sc, null};
+	*r = (struct rule){b->first, sc, b->priority, null};
 	free(b);
 	return r;
 }
@@ -53,13 +54,14 @@ Rule ruleb_uild(RuleBuilder b){
 struct groupb {
 	GroupId id;
 	string name;
+	int priority;
 	Rule first;
 	Rule last;
 };
 
-GroupBuilder groupb_new(GroupId id, string name){
+GroupBuilder groupb_new(GroupId id, string name, int priority){
 	new(GroupBuilder, b);
-	*b = (struct groupb){id, name, null, null};
+	*b = (struct groupb){id, name, priority, null, null};
 	return b;
 }
 
@@ -76,7 +78,7 @@ Group groupb_uild(GroupBuilder b){
 	new(Group, g);
 	size_t rc = 0;
 	for(Rule r = b->first; r; r = r->next) rc++;
-	*g = (struct group){b->id, b->name, b->first, rc, null};
+	*g = (struct group){b->id, b->name, b->first, rc, b->priority, null};
 	free(b);
 	return g;
 }

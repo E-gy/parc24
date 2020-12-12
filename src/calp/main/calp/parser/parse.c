@@ -100,7 +100,7 @@ static ParsPreResult parser_makast(Parser p, Lexer l, Symbol symb, string* str){
 
 ParseResult parser_parse(Parser p, Lexer l, string s, GroupId g0){
 	if(!p || !l || !s || !g0) return Error_T(parse_result, {"Invalid args"});
-	Symbol gsymb = symbol_new_group(g0);
+	Symbol gsymb = symbol_new_group(g0, 0);
 	if(!gsymb) return Error_T(parse_result, {"Allocation failed"});
 	ParsPreResult result = parser_makast(p, l, gsymb, &s);
 	symbol_destroy(gsymb);

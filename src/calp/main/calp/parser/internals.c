@@ -22,13 +22,15 @@ void FirstList_destroy(FirstList l){
 	free(l);
 }
 
-Result FirstList_add(FirstList l, EntityInfo symbol, Rule r){
+Result FirstList_add(FirstList l, EntityInfo symbol, Rule r, int priority){
 	if(!l) return Error;
 	for(FirstListElement e = l->first; e; e = e->next) if(e->symbol == symbol && e->r == r) return Ok;
 	FirstListElement e = malloc(sizeof(*e));
 	if(!e) return Error;
-	*e = (struct groupfle){symbol, r, l->first};
-	l->first = e;
+	FirstListElement* ins = &l->first;
+	for(; *ins && (*ins)->priority > priority; ins = &((*ins)->next));
+	*e = (struct groupfle){symbol, r, priority, *ins};
+	*ins = e;
 	return Ok;
 }
 
@@ -116,7 +118,7 @@ void entimap_log(Grammar gr, EntitiesMap m){
 		logf("		init: %s", i->init ? "true" : "false");
 		logf("		nullable: %s", i->nullable ? "true" : "false");
 		log("		firsts: ");
-		for(FirstListElement f = i->i.group.firsts->first; f; f = f->next) logf("			'%s' -> %p", f->symbol->i.term.symbol->val.term.name, f->r);
+		for(FirstListElement f = i->i.group.firsts->first; f; f = f->next) logf("			'%s' -> %p (%d)", f->symbol->i.term.symbol->val.term.name, f->r, f->priority);
 		logf("		fallback: %p", i->i.group.firsts->fallback);
 		if(i->i.group.firsts->lr.r) logf("		lr on: %p", i->i.group.firsts->lr.r);
 		log("		rules:");
