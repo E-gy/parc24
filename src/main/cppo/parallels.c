@@ -31,7 +31,6 @@ static threadfwrap_reti(writestr)
 
 ThreadResult parallels_writestr(fd_t f, string str, bool background){
 	if(f < 0 || !str) return Error_T(parallels_tc_result, {"invalid args"});
-	pthread_t t;
 	WI i = malloc(sizeof(*i));
 	string_mut strd = strdup(str);
 	if(!i) retclean(Error_T(parallels_tc_result, {"thread args transfer failed"}), { free(i); free(strd); });
@@ -55,7 +54,6 @@ static threadfwrap_reti(readstr)
 
 ThreadResult parallels_readstr(fd_t f, string_mut* str){
 	if(f < 0 || !str) return Error_T(parallels_tc_result, {"invalid args"});
-	pthread_t t;
 	RI i = malloc(sizeof(*i));
 	if(!i) return Error_T(parallels_tc_result, {"thread args transfer failed"});
 	*i = (struct readstri){f, str};

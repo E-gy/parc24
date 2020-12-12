@@ -12,10 +12,6 @@ typedef Trie CCMDStore;
 
 static void ccmd_destroy(CCMD ccmd){}
 
-static CCMD string_mut_clone(CCMD ccmd){
-	return ccmd;
-}
-
 CCMDStore ccmdstore_new(void){
 	return trie_new(ccmd_destroy);
 }
