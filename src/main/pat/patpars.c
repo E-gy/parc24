@@ -45,7 +45,7 @@ DEF_GROUP(acharoesc,
 	RULEp(-100, SYMBOL_T(achar))
 )
 DEF_GROUP(achar_clr_oesc,
-	RULE(SYMBOL_T(bkslsh); SYMBOL_T(achar_clr));
+	RULE(SYMBOL_T(bkslsh); SYMBOL_T(achar));
 	RULEp(-100, SYMBOL_T(achar_clr))
 )
 
