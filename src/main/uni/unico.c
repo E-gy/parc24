@@ -27,6 +27,38 @@ struct getvarv parcontext_getunivar(ParContext c, string v){
 		buffer_printf(buff, "%i", c->lastexit);
 		return varvcopy(buffer_destr(buff));
 	}
+	if(streq("$", v)){
+		Buffer buff = buffer_new(16);
+		buffer_printf(buff, "%i", getpid());
+		return varvcopy(buffer_destr(buff));
+	}
+	if(streq("#", v)){
+		int argc = 0;
+		for(; c->args[argc]; argc++);
+		Buffer buff = buffer_new(16);
+		buffer_printf(buff, "%i", argc);
+		return varvcopy(buffer_destr(buff));
+	}
+	if(streq("@", v) || streq("*", v)){ //FIXME?
+		Buffer buff = buffer_new(256);
+		for(argsarr a = c->args; *a; a++){
+			if(a != c->args) buffer_append_str(buff, " ");
+			buffer_append_str(buff, *a);
+		}
+		return varvcopy(buffer_destr(buff));
+	}
+	if(streq("RANDOM", v)){
+		Buffer buff = buffer_new(16);
+		buffer_printf(buff, "%i", rand()%32767);
+		return varvcopy(buffer_destr(buff));
+	}
+	#ifndef _WIN32
+	if(streq("UID", v)){
+		Buffer buff = buffer_new(16);
+		buffer_printf(buff, "%i", getuid());
+		return varvcopy(buffer_destr(buff));
+	}
+	#endif
 	IfOk_T(str2i(v), num, {
 		if(num == 0) return varvref(c->currexe);
 		if(num > 0 && num-1 < ntarrlen_t(c->args, long)) return varvref(c->args[num-1]); 
