@@ -131,7 +131,7 @@ PatCompResult pattern_parse(Parser parser, string str, bool doublestar){
 	ParseResult past = parser_parse(parser, lexer0, str, entry);
 	if(!IsOk_T(past)) return Error_T(patcomp_result, past.r.error);
 	PatCompResult pat = patravast(past.r.ok.ast, doublestar);
-	ast_destroy(past.r.ok);
+	ast_destroy(past.r.ok.ast);
 	return pat;
 }
 
