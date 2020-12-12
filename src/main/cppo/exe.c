@@ -90,7 +90,7 @@ static Result fdremainopenonexec(fd_t fd){
 	return fcntl(fd, F_SETFD, flags) < 0 ? Error : Ok;
 }
 
-static Result fdup(fd_t io, fd_t stream, void* inf){
+static Result fdup(fd_t io, fd_t stream, ATTR_UNUSED void* inf){
 	if(dup2(stream, io) < 0) return Error;
 	if(!IsOk(fdremainopenonexec(io))) return Error;
 	return Ok;
