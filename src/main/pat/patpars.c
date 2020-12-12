@@ -241,7 +241,9 @@ static PatCompResult patravast(AST ast, bool doublestar){
 		PatCompResult a2r = patravast(ast->d.group.children[1], doublestar);
 		if(!IsOk_T(a2r)) retclean(a2r, { auto_destroy(a1r.r.ok); });
 		Automaton a = auto_concat(a1r.r.ok, a2r.r.ok);
-		if(!a) retclean(Error_T(patcomp_result, {"failed to concatenate elements"}), { auto_destroy(a2r.r.ok); auto_destroy(a1r.r.ok); });
+		auto_destroy(a2r.r.ok);
+		auto_destroy(a1r.r.ok);
+		if(!a) return Error_T(patcomp_result, {"failed to concatenate elements"});
 		return Ok_T(patcomp_result, a);
 	}
 	if(gid == entry) return patravast(ast->d.group.children[0], doublestar);
