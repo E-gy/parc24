@@ -328,7 +328,7 @@ State auto_concat(State a1, State a2){
 	State concatenated = null;
 	EpsTransitionList eps = null;
 	Encounter es = null;
-	if(IsOk(captclean(auto_concat_collect_eps(a1, a2, &eps, &es), {encounter_destroy(es);}))) concatenated = auto_addeps(a1, eps);
+	if(IsOk(captclean(auto_concat_collect_eps(a1, a2, &eps, &es), {for(; es; es = encounter_destroy(es));}))) concatenated = auto_addeps(a1, eps);
 	for(EpsTransitionList we = eps; we; we = we->next) we->from->accepting = true;
 	epstrl_destroy(eps);
 	return concatenated;
