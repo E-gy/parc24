@@ -52,6 +52,12 @@ struct getvarv parcontext_getunivar(ParContext c, string v){
 		buffer_printf(buff, "%i", rand()%32767);
 		return varvcopy(buffer_destr(buff));
 	}
+	if(streq("PWD", v)){
+		Buffer buff = buffer_new(512);
+		getcwd(buff->data, buff->cap);
+		buff->size = strlen(buff->data);
+		return varvcopy(buffer_destr(buff));
+	}
 	#ifndef _WIN32
 	if(streq("UID", v)){
 		Buffer buff = buffer_new(16);
