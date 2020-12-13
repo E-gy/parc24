@@ -69,7 +69,7 @@ int main(ATTR_UNUSED int argc, argsarr args){
 		parciolog(ios, LL_CRITICAL, "Failed to create aliases store");
 		return 1;
 	}
-	struct parcontext ctxt = {vars, funcs, ccmds, aliases, ios, patco, args[0], opts.args, 0, false, &opts.parcopts, parcer};
+	struct parcontext ctxt = {vars, vars, funcs, ccmds, aliases, ios, patco, args[0], opts.args, 0, false, &opts.parcopts, parcer};
 	if(opts.commandstr || opts.commandfile){
 		string_mut str = opts.commandstr;
 		if(!(str = opts.commandstr)){

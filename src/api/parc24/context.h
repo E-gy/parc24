@@ -14,6 +14,7 @@
 
 struct parcontext {
 	/** @ref */ VarStore vars;
+	/** @ref */ VarStore vars_cmus;
 	/** @ref */ FuncStore funcs;
 	/** @ref */ CCMDStore ccmds;
 	/** @ref */ AliasStore aliases;

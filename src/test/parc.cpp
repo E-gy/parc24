@@ -39,8 +39,9 @@ struct parctesting {
 		ccmdstore_set(ccmds, "echo", cmd_echo); \
 		ccmdstore_set(ccmds, "shopt", cmd_shopt); \
 		string_mut noargs[] = {null}; \
+		auto vars = varstore_new(); \
 		(struct parctesting){ p0r.r.ok.write, p1r.r.ok.read, p2r.r.ok.read, { \
-			varstore_new(), funcstore_new(), ccmds, aliastore_new(), ios, patcomp_new(), \
+			vars, vars, funcstore_new(), ccmds, aliastore_new(), ios, patcomp_new(), \
 			"parc", noargs, 0, false, &parcopts, \
 			parcer_defolt_new() \
 		}}; \
