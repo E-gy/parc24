@@ -473,7 +473,7 @@ SCENARIO("extended patterns", "[patterns]"){
 	}
 	GIVEN("/!(*.gif|*.png|*.jp?(e)g)/"){
 		THEN("pattern compiles"){
-			IfElse_T(pattern_compile(compiler, "!(hello)", opts), p, {
+			IfElse_T(pattern_compile(compiler, "!(*.gif|*.png|*.jp?(e)g)", opts), p, {
 				AND_THEN("pattern matches"){
 					CHECK(!pattern_test(p, "hello.png"));
 					CHECK(!pattern_test(p, "wave.jpg"));
