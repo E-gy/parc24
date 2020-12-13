@@ -40,6 +40,10 @@ Result auto_negate(Automaton a);
  * @return State 
  */
 Automaton auto_merge(Automaton a1, Automaton a2, bool aor);
+#define auto_union(a1, a2) auto_merge(a1, a2, true)
+#define auto_or auto_union
+#define auto_isect(a1, a2) auto_merge(a1, a2, false)
+#define auto_and auto_isect
 
 /**
  * @param a1 @ref 
