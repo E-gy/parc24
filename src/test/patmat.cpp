@@ -409,3 +409,80 @@ SCENARIO("standard patterns", "[patterns]"){
 	}
 	patcomp_destroy(compiler);
 }
+
+SCENARIO("extended patterns", "[patterns]"){
+	struct parc_options opts = parc_options_default;
+	opts.extglob = true;
+	PatternCompiler compiler = patcomp_new();
+	if(!compiler) FAIL("failed to initialize compiler");
+	GIVEN("/?(hello)/"){
+		THEN("pattern compiles"){
+			IfElse_T(pattern_compile(compiler, "?(hello)", opts), p, {
+				AND_THEN("pattern matches"){
+					CHECK(pattern_test(p, ""));
+					CHECK(pattern_test(p, "hello"));
+					CHECK(!pattern_test(p, "abc"));
+					CHECK(!pattern_test(p, "helo"));
+					CHECK(!pattern_test(p, "hellohello"));
+				}
+				pattern_destroy(p);
+			}, err, { FAIL_FMT("Pattern compilation failed: %s", err.s); });
+		}
+	}
+	GIVEN("/*(hello)/"){
+		THEN("pattern compiles"){
+			IfElse_T(pattern_compile(compiler, "*(hello)", opts), p, {
+				AND_THEN("pattern matches"){
+					CHECK(pattern_test(p, ""));
+					CHECK(pattern_test(p, "hello"));
+					CHECK(pattern_test(p, "hellohello"));
+					CHECK(!pattern_test(p, "abc"));
+					CHECK(!pattern_test(p, "helo"));
+				}
+				pattern_destroy(p);
+			}, err, { FAIL_FMT("Pattern compilation failed: %s", err.s); });
+		}
+	}
+	GIVEN("/+(hello)/"){
+		THEN("pattern compiles"){
+			IfElse_T(pattern_compile(compiler, "+(hello)", opts), p, {
+				AND_THEN("pattern matches"){
+					CHECK(pattern_test(p, "hello"));
+					CHECK(pattern_test(p, "hellohello"));
+					CHECK(!pattern_test(p, ""));
+					CHECK(!pattern_test(p, "abc"));
+					CHECK(!pattern_test(p, "helo"));
+				}
+				pattern_destroy(p);
+			}, err, { FAIL_FMT("Pattern compilation failed: %s", err.s); });
+		}
+	}
+	GIVEN("/!(hello)/"){
+		THEN("pattern compiles"){
+			IfElse_T(pattern_compile(compiler, "!(hello)", opts), p, {
+				AND_THEN("pattern matches"){
+					CHECK(!pattern_test(p, "hello"));
+					CHECK(pattern_test(p, "hellohello"));
+					CHECK(pattern_test(p, ""));
+					CHECK(pattern_test(p, "abc"));
+					CHECK(pattern_test(p, "helo"));
+				}
+				pattern_destroy(p);
+			}, err, { FAIL_FMT("Pattern compilation failed: %s", err.s); });
+		}
+	}
+	GIVEN("/!(*.gif|*.png|*.jp?(e)g)/"){
+		THEN("pattern compiles"){
+			IfElse_T(pattern_compile(compiler, "!(hello)", opts), p, {
+				AND_THEN("pattern matches"){
+					CHECK(!pattern_test(p, "hello.png"));
+					CHECK(!pattern_test(p, "wave.jpg"));
+					CHECK(!pattern_test(p, "bug choongus.jpeg"));
+					CHECK(pattern_test(p, "roflcopter.wav"));
+				}
+				pattern_destroy(p);
+			}, err, { FAIL_FMT("Pattern compilation failed: %s", err.s); });
+		}
+	}
+	patcomp_destroy(compiler);
+}
