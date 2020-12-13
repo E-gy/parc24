@@ -327,7 +327,7 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 			if(!eq[1]){
 				if(!IsOk(varstore_add(ctxt->vars, var, ""))) retclean(Error_T(travast_result, {"failed to add variable to store"}), { *eq = '='; });
 			} else {
-				ExpandoResult varva = expando_word(eq+1, expando_targets_all, ctxt);
+				ExpandoResult varva = expando_word(eq+1, ((struct expando_targets){ .tilde = true, .parvar = true, .arithmetics = true, .command = true, .process = true, .path = false, .quot = true }), ctxt);
 				if(!IsOk_T(varva)) return Error_T(travast_result, varva.r.error);
 				arrmuttake1(varv, varva.r.ok, {});
 				if(!IsOk(varstore_add_(ctxt->vars, var, varv))) retclean(Error_T(travast_result, {"failed to add variable to store"}), { *eq = '='; free(varv); });
