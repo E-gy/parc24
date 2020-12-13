@@ -7,6 +7,9 @@ TraverseASTResult cmd_exit(argsarr args, ParContext context);
 TraverseASTResult cmd_break(argsarr args, ParContext context);
 TraverseASTResult cmd_continue(argsarr args, ParContext context);
 
+TraverseASTResult cmd_cd(argsarr args, ParContext context);
+TraverseASTResult cmd_pwd(argsarr args, ParContext context);
+
 TraverseASTResult cmd_alias(argsarr args, ParContext context);
 TraverseASTResult cmd_unalias(argsarr args, ParContext context);
 
