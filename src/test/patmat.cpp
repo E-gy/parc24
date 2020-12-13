@@ -117,15 +117,15 @@ SCENARIO("automata operations", "[patterns]"){
 		WHEN("applying ? on the automaton"){
 			Automaton aopt = auto_optional(a);
 			THEN("automaton accepts same things and empty string"){
-				REQUIRE(auto_test(a, "a"));
-				REQUIRE(auto_test(a, "d"));
-				REQUIRE(auto_test(a, "+"));
-				REQUIRE(auto_test(a, " "));
-				REQUIRE(auto_test(a, "abc"));
-				REQUIRE(auto_test(a, "hi"));
-				REQUIRE(auto_test(a, ""));
-				REQUIRE(!auto_test(a, "grr"));
-				REQUIRE(!auto_test(a, "  "));
+				REQUIRE(auto_test(aopt, "a"));
+				REQUIRE(auto_test(aopt, "d"));
+				REQUIRE(auto_test(aopt, "+"));
+				REQUIRE(auto_test(aopt, " "));
+				REQUIRE(auto_test(aopt, "abc"));
+				REQUIRE(auto_test(aopt, "hi"));
+				REQUIRE(auto_test(aopt, ""));
+				REQUIRE(!auto_test(aopt, "grr"));
+				REQUIRE(!auto_test(aopt, "  "));
 			}
 			auto_destroy(aopt);
 		}
