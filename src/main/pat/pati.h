@@ -53,6 +53,24 @@ Automaton auto_merge(Automaton a1, Automaton a2, bool aor);
 Automaton auto_concat(Automaton a1, Automaton a2);
 
 /**
+ * @param a @ref
+ * @return @produces 
+ */
+Automaton auto_optional(Automaton a);
+
+/**
+ * @param a @ref
+ * @return @produces 
+ */
+Automaton auto_kleene(Automaton a);
+
+/**
+ * @param a @ref
+ * @return @produces 
+ */
+Automaton auto_kleeneplus(Automaton a);
+
+/**
  * @param a @ref 
  * @param str @ref
  * @return 

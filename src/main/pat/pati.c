@@ -348,6 +348,49 @@ State auto_concat(State a1, State a2){
 	return concatenated;
 }
 
+State auto_optional(State a){
+	if(!a) return null;
+	State ra = null;
+	State se = patstate_new(false);
+	State ee = patstate_new(true);
+	if(ee && se){
+		EpsTransitionList eps = epstrl_add(epstrl_add(epstrl_add(null, se, ee), se, a), ee, null);
+		if(eps){
+			Encounter es = null;
+			if(IsOk(captclean(auto_concat_ceps1(a, ee, &eps, &es), {for(; es; es = encounter_destroy(es));}))) ra = auto_addeps(se, eps);
+		}
+		epstrl_destroy(eps);
+	}
+	patstate_destroy(se);
+	patstate_destroy(ee);
+	return ra;
+}
+
+State auto_kleene(State a){
+	if(!a) return null;
+	State ra = null;
+	State ks[] = {patstate_new(false), patstate_new(false), patstate_new(false), patstate_new(true)};
+	if(ks[0] && ks[1] && ks[2] && ks[3]){
+		EpsTransitionList eps = epstrl_add(epstrl_add(epstrl_add(epstrl_add(epstrl_add(epstrl_add(null, ks[0], ks[1]), ks[1], a), ks[2], ks[1]), ks[2], ks[3]), ks[0], ks[3]), ks[3], null);
+		if(eps){
+			Encounter es = null;
+			if(IsOk(captclean(auto_concat_ceps1(a, ks[2], &eps, &es), {for(; es; es = encounter_destroy(es));}))) ra = auto_addeps(ks[0], eps);
+		}
+		epstrl_destroy(eps);
+	}
+	for(size_t i = 0; i < sizeof(ks)/sizeof(*ks); i++) patstate_destroy(ks[i]);
+	return ra;
+}
+
+Automaton auto_kleeneplus(Automaton a){
+	if(!a) return null;
+	Automaton kleene = auto_kleene(a);
+	if(!kleene) return null;
+	Automaton kp = auto_concat(a, kleene);
+	auto_destroy(kleene);
+	return kp;
+}
+
 bool auto_test(State a, string str){
 	if(!a || !str) return false;
 	if(!*str) return a->accepting;
