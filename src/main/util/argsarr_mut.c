@@ -35,14 +35,14 @@ static Result argsarrmut_capset(ArgsArr_Mut args, size_t ncap){
 
 Result argsarrmut_append(ArgsArr_Mut args, string_mut arg){
 	if(!args || !arg) return Error;
-	if(args->size == args->cap) if(!argsarrmut_capset(args, args->cap*2)) return Error;
+	if(args->size == args->cap) if(!IsOk(argsarrmut_capset(args, args->cap*2))) return Error;
 	args->args[args->size++] = arg;
 	return Ok;
 }
 
 Result argsarrmut_appendnom(ArgsArr_Mut args, ArgsArr_Mut add){
 	if(!args || !add) return Error;
-	if(args->size + add->size > args->cap) if(!argsarrmut_capset(args, args->size + add->size)) return Error;
+	if(args->size + add->size > args->cap) if(!IsOk(argsarrmut_capset(args, args->size + add->size))) return Error;
 	for(size_t i = 0; i < add->size; i++) args->args[args->size++] = add->args[i];
 	free(add->args);
 	free(add);
