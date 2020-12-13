@@ -25,7 +25,7 @@ DEF_SYMBOL_TERMINAL(achar_clr, {
 	return *str && *str != '[' && *str != ']' ? str+1 : null;
 })
 DEF_SYMBOL_TERMINAL(achar_ext, {
-	return *str && *str != '|' && *str != '?' && *str != '*' && *str != '+' && *str != '@' && *str != '!' ? str+1 : null;
+	return *str && *str != '|' && *str != '?' && *str != '*' && *str != '+' && *str != '@' && *str != '!' && *str != '(' && *str != ')' && *str != '[' && *str != ']' ? str+1 : null;
 })
 
 //[::]
@@ -101,7 +101,7 @@ DEF_GROUP(extg_op,
 	RULE(SYMBOL_T(plus));
 	RULE(SYMBOL_T(atdog))
 )
-DEF_GROUP(extg, RULE(SYMBOL_G(extg_op); SYMBOL_T(parl); SYMBOL_G(extg_el); SYMBOL_G(extg_els); SYMBOL_T(parr)))
+DEF_GROUPp(extg, 10, RULE(SYMBOL_G(extg_op); SYMBOL_T(parl); SYMBOL_G(extg_el); SYMBOL_G(extg_els); SYMBOL_T(parr)))
 
 // //
 
