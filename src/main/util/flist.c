@@ -15,7 +15,7 @@ static Result files_list_(ArgsArr_Mut files, string dir, Pattern pat, struct par
 	DIR* d = opendir(dir);
 	if(!d) return Ok;
 	struct dirent* e;
-	while((e = readdir(d))) if(!streq(".", e->d_name) && !streq("..", e->d_name)){
+	while((e = readdir(d))) if(!streq(".", e->d_name) && !streq("..", e->d_name) && (opts.dotglob || e->d_name[0] != '.')){
 		Buffer buff = buffer_new_from(dir, -1);
 		if(!buff || !IsOk(buffer_append_str(buff, "/")) || !IsOk(buffer_append_str(buff, e->d_name))) retclean(Error, { buffer_destroy(buff); });
 		if(opts.nocaseglob) for(size_t i = 0; i < buff->size; i++) if(isupper(buff->data[i])) buff->data[i] += 'a' - 'A';
