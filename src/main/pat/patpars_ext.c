@@ -255,6 +255,39 @@ static PatCompResult patravast(AST ast, bool doublestar){
 		if(negate && !IsOk(auto_negate(a))) retclean(Error_T(patcomp_result, {"failed to negate class"}), { auto_destroy(a); });
 		return Ok_T(patcomp_result, a);
 	}
+	if(gid == extg_el) return patravast(ast->d.group.children[0], doublestar);
+	if(gid == extg){
+		const TerminalSymbolId op = ast->d.group.children[0]->d.group.children[0]->d.leaf.symbolId;
+		PatCompResult ab = patravast(ast->d.group.children[2], doublestar);
+		if(!IsOk_T(ab)) return ab;
+		Automaton a = ab.r.ok;
+		for(AST elsa = ast->d.group.children[3]; elsa->d.group.cc > 1; elsa = elsa->d.group.children[2]){
+			PatCompResult ac = patravast(elsa->d.group.children[1], doublestar);
+			if(!IsOk_T(ac)) retclean(ac, { auto_destroy(a); });
+			Automaton aac = auto_or(a, ac.r.ok);
+			auto_destroy(a);
+			auto_destroy(ac.r.ok);
+			if(!aac) return Error_T(patcomp_result, {"failed to unite extended elements"});
+			a = aac;
+		}
+		if(op == qmrk){
+			Automaton aa = auto_optional(a);
+			auto_destroy(a);
+			if(!aa) return Error_T(patcomp_result, {"failed to optionalize"});
+			a = aa;
+		} else if(op == star){
+			Automaton aa = auto_kleene(a);
+			auto_destroy(a);
+			if(!aa) return Error_T(patcomp_result, {"failed to kleeneize"});
+			a = aa;
+		} else if(op == plus){
+			Automaton aa = auto_kleeneplus(a);
+			auto_destroy(a);
+			if(!aa) return Error_T(patcomp_result, {"failed to kleeneplusize"});
+			a = aa;
+		} else if(op == excl) if(!IsOk(auto_negate(a))) retclean(Error_T(patcomp_result, {"failed to negatize"}), { auto_destroy(a); });
+		return Ok_T(patcomp_result, a);
+	}
 	if(gid == pat_el) return patravast(ast->d.group.children[0], doublestar);
 	if(gid == pat_els){
 		if(ast->d.group.cc == 1){
