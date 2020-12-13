@@ -198,7 +198,7 @@ static PatCompResult patravast(AST ast, bool doublestar){
 			s1->defolt = s2;
 			return Ok_T(patcomp_result, s1);
 		}
-		if(sid == achar || sid == achar_clr){
+		if(sid == achar || sid == achar_clr || sid == achar_ext){
 			State s1 = patstate_new(false);
 			State s2 = patstate_new(true);
 			if(!s1 || !s2) retclean(Error_T(patcomp_result, {"failed to create states"}), { patstate_destroy(s1); patstate_destroy(s2); });
