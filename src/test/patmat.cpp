@@ -114,6 +114,21 @@ SCENARIO("automata operations", "[patterns]"){
 				REQUIRE(auto_test(a, "  "));
 			}
 		}
+		WHEN("applying ? on the automaton"){
+			Automaton aopt = auto_optional(a);
+			THEN("automaton accepts same things and empty string"){
+				REQUIRE(auto_test(a, "a"));
+				REQUIRE(auto_test(a, "d"));
+				REQUIRE(auto_test(a, "+"));
+				REQUIRE(auto_test(a, " "));
+				REQUIRE(auto_test(a, "abc"));
+				REQUIRE(auto_test(a, "hi"));
+				REQUIRE(auto_test(a, ""));
+				REQUIRE(!auto_test(a, "grr"));
+				REQUIRE(!auto_test(a, "  "));
+			}
+			auto_destroy(aopt);
+		}
 		auto_destroy(a);
 	}
 	GIVEN("an automaton accepting 'a' and one accepting 'b'"){
@@ -211,6 +226,30 @@ SCENARIO("automata operations", "[patterns]"){
 			REQUIRE(!auto_test(aaa3, "grrrrrrr"));
 			REQUIRE(!auto_test(aaa3, "aaaaaarrrrq"));
 			auto_destroy(aaa3);
+		}
+		THEN("/(...)*/ accepts words of length multiple of 3 and empty too"){
+			Automaton a33 = auto_kleene(a3);
+			REQUIRE(auto_test(a33, "asf"));
+			REQUIRE(auto_test(a33, "aaa"));
+			REQUIRE(auto_test(a33, "   "));
+			REQUIRE(auto_test(a33, "aaa   "));
+			REQUIRE(auto_test(a33, "aaa   asf"));
+			REQUIRE(!auto_test(a33, "    "));
+			REQUIRE(!auto_test(a33, "  "));
+			REQUIRE(auto_test(a33, ""));
+			auto_destroy(a33);
+		}
+		THEN("/(...)+/ accepts words of length multiple of 3"){
+			Automaton a33 = auto_kleeneplus(a3);
+			REQUIRE(auto_test(a33, "asf"));
+			REQUIRE(auto_test(a33, "aaa"));
+			REQUIRE(auto_test(a33, "   "));
+			REQUIRE(auto_test(a33, "aaa   "));
+			REQUIRE(auto_test(a33, "aaa   asf"));
+			REQUIRE(!auto_test(a33, "    "));
+			REQUIRE(!auto_test(a33, "  "));
+			REQUIRE(!auto_test(a33, ""));
+			auto_destroy(a33);
 		}
 		auto_destroy(aa);
 		auto_destroy(a3);
