@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <cppo.h>
 #include <unistd.h>
+#include <limits.h>
 
 #ifdef _WIN32
 #define isabs(path) path[0] && path[1] && path[1] == ':'
