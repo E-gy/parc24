@@ -221,11 +221,11 @@ struct epstrl {
 /**
  * @param list @consumes 
  * @param from @ref
- * @param to @ref
+ * @param to @ref @nullable
  * @return @produces list 
  */
 static EpsTransitionList epstrl_add(EpsTransitionList list, State from, State to){
-	if(!from || !to) return list;
+	if(!from) return list;
 	new(EpsTransitionList, e);
 	*e = (struct epstrl){from, to, list};
 	return e;
@@ -250,7 +250,7 @@ static void epstrl_destroy(EpsTransitionList l){
 static State auto_addeps_(State a, EpsTransitionList eps, Merger merger, Merger* mergers){
 	while(true){
 		bool changed = false;
-		for(EpsTransitionList e = eps; e; e = e->next) for(size_t i = 0; i < merger->sc; i++) if(e->from == merger->s[i] && merger_adds(&merger, e->to)){ changed = true; break; }
+		for(EpsTransitionList e = eps; e; e = e->next) for(size_t i = 0; i < merger->sc; i++) if(e->to && e->from == merger->s[i] && merger_adds(&merger, e->to)){ changed = true; break; }
 		if(!changed) break;
 	}
 	if(!merger) return null;
@@ -264,7 +264,7 @@ static State auto_addeps_(State a, EpsTransitionList eps, Merger merger, Merger*
 	merger->next = *mergers;
 	*mergers = merger;
 	bool accepting = false;
-	for(size_t i = 0; i < merger->sc && !accepting; i++) accepting |= merger->s[i]->accepting;
+	for(EpsTransitionList e = eps; e && !accepting; e = e->next) for(size_t i = 0; i < merger->sc && !accepting; i++) accepting |= !e->to && e->from == merger->s[i];
 	const State merged = patstate_new(accepting);
 	if(!merged) return null;
 	merger->sr = merged;
@@ -315,7 +315,9 @@ static Result auto_concat_collect_eps(State s, State a2, EpsTransitionList* eps,
 		EpsTransitionList neps = epstrl_add(*eps, s, a2);
 		if(!neps) return Error;
 		*eps = neps;
-		s->accepting = false;
+		neps = epstrl_add(*eps, s, null);
+		if(!neps) return Error;
+		*eps = neps;
 	}
 	for(Transition t = s->transitions; t; t = t->next) if(!IsOk(auto_concat_collect_eps(t->to, a2, eps, es))) return Error;
 	if(s->defolt && !IsOk(auto_concat_collect_eps(s->defolt, a2, eps, es))) return Error;
@@ -329,7 +331,6 @@ State auto_concat(State a1, State a2){
 	EpsTransitionList eps = null;
 	Encounter es = null;
 	if(IsOk(captclean(auto_concat_collect_eps(a1, a2, &eps, &es), {for(; es; es = encounter_destroy(es));}))) concatenated = auto_addeps(a1, eps);
-	for(EpsTransitionList we = eps; we; we = we->next) we->from->accepting = true;
 	epstrl_destroy(eps);
 	return concatenated;
 }
