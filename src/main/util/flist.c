@@ -8,7 +8,7 @@
 #include <ctype.h>
 
 static Result files_list_(ArgsArr_Mut files, string dir, Pattern pat, struct parc_options opts){
-	{
+	if(!streq(".", dir)){
 		string dirnopref = strpref("./", dir) ? dir+2 : dir;
 		if(pattern_test(pat, dirnopref)) if(!IsOk(argsarrmut_append(files, strdup(dirnopref)))) return Error;
 	}
