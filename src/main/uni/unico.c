@@ -71,6 +71,7 @@ struct getvarv parcontext_getunivar(ParContext c, string v){
 		string_mut envv = getenv(v);
 		if(envv) return varvref(envv);
 	}
+	if(streq("HOME", v)) return varvref(user_get_home(null));
 	return varvref(null);
 }
 

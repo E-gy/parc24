@@ -166,14 +166,11 @@ ExpandoResult expando_tilde(Buffer buff, size_t* si, ATTR_UNUSED struct expando_
 	}
 	if(strpref("~", str)){
 		//TODO user name
-		string vhome = varstore_get(context->vars, "HOME");
-		if(!vhome) vhome = getenv("HOME");
-		if(!vhome) vhome = user_get_home(null);
-		if(vhome){
-			if(!IsOk(buffer_splice_str(buff, *si, (*si)+1, vhome))) return Error_T(expando_result, {"variable value splice failed"});
-			*si += strlen(vhome);
-		}
-		return Ok_T(expando_result, null);
+		struct getvarv vhome = parcontext_getunivar(context, "HOME");
+		Result splok = buffer_splice_str(buff, *si, (*si)+1, vhome.v.ref);
+		if(IsOk(splok)) *si += strlen(vhome.v.ref);
+		if(vhome.copy) free(vhome.v.copy);
+		return IsOk(splok) ? Ok_T(expando_result, null) : Error_T(expando_result, {"variable value splice failed"});;
 	}
 	return Error_T(expando_result, {"not a tilde expression"});
 }
