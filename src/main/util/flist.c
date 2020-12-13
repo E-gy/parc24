@@ -2,7 +2,6 @@
 
 #include "null.h"
 #include "string.h"
-#include <io.h>
 #include <dirent.h>
 #include "buffer.h"
 #include <ctype.h>
