@@ -30,7 +30,7 @@ TraverseASTResult cmd_cd(argsarr args, ParContext context){
 	int chok = chdir(buff->data);
 	buffer_destroy(buff);
 	if(chok < 0) return Ok_T(travast_result, {TRAV_COMPLETED, {.completed = 1}});
-	varstore_add(context->vars, "OLDPWD", opwd); //FIXME
+	varstore_add(context->vars_cmus, "OLDPWD", opwd);
 	return Ok_T(travast_result, {TRAV_COMPLETED, {.completed = 0}});
 }
 
