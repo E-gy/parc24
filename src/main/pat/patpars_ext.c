@@ -13,11 +13,19 @@ DEF_SYMBOL_TERMINAL_1xCHAR(dash, '-')
 DEF_SYMBOL_TERMINAL_1xCHAR(bkslsh, '\\')
 DEF_SYMBOL_TERMINAL_1xCHAR(brakl,'[')
 DEF_SYMBOL_TERMINAL_1xCHAR(brakr,']')
+DEF_SYMBOL_TERMINAL_1xCHAR(parl,'(')
+DEF_SYMBOL_TERMINAL_1xCHAR(parr,')')
+DEF_SYMBOL_TERMINAL_1xCHAR(vpipe,'|')
+DEF_SYMBOL_TERMINAL_1xCHAR(plus,'+')
+DEF_SYMBOL_TERMINAL_1xCHAR(atdog,'@')
 DEF_SYMBOL_TERMINAL(achar, {
 	return *str ? str+1 : null;
 })
 DEF_SYMBOL_TERMINAL(achar_clr, {
 	return *str && *str != '[' && *str != ']' ? str+1 : null;
+})
+DEF_SYMBOL_TERMINAL(achar_ext, {
+	return *str && *str != '|' && *str != '?' && *str != '*' && *str != '+' && *str != '@' && *str != '!' ? str+1 : null;
 })
 
 //[::]
@@ -40,13 +48,13 @@ DEF_SYMBOL_TERMINAL_CLASS(xdigit)
 
 // escape
 
-DEF_GROUP(acharoesc,
-	RULE(SYMBOL_T(bkslsh); SYMBOL_T(achar));
-	RULEp(-100, SYMBOL_T(achar_clr))
-)
 DEF_GROUP(achar_clr_oesc,
 	RULE(SYMBOL_T(bkslsh); SYMBOL_T(achar));
 	RULEp(-100, SYMBOL_T(achar_clr))
+)
+DEF_GROUP(achar_ext_oesc,
+	RULE(SYMBOL_T(bkslsh); SYMBOL_T(achar));
+	RULEp(-100, SYMBOL_T(achar_ext))
 )
 
 // []
@@ -79,14 +87,30 @@ DEF_GOPT(clr_neg, RULE(SYMBOL_T(excl)); RULE(SYMBOL_T(caret)))
 DEF_GKLEENE(clr_els, SYMBOL_G(clr_el))
 DEF_GROUP(clre, RULE(SYMBOL_T(brakl); SYMBOL_G(clr_neg); SYMBOL_G(clr_el); SYMBOL_G(clr_els); SYMBOL_T(brakr)))
 
+// (|)
+
+static Group pat_els();
+
+DEF_GROUP(extg_el, RULE(SYMBOL_G(pat_els)))
+
+DEF_GKLEENE(extg_els, SYMBOL_T(vpipe); SYMBOL_G(extg_el))
+DEF_GROUP(extg_op, 
+	RULE(SYMBOL_T(qmrk));
+	RULE(SYMBOL_T(star));
+	RULE(SYMBOL_T(excl));
+	RULE(SYMBOL_T(plus));
+	RULE(SYMBOL_T(atdog))
+)
+DEF_GROUP(extg, RULE(SYMBOL_G(extg_op); SYMBOL_T(parl); SYMBOL_G(extg_el); SYMBOL_G(extg_els); SYMBOL_T(parr)))
 
 // //
 
 DEF_GROUP(pat_el,
+	RULE(SYMBOL_G(extg));
 	RULE(SYMBOL_G(clre));
 	RULE(SYMBOL_T(qmrk));
 	RULE(SYMBOL_T(star));
-	RULE(SYMBOL_G(acharoesc))
+	RULE(SYMBOL_G(achar_ext_oesc))
 )
 
 DEF_GKLEENE(pat_els, SYMBOL_G(pat_el))
@@ -95,12 +119,16 @@ DEF_SYMBOL_TERMINAL(eoi, { return str && !*str ? str : null; })
 DEF_GROUP(entry, RULE(SYMBOL_G(pat_els); SYMBOL_T(eoi)))
 
 DEF_GRAMMAR(pattern_ext,
-	GROUP(acharoesc);
 	GROUP(achar_clr_oesc);
+	GROUP(achar_ext_oesc);
 	GROUP(clr_el);
 	GROUP(clr_neg);
 	GROUP(clr_els);
 	GROUP(clre);
+	GROUP(extg_el);
+	GROUP(extg_els);
+	GROUP(extg_op);
+	GROUP(extg);
 	GROUP(pat_el);
 	GROUP(pat_els);
 	GROUP(entry)
@@ -194,7 +222,7 @@ static PatCompResult patravast(AST ast, bool doublestar){
 		return Error_T(patcomp_result, {"AST (leaf) not recognized"});
 	}
 	const GroupId gid = ast->d.group.groupId;
-	if(gid == acharoesc || gid == achar_clr_oesc) return patravast(ast->d.group.children[ast->d.group.cc-1], doublestar);
+	if(gid == achar_clr_oesc || gid == achar_ext_oesc) return patravast(ast->d.group.children[ast->d.group.cc-1], doublestar);
 	if(gid == clr_el){
 		switch(ast->d.group.cc){
 			case 3: {
