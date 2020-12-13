@@ -263,6 +263,8 @@ extern "C" {
 
 SCENARIO("standard patterns", "[patterns]"){
 	struct parc_options opts = parc_options_default;
+	opts.extglob = GENERATE(false, true);
+	CAPTURE(opts.extglob);
 	PatternCompiler compiler = patcomp_new();
 	if(!compiler) FAIL("failed to initialize compiler");
 	GIVEN("/a/"){
