@@ -600,14 +600,20 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 			ExpandoResult ccp0a = expando_word(cc->d.group.children[1]->d.leaf.val, expando_targets_all, ctxt);
 			if(!IsOk_T(ccp0a)) return captclean(Error_T(travast_result, {"failed to expand case pattern"}), {free(mv);});
 			arrmuttake1(ccp0, ccp0a.r.ok, {});
-			bool ccmatch = streq(mv, ccp0); //TODO pattern matching
+			PatCompResult patr = pattern_compile(ctxt->patcomp, ccp0, *ctxt->parcopts);
 			free(ccp0);
+			if(!IsOk_T(patr)) return Error_T(travast_result, {"invalid case pattern"});
+			bool ccmatch = pattern_test(patr.r.ok, mv);
+			pattern_destroy(patr.r.ok);
 			for(AST ccpn = cc->d.group.children[2]; !ccmatch && ccpn->d.group.cc > 1; ccpn = ccpn->d.group.children[2]){
 				ExpandoResult pna = expando_word(ccpn->d.group.children[1]->d.leaf.val, expando_targets_all, ctxt);
 				if(!IsOk_T(pna)) return captclean(Error_T(travast_result, {"failed to expand case pattern"}), {free(mv);});
 				arrmuttake1(pn, pna.r.ok, {free(mv);});
-				ccmatch |= streq(mv, pn);
+				PatCompResult patr = pattern_compile(ctxt->patcomp, pn, *ctxt->parcopts);
 				free(pn);
+				if(!IsOk_T(patr)) retclean(Error_T(travast_result, {"invalid case pattern"}), {free(mv);});
+				ccmatch |= pattern_test(patr.r.ok, mv);
+				pattern_destroy(patr.r.ok);
 			}
 			if(ccmatch){
 				free(mv);
