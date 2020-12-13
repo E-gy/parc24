@@ -308,19 +308,31 @@ State auto_addeps(State a, EpsTransitionList eps){
 	return concatenated;
 }
 
-static Result auto_concat_collect_eps(State s, State a2, EpsTransitionList* eps, Encounter* es){
+static Result auto_concat_ceps1(State s, State a2, EpsTransitionList* eps, Encounter* es){
+	if(!s) return Ok;
 	for(Encounter e = *es; e; e = e->next) if(e->s == s) return Ok;
 	*es = encounter_new(s, *es);
 	if(s->accepting){
 		EpsTransitionList neps = epstrl_add(*eps, s, a2);
 		if(!neps) return Error;
 		*eps = neps;
-		neps = epstrl_add(*eps, s, null);
+	}
+	for(Transition t = s->transitions; t; t = t->next) if(!IsOk(auto_concat_ceps1(t->to, a2, eps, es))) return Error;
+	if(s->defolt && !IsOk(auto_concat_ceps1(s->defolt, a2, eps, es))) return Error;
+	return Ok;
+}
+
+static Result auto_concat_ceps2(State s, EpsTransitionList* eps, Encounter* es){
+	if(!s) return Ok;
+	for(Encounter e = *es; e; e = e->next) if(e->s == s) return Ok;
+	*es = encounter_new(s, *es);
+	if(s->accepting){
+		EpsTransitionList neps = epstrl_add(*eps, s, null);
 		if(!neps) return Error;
 		*eps = neps;
 	}
-	for(Transition t = s->transitions; t; t = t->next) if(!IsOk(auto_concat_collect_eps(t->to, a2, eps, es))) return Error;
-	if(s->defolt && !IsOk(auto_concat_collect_eps(s->defolt, a2, eps, es))) return Error;
+	for(Transition t = s->transitions; t; t = t->next) if(!IsOk(auto_concat_ceps2(t->to, eps, es))) return Error;
+	if(s->defolt && !IsOk(auto_concat_ceps2(s->defolt, eps, es))) return Error;
 	return Ok;
 }
 
@@ -329,8 +341,9 @@ State auto_concat(State a1, State a2){
 	if(!a2) return a1;
 	State concatenated = null;
 	EpsTransitionList eps = null;
-	Encounter es = null;
-	if(IsOk(captclean(auto_concat_collect_eps(a1, a2, &eps, &es), {for(; es; es = encounter_destroy(es));}))) concatenated = auto_addeps(a1, eps);
+	Encounter es1 = null;
+	Encounter es2 = null;
+	if(IsOk(captclean(auto_concat_ceps1(a1, a2, &eps, &es1), {for(; es1; es1 = encounter_destroy(es1));}))) if(IsOk(captclean(auto_concat_ceps2(a2, &eps, &es2), {for(; es2; es2 = encounter_destroy(es2));}))) concatenated = auto_addeps(a1, eps);
 	epstrl_destroy(eps);
 	return concatenated;
 }
