@@ -4,6 +4,7 @@
 #include <util/null.h>
 #include <util/buffer.h>
 #include <util/bufferio.h>
+#include <util/flist.h>
 #include <tihs/exe.h>
 #include <cppo.h>
 #include <stdlib.h>
@@ -186,12 +187,13 @@ ExpandoResult expando_tilde(Buffer buff, size_t* si, ATTR_UNUSED struct expando_
 
 ExpandoResult expando_word(string str, struct expando_targets what, ParContext context){
 	Buffer buff = buffer_new_from(str, -1);
+	bool subjectopaexp = what.path;
 	size_t i = 0;
 	while(buff->data[i]){
-		if(capture_isquotstart(s) && !isescaped(s, str)) IfError_T(expando_quot(buff, &i, what, context), err, { return Error_T(expando_result, err); });
+		if(capture_isquotstart(s) && !isescaped(s, str)){ IfError_T(expando_quot(buff, &i, what, context), err, { return Error_T(expando_result, err); }); subjectopaexp = false; }
 		else if(capture_isexpandostart(s) && !isescaped(s, str)) IfError_T(expando_expando(buff, &i, what, context), err, { return Error_T(expando_result, err); });
 		else if(capture_isvariablestart(s) && !isescaped(s, str)) IfError_T(expando_variable(buff, &i, what, context), err, { return Error_T(expando_result, err); });
-		else if(capture_istildestart(s) && !isescaped(s, str)) IfError_T(expando_tilde(buff, &i, what, context), err, { return Error_T(expando_result, err); });
+		else if(capture_istildestart(s) && !isescaped(s, str)){ IfError_T(expando_tilde(buff, &i, what, context), err, { return Error_T(expando_result, err); }); subjectopaexp = false; }
 		else if(s[0] == '\\'){
 			i++;
 			if(!s){
@@ -200,6 +202,15 @@ ExpandoResult expando_word(string str, struct expando_targets what, ParContext c
 			}
 			buffer_delete(buff, i-1, i);
 		} else i++;
+	}
+	if(subjectopaexp && (strchr(buff->data, '*') || strchr(buff->data, '?' || strchr(buff->data, '[')))){ //TODO escapes have been deleted above but we may need them for pattern construction
+		PatCompResult patco = pattern_compile(context->patcomp, buff->data, *context->parcopts);
+		if(IsOk_T(patco)){
+			ArgsArr_Mut mf = files_list(patco.r.ok, *context->parcopts);
+			pattern_destroy(patco.r.ok);
+			if(mf->size > 0 || context->parcopts->nullglob) return Ok_T(expando_result, mf);
+			argsarrmut_destroy(mf);
+		}
 	}
 	ArgsArr_Mut args = argsarrmut_new(1);
 	argsarrmut_append(args, buffer_destr(buff));
