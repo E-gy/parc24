@@ -30,6 +30,7 @@ ExpandoResult expando_quot(Buffer buff, size_t* si, struct expando_targets what,
 		return Ok_T(expando_result, null);
 	}
 	if(str[0] == '\"'){
+		what.path = false;
 		size_t i = 0;
 		buffer_delete(buff, *si, (*si)+1);
 		while(true){
@@ -67,6 +68,7 @@ ExpandoResult expando_quot(Buffer buff, size_t* si, struct expando_targets what,
 ExpandoResult expando_expando(Buffer buff, size_t* si, struct expando_targets what, ParContext context){
 	size_t esi = 0, eei, rei;
 	if(strpref("$(", str)){
+		what.path = true;
 		int bal = 1;
 		size_t i = 2;
 		while(*s && bal > 0){
