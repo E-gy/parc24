@@ -31,7 +31,11 @@ static TSPA pakked_new(argsarr args, ParContext c){
 }
 
 static int cmd_echo_exe(TSPA a){
-	for(size_t i = 1; i < a->args->size; i++) parcioprintf(a->ios, LL_INFO, "%s%s", a->args->args[i], i < a->args->size-1 ? " " : "\n");
+	bool omitnl = false;
+	ATTR_UNUSED bool bakslsh = false; //TODO baskslsh processing
+	size_t i = 1;
+	for(; i < a->args->size; i++) if(streq("-n", a->args->args[i])) omitnl = true; else if(streq("-e", a->args->args[i])) bakslsh = true; else if(streq("-E", a->args->args[i])) bakslsh = false; else break;
+	for(; i < a->args->size; i++) parcioprintf(a->ios, LL_INFO, "%s%s", a->args->args[i], i < a->args->size-1 ? " " : omitnl ? "" : "\n");
 	retclean(0, { pakked_destroy(a); });
 }
 static threadfwrap_reti(cmd_echo_exe)
