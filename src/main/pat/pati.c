@@ -192,32 +192,68 @@ static Merger mergers_find(Merger* mergers, Merger liek){
 }
 
 /**
- * @param m @consumes 
+ * @param m @consumes @produces
  * @param as @ref
- * @return Merger 
+ * @return whether the state was added
  */
-static Merger merger_adds(Merger m, State as){
-	if(!m || !as) return m;
+static bool merger_adds(Merger* mm, State as){
+	if(!mm || !*mm || !as) return false;
+	const Merger m = *mm;
 	size_t i = 0;
 	for(; i < m->sc && ptr2ull(m->s[i]) < ptr2ull(as); i++);
-	if(i < m->sc && m->s[i] == as) return m;
+	if(i < m->sc && m->s[i] == as) return false;
 	Merger nm = realloc(m, sizeof(*nm) + (m->sc+1)*(sizeof(State)));
-	if(!nm) return null;
+	if(!nm) return false;
 	memmove(nm->s+i+1, nm->s+i, (nm->sc-i)*sizeof(State));
 	nm->sc++;
 	nm->s[i] = as;
-	return nm;
+	*mm = nm;
+	return true;
+}
+
+typedef struct epstrl* EpsTransitionList;
+struct epstrl {
+	State from;
+	State to;
+	EpsTransitionList next;
+};
+
+/**
+ * @param list @consumes 
+ * @param from @ref
+ * @param to @ref
+ * @return @produces list 
+ */
+static EpsTransitionList epstrl_add(EpsTransitionList list, State from, State to){
+	if(!from || !to) return list;
+	new(EpsTransitionList, e);
+	*e = (struct epstrl){from, to, list};
+	return e;
 }
 
 /**
- * @param s1 @ref 
- * @param a2 @ref
- * @param s @consumes
- * @param mergers @refmut
- * @return 
+ * @param l @consumes 
  */
-static State auto_concat_(State s1, State a2, Merger merger, Merger* mergers){
-	if(!(merger = s1 && s1->accepting ? merger_adds(merger, a2) : merger)) return null;
+static void epstrl_destroy(EpsTransitionList l){
+	if(!l) return;
+	epstrl_destroy(l->next);
+	free(l);
+}
+
+/**
+ * @param a @ref 
+ * @param eps @ref
+ * @param merger @consumes
+ * @param mergers @refmut
+ * @return @produces 
+ */
+static State auto_addeps_(State a, EpsTransitionList eps, Merger merger, Merger* mergers){
+	while(true){
+		bool changed = false;
+		for(EpsTransitionList e = eps; e; e = e->next) for(size_t i = 0; i < merger->sc; i++) if(e->from == merger->s[i] && merger_adds(&merger, e->to)){ changed = true; break; }
+		if(!changed) break;
+	}
+	if(!merger) return null;
 	{
 		Merger m = mergers_find(mergers, merger);
 		if(m){
@@ -228,47 +264,73 @@ static State auto_concat_(State s1, State a2, Merger merger, Merger* mergers){
 	merger->next = *mergers;
 	*mergers = merger;
 	bool accepting = false;
-	for(size_t i = 0; i < merger->sc && !accepting; i++) if(merger->s[i] != s1) accepting |= merger->s[i]->accepting;
+	for(size_t i = 0; i < merger->sc && !accepting; i++) accepting |= merger->s[i]->accepting;
 	const State merged = patstate_new(accepting);
 	if(!merged) return null;
 	merger->sr = merged;
-	size_t s1i = 0;
-	for(; s1i < merger->sc && merger->s[s1i] != s1; s1i++);
 	Transition* ts = calloc(merger->sc, sizeof(*ts));
 	if(!ts) retclean(null, {patstate_destroy(merged);});
 	for(size_t i = 0; i < merger->sc; i++) ts[i] = merger->s[i]->transitions;
 	Transition* tr = &merged->transitions;
 	for(unsigned char c = 0; c < 128; c++){
-		State ns1 = null;
 		Merger nss = merger_new(null, 0);
-		for(size_t i = 0; i < merger->sc; i++) if(ts[i] && ts[i]->c == c) nss = merger_adds(nss, i == s1i ? (ns1 = ts[i]->to) : ts[i]->to);
+		for(size_t i = 0; i < merger->sc; i++) if(ts[i] && ts[i]->c == c) merger_adds(&nss, ts[i]->to);
 		if(nss->sc == 0){
 			merger_destroy(nss);
 			continue;
 		}
-		for(size_t i = 0; i < merger->sc; i++) if(ts[i] && ts[i]->c == c) ts[i] = ts[i]->next; else if(merger->s[i]->defolt) nss = merger_adds(nss, i == s1i ? (ns1 = merger->s[i]->defolt) : merger->s[i]->defolt);
-		if(!(*tr = patransition_new(c, auto_concat_(ns1, a2, nss, mergers)))) retclean(null, { merger_destroy(nss); free(ts); patstate_destroy(merged); });
+		for(size_t i = 0; i < merger->sc; i++) if(ts[i] && ts[i]->c == c) ts[i] = ts[i]->next; else if(merger->s[i]->defolt) merger_adds(&nss, merger->s[i]->defolt);
+		if(!(*tr = patransition_new(c, auto_addeps_(a, eps, nss, mergers)))) retclean(null, { merger_destroy(nss); free(ts); patstate_destroy(merged); });
 		tr = &((*tr)->next);
 	}
 	{
-		State ns1 = null;
 		Merger dsm = merger_new(null, 0);
-		for(size_t i = 0; i < merger->sc; i++) if(merger->s[i]->defolt) dsm = merger_adds(dsm, i == s1i ? (ns1 = merger->s[i]->defolt) : merger->s[i]->defolt);
-		if(dsm->sc > 0) merged->defolt = auto_concat_(ns1, a2, dsm, mergers); else merger_destroy(dsm);
+		for(size_t i = 0; i < merger->sc; i++) if(merger->s[i]->defolt) merger_adds(&dsm, merger->s[i]->defolt);
+		if(dsm->sc > 0) merged->defolt = auto_addeps_(a, eps, dsm, mergers); else merger_destroy(dsm);
 	}
 	free(ts);
 	return merged;
 }
 
-State auto_concat(State a1, State a2){
-	if(!a1) return a2;
-	if(!a2) return a1;
+/**
+ * @param a @ref 
+ * @param eps @ref
+ * @return @produces 
+ */
+State auto_addeps(State a, EpsTransitionList eps){
+	if(!a) return null;
 	Merger mergers = null;
 	Merger m0 = merger_new(null, 1);
 	if(!m0) return null;
-	m0->s[0] = a1;
-	State concatenated = auto_concat_(a1, a2, m0, &mergers);
+	m0->s[0] = a;
+	State concatenated = auto_addeps_(a, eps, m0, &mergers);
 	for(; mergers; mergers = merger_destroy(mergers));
+	return concatenated;
+}
+
+static Result auto_concat_collect_eps(State s, State a2, EpsTransitionList* eps, Encounter* es){
+	for(Encounter e = *es; e; e = e->next) if(e->s == s) return Ok;
+	*es = encounter_new(s, *es);
+	if(s->accepting){
+		EpsTransitionList neps = epstrl_add(*eps, s, a2);
+		if(!neps) return Error;
+		*eps = neps;
+		s->accepting = false;
+	}
+	for(Transition t = s->transitions; t; t = t->next) if(!IsOk(auto_concat_collect_eps(t->to, a2, eps, es))) return Error;
+	if(s->defolt && !IsOk(auto_concat_collect_eps(s->defolt, a2, eps, es))) return Error;
+	return Ok;
+}
+
+State auto_concat(State a1, State a2){
+	if(!a1) return a2;
+	if(!a2) return a1;
+	State concatenated = null;
+	EpsTransitionList eps = null;
+	Encounter es = null;
+	if(IsOk(captclean(auto_concat_collect_eps(a1, a2, &eps, &es), {encounter_destroy(es);}))) concatenated = auto_addeps(a1, eps);
+	for(EpsTransitionList we = eps; we; we = we->next) we->from->accepting = true;
+	epstrl_destroy(eps);
 	return concatenated;
 }
 
