@@ -101,7 +101,7 @@ EntityInfo entimap_add(EntitiesMap m, struct entinf ii){
 	return *i = nii;
 }
 
-#ifndef NDEBUG
+/*#ifndef NDEBUG
 
 #include <calp/util/log.h>
 #include <calp/grammar/fun.h>
@@ -137,8 +137,8 @@ void entimap_log(Grammar gr, EntitiesMap m){
 	}
 }
 
-#else
+#else*/
 
-void entimap_log(Grammar gr, EntitiesMap m){}
+void entimap_log(ATTR_UNUSED Grammar gr, ATTR_UNUSED EntitiesMap m){}
 
-#endif
+//#endif
