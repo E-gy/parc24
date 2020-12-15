@@ -85,7 +85,6 @@ static ParsPreResult parser_makast(Parser p, Lexer l, Symbol symb, string* str){
 				}
 			}
 			if(gi->i.group.firsts->fallback){
-				Rule r = gi->i.group.firsts->fallback;
 				ParsPreResult res = parser_makastr(p, l, str, gi->i.group.firsts->fallback, symb, gi);
 				if(IsOk_T(res)) return res;
 			}
