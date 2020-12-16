@@ -24,7 +24,7 @@ ExpandoResult expando_quot(Buffer buff, size_t* si, struct expando_targets what,
 	if(str[0] == '\''){
 		string e = strchr(str+1, '\'');
 		if(!e) return Error_T(expando_result, {"didn't fint matching `'`"});
-		size_t ei = e-str;
+		size_t ei = e-buff->data;
 		buffer_delete(buff, ei, ei+1);
 		buffer_delete(buff, *si, (*si)+1);
 		*si = ei-1;
@@ -196,7 +196,7 @@ ExpandoResult expando_word(string str, struct expando_targets what, ParContext c
 		else if(capture_istildestart(s) && !isescaped(s, str)){ IfError_T(expando_tilde(buff, &i, what, context), err, { return Error_T(expando_result, err); }); subjectopaexp = false; }
 		else if(s[0] == '\\'){
 			i++;
-			if(!s){
+			if(!*s){
 				buffer_destroy(buff);
 				return Error_T(expando_result, {"\\ last character"});
 			}
