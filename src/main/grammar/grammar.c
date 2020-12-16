@@ -594,20 +594,23 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 		arrmuttake1(varn, varnr.r.ok, {});
 		TraverseASTResult res = Ok_T(travast_result, {0});
 		do {
+			if(!IsOk_T((res = parcontext_uniwait(res)))) break;
 			ExpandoResult nva = expando_word(nvw->d.group.children[0]->d.leaf.val, expando_targets_all, ctxt);
 			if(!IsOk_T(nva)){ res = Error_T(travast_result, {"in list element expando failed"}); break; }
-			arrmuttake1(nv, nva.r.ok, {});
-			Result varadr = varstore_add(ctxt->vars, varn, nv);
-			free(nv); 
-			if(IsOk(varadr)){ res = Error_T(travast_result, {"varstore add failed"}); break; }
-			if(!IsOk_T((res = parcontext_uniwait(res)))) break;
-			if(travt_is_shrtct(res.r.ok.type)) if(res.r.ok.type != TRAV_SHRTCT_CONTINUE || res.r.ok.v.shortcut_depth > 1){
-				if(res.r.ok.type != TRAV_SHRTCT_EXIT) if(--res.r.ok.v.shortcut_depth == 0) res = Ok_T(travast_result, {0});
-				break;
+			for(size_t i = 0; i < nva.r.ok->size; i++){
+				Result varadr = varstore_add(ctxt->vars, varn, nva.r.ok->args[i]);
+				if(!IsOk(varadr)){ res = Error_T(travast_result, {"varstore add failed"}); break; }
+				if(!IsOk_T((res = parcontext_uniwait(res)))) break;
+				if(travt_is_shrtct(res.r.ok.type)) if(res.r.ok.type != TRAV_SHRTCT_CONTINUE || res.r.ok.v.shortcut_depth > 1){
+					if(res.r.ok.type != TRAV_SHRTCT_EXIT) if(--res.r.ok.v.shortcut_depth == 0) res = Ok_T(travast_result, {0});
+					break;
+				}
+				res = traverse_ast(ast->d.group.children[4], ctxt);
 			}
-			res = traverse_ast(ast->d.group.children[4], ctxt);
+			argsarrmut_destroy(nva.r.ok);
+			if(!IsOk_T(res)) break;
 			nvw = nvw->d.group.children[1];
-		} while(nvw->d.group.cc > 0);
+		} while(nvw->d.group.cc > 1);
 		free(varn);
 		return res;
 	}
