@@ -26,7 +26,7 @@ void parciolog(IOsStack io, enum log_level level, string str, ...){
 	va_end(args);
 	if(!IsOk(prr)){ buffer_destroy(buff); return; }
 	if(!IsOk(buffer_append_str(buff, "\n"))){ buffer_destroy(buff); return; }
-	fddio_writestr(iosstack_raw_get(io, level >= LL_ERROR ? IOSTREAM_STD_ERR : IOSTREAM_STD_OUT), buff->data);
+	fddio_writestr(level >= LL_SUPERCRITICAL ? IOSTREAM_STD_ERR : iosstack_raw_get(io, level >= LL_ERROR ? IOSTREAM_STD_ERR : IOSTREAM_STD_OUT), buff->data);
 	buffer_destroy(buff);
 }
 

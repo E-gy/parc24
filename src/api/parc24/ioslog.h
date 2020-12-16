@@ -17,6 +17,7 @@ typedef struct iosstack* IOsStack;
 
 enum log_level {
 	LL_DEBUG = 0, LL_INFO, LL_WARN, LL_ERROR, LL_CRITICAL,
+	/** bypasses IO stack, prints to std err */ LL_SUPERCRITICAL
 };
 typedef enum log_level LogLevel;
 
