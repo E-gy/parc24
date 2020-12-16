@@ -7,15 +7,15 @@
 Result_T(parspreresult, AST, string_v);
 #define ParsPreResult struct parspreresult
 
-static ParsPreResult parser_makast(Parser p, Lexer l, Symbol symb, string* str);
-static ParsPreResult parser_makastr(Parser p, Lexer l, string* str, Rule r, Symbol symb, EntityInfo gi);
+static ParsPreResult parser_makast(Parser p, Lexer l, Symbol symb, string* str, int d);
+static ParsPreResult parser_makastr(Parser p, Lexer l, string* str, Rule r, Symbol symb, EntityInfo gi, int d);
 
-static ParsPreResult parser_makastr(Parser p, Lexer l, string* str, Rule r, Symbol symb, EntityInfo gi){
+static ParsPreResult parser_makastr(Parser p, Lexer l, string* str, Rule r, Symbol symb, EntityInfo gi, int d){
 	AST gast = ast_new_group(symb, gi->i.group.group, r->symbolsc);
 	size_t i = 0;
 	string sstr = *str;
 	for(Symbol rs = r->symbols; rs; rs = rs->next){
-		ParsPreResult rsast = parser_makast(p, l, rs, &sstr);
+		ParsPreResult rsast = parser_makast(p, l, rs, &sstr, d);
 		if(!IsOk_T(rsast)) break;
 		gast->d.group.children[i++] = rsast.r.ok;
 	}
@@ -33,7 +33,7 @@ static ParsPreResult parser_makastr(Parser p, Lexer l, string* str, Rule r, Symb
 				Symbol lrs = lrr->symbols;
 				size_t i = 0;
 				for(; lrs && lrs != lrfrom; lrs = lrs->next){
-					ParsPreResult rsast = parser_makast(p, l, lrs, &ssstr); //in theory, accepts empty string
+					ParsPreResult rsast = parser_makast(p, l, lrs, &ssstr, d); //in theory, accepts empty string
 					if(!IsOk_T(rsast)) break;
 					ngast->d.group.children[i++] = rsast.r.ok;
 				}
@@ -43,7 +43,7 @@ static ParsPreResult parser_makastr(Parser p, Lexer l, string* str, Rule r, Symb
 				}
 				const size_t yi = i++; //growth ast is put in only on success
 				for(lrs = lrs->next; lrs; lrs = lrs->next){
-					ParsPreResult rsast = parser_makast(p, l, lrs, &ssstr);
+					ParsPreResult rsast = parser_makast(p, l, lrs, &ssstr, d);
 					if(!IsOk_T(rsast)) break;
 					ngast->d.group.children[i++] = rsast.r.ok;
 				}
@@ -61,34 +61,42 @@ static ParsPreResult parser_makastr(Parser p, Lexer l, string* str, Rule r, Symb
 	return Ok_T(parspreresult, gast);
 }
 
-static ParsPreResult parser_makast(Parser p, Lexer l, Symbol symb, string* str){
+static ParsPreResult parser_makast(Parser p, Lexer l, Symbol symb, string* str, int d){
 	switch(symb->type){
 		case SYMBOL_TYPE_TERM: {
 			IfElse_T(l(*str, symb->val.term.id), ok, {
 				AST ret = ast_new_leaf(symb, strndup(ok.start, ok.end-ok.start));
 				if(!ret) return Error_T(parspreresult, {"[INTERNAL] AST leaf construction failed"});
 				*str = ok.next;
+				for(int i = 0; i < d; i++) logi(" "); logf("{} '%s' (\"%s\")", symb->val.term.name, ret->d.leaf.val);
 				return Ok_T(parspreresult, ret);
 			}, err, {
-				logdebug("'%s' failed to match \"%s\": %s", symb->val.term.name, *str, err.s);
+				for(int i = 0; i < d; i++) logi(" "); logf("{} '%s' failed to match \"%s\": %s", symb->val.term.name, *str, err.s);
 				return Error_T(parspreresult, {"Terminal symbol failed to match"});
 			});
 		}
 		case SYMBOL_TYPE_GROUP: {
 			EntityInfo gi = entimap_get(p->ents, entinf_blank_group(symb->val.group.id));
 			if(!gi) return Error_T(parspreresult, {"[INTERNAL] Invalid state: group not in map"});
+			for(int i = 0; i < d; i++) logi(" "); logf("{> %s", gi->i.group.group->name);
 			for(FirstListElement fl = gi->i.group.firsts->first; fl; fl = fl->next){
 				if(fl->symbol->type != SYMB_TERM) return Error_T(parspreresult, {"[INTERNAL] Invalid state: non-terminal first list element"});
 				if(fl->symbol->i.term.symbolId(*str)){
-					ParsPreResult res = parser_makastr(p, l, str, fl->r, symb, gi);
-					if(IsOk_T(res)) return res;
+					ParsPreResult res = parser_makastr(p, l, str, fl->r, symb, gi, d+1);
+					if(IsOk_T(res)){
+						for(int i = 0; i < d; i++) logi(" "); logf("}< %s", "");
+						return res;
+					}
 				}
 			}
 			if(gi->i.group.firsts->fallback){
-				ParsPreResult res = parser_makastr(p, l, str, gi->i.group.firsts->fallback, symb, gi);
-				if(IsOk_T(res)) return res;
+				ParsPreResult res = parser_makastr(p, l, str, gi->i.group.firsts->fallback, symb, gi, d+1);
+				if(IsOk_T(res)){
+					for(int i = 0; i < d; i++) logi(" "); logf("}< %s", "def");
+					return res;
+				}
 			}
-			logdebug("<%s> first list exhausted, no matches", gi->i.group.group->name);
+			for(int i = 0; i < d; i++) logi(" "); logf("}< <%s> first list exhausted, no matches", gi->i.group.group->name);
 			return Error_T(parspreresult, {"First list exhausted, no matches found"});
 		}
 		default: return Error_T(parspreresult, {"._."}); //._.
@@ -101,7 +109,7 @@ ParseResult parser_parse(Parser p, Lexer l, string s, GroupId g0){
 	if(!p || !l || !s || !g0) return Error_T(parse_result, {"Invalid args"});
 	Symbol gsymb = symbol_new_group(g0, 0);
 	if(!gsymb) return Error_T(parse_result, {"Allocation failed"});
-	ParsPreResult result = parser_makast(p, l, gsymb, &s);
+	ParsPreResult result = parser_makast(p, l, gsymb, &s, 0);
 	symbol_destroy(gsymb);
 	return IsOk_T(result) ? Ok_T(parse_result, {result.r.ok, s}) : Error_T(parse_result, result.r.error);
 }
