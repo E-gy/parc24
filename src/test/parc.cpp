@@ -98,28 +98,31 @@ SCENARIO("variables assignments", "[variables][full stack][parc]"){
 
 SCENARIO("echo does the echo", "[echo][full stack][parc]"){
 	auto ctxt = initectxt();
+	string_mut output;
+	auto outread = parallels_readstr(ctxt.stdout_r, &output);
+	if(!IsOk_T(outread)) FAIL("output read setup failed");
 	GIVEN("initialized context"){
 		AND_GIVEN("constant to say"){
-			string_mut output;
-			auto outread = parallels_readstr(ctxt.stdout_r, &output);
-			if(!IsOk_T(outread)) FAIL("output read setup failed");
 			auto exer = tihs_exestr("echo hello", &ctxt.ctxt);
 			REQUIRE(IsOk_T(exer));
 			destrctxt(ctxt); //we're done executing things - flush all outputs so we can check them
 			if(!IsOk_T(exethread_waitretcode(outread.r.ok))) FAIL("output read wait failed");
 			REQUIRE_THAT(output, Equals("hello\n"));
-			free(output);
+		}
+		AND_GIVEN("-n constant to say"){
+			auto exer = tihs_exestr("echo -n hello", &ctxt.ctxt);
+			REQUIRE(IsOk_T(exer));
+			destrctxt(ctxt); //we're done executing things - flush all outputs so we can check them
+			if(!IsOk_T(exethread_waitretcode(outread.r.ok))) FAIL("output read wait failed");
+			REQUIRE_THAT(output, Equals("hello"));
 		}
 		AND_GIVEN("constant to say and a comment"){
-			string_mut output;
-			auto outread = parallels_readstr(ctxt.stdout_r, &output);
-			if(!IsOk_T(outread)) FAIL("output read setup failed");
 			auto exer = tihs_exestr("echo hello #recent friend", &ctxt.ctxt);
 			REQUIRE(IsOk_T(exer));
 			destrctxt(ctxt); //we're done executing things - flush all outputs so we can check them
 			if(!IsOk_T(exethread_waitretcode(outread.r.ok))) FAIL("output read wait failed");
 			REQUIRE_THAT(output, Equals("hello\n"));
-			free(output);
 		}
 	}
+	free(output);
 }
