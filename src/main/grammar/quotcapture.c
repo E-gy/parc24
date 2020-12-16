@@ -58,7 +58,7 @@ string capture_expando(const string str){
 	return null;
 }
 
-#define WSEPS "\"'|&;(){}<> \t\r\n"
+int char_isword(int c);
 
 string capture_variable(string str){
 	if(!str) return null;
@@ -70,11 +70,13 @@ string capture_variable(string str){
 	}
 	if(str[0] == '$'){
 		string s = str+1;
-		for(; *s && !strchr(WSEPS, *s); s++);
+		for(; *s && char_isword(*s); s++);
 		return s > str+1 ? s : null;
 	}
 	return null;
 }
+
+#define WSEPS "\"'|&;(){}<> \t\r\n"
 
 string capture_word(const string str){
 	if(!str || !*str) return null;
