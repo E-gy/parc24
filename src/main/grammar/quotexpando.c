@@ -13,7 +13,7 @@
 #define isescaped(str, s0) __extension__({ bool _esc = false; for(string _s = str-1; _s >= s0 && *_s == '\\'; _s--) _esc = !_esc; _esc; })
 
 #define str (buff->data+(*si))
-#define s (buff->data+(*si)+i)
+#define s (buff->data+i)
 
 ExpandoResult expando_quot(Buffer buff, size_t* si, struct expando_targets what, ParContext context);
 ExpandoResult expando_expando(Buffer buff, size_t* si, struct expando_targets what, ParContext context);
@@ -32,15 +32,15 @@ ExpandoResult expando_quot(Buffer buff, size_t* si, struct expando_targets what,
 	}
 	if(str[0] == '\"'){
 		what.path = false;
-		size_t i = 0;
-		buffer_delete(buff, *si, (*si)+1);
+		size_t i = *si;
+		buffer_delete(buff, i, i+1);
 		while(true){
 			string nquot = strchr(s, '"');
 			if(!nquot) return Error_T(expando_result, {"didn't fint matching '\"'"});
-			size_t ei = nquot-str;
+			size_t ei = nquot-buff->data;
 			while(i <= ei){
 				if(i == ei){
-					buffer_delete(buff, (*si)+i, (*si)+i+1);
+					buffer_delete(buff, i, i+1);
 					*si = i;
 					return Ok_T(expando_result, null);
 				}
@@ -56,7 +56,7 @@ ExpandoResult expando_quot(Buffer buff, size_t* si, struct expando_targets what,
 					IfError_T(expando_tilde(buff, &i, what, context), err, { return Error_T(expando_result, err); });
 					break;
 				} else if(strpref("\\$", s) || strpref("\\`", s) || strpref("\\\"", s) || strpref("\\\\", s) || strpref("\\\n", s)){
-					buffer_delete(buff, (*si)+i, (*si)+i+1);
+					buffer_delete(buff, i, i+1);
 					i++;
 					break;
 				} else i++;
@@ -71,7 +71,7 @@ ExpandoResult expando_expando(Buffer buff, size_t* si, struct expando_targets wh
 	if(strpref("$(", str)){
 		what.path = true;
 		int bal = 1;
-		size_t i = 2;
+		size_t i = (*si)+2;
 		while(*s && bal > 0){
 			if(capture_isquotstart(s) && !isescaped(s, str)) IfError_T(expando_quot(buff, &i, what, context), err, { return Error_T(expando_result, err); });
 			else if(capture_isexpandostart(s) && !isescaped(s, str)) IfError_T(expando_expando(buff, &i, what, context), err, { return Error_T(expando_result, err); });
@@ -84,18 +84,18 @@ ExpandoResult expando_expando(Buffer buff, size_t* si, struct expando_targets wh
 		}
 		if(bal == 0){
 			esi = 2;
-			eei = (rei=i)-1;
+			eei = (rei=(i-*si))-1;
 		}
 	}
 	if(str[0] == '`'){
-		size_t i = 0;
+		size_t i = *si;
 		do {
 			string quot = strchr(s+1, '`');
 			if(!quot) return Error_T(expando_result, {"couldn't find closing '`'"});
-			i = quot-str;
+			i = quot-buff->data;
 		} while(isescaped(s, str));
 		esi = 1;
-		eei = (rei=i+1)-1;
+		eei = (rei=(i-*si)+1)-1;
 	}
 	if(esi){
 		string_mut capt = buffer_destr(buffer_new_from(str+esi, eei-esi));
