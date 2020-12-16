@@ -1,4 +1,5 @@
 #include <parc24/iosstack.h>
+#include <parc24/ioslog.h>
 
 #include <util/null.h>
 #include <stdlib.h>
@@ -65,7 +66,7 @@ IOsStack iosstack_new(void){
 void iosstack_destroy(IOsStack s){
 	if(!s) return;
 	while(s->top) iosstack_pop(s);
-	for(size_t i = 0; i < MAXSTREAMS; i++) if(hasstream(s, i)) close(getstream(s, i));
+	for(size_t i = 0; i < MAXSTREAMS; i++) if(hasstream(s, i)) if(close(getstream(s, i)) < 0) parciolog(s, LL_SUPERCRITICAL, "FAILED TO CLOSE INITIAL STREAM (virt %d, real %d). THIS IS VERY VERY BAD!", i, getstream(s, i));
 	free(s);
 }
 
@@ -107,7 +108,7 @@ static Result iop_revert(IOsStack s, StackOp op){
 	switch(op->type){
 		case BOOKMARK: break;
 		case IOP_OPEN:
-			close(getstream(s, op->v.open.stream));
+			if(close(getstream(s, op->v.open.stream)) < 0) parciolog(s, LL_SUPERCRITICAL, "FAILED TO CLOSE OPENED STREAM (virt %d, real %d). THIS IS VERY VERY BAD!", op->v.open.stream, getstream(s, op->v.open.stream));
 			setstream(s, op->v.open.stream, op->v.open.cl_rio);
 			break;
 		case IOP_CLOSE:
@@ -117,7 +118,7 @@ static Result iop_revert(IOsStack s, StackOp op){
 			setstream(s, op->v.copdup.dstream, op->v.copdup.cl_rio);
 			break;
 		case IOP_DUP:
-			close(getstream(s, op->v.copdup.dstream));
+			if(close(getstream(s, op->v.copdup.dstream)) < 0) parciolog(s, LL_SUPERCRITICAL, "FAILED TO CLOSE DUPPED STREAM (virt %d, real %d). THIS IS VERY VERY BAD!", op->v.copdup.dstream, getstream(s, op->v.copdup.dstream));
 			setstream(s, op->v.copdup.dstream, op->v.copdup.cl_rio);
 			break;
 		default: return Error;
