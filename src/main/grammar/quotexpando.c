@@ -3,10 +3,10 @@
 #include <util/string.h>
 #include <util/null.h>
 #include <util/buffer.h>
-#include <util/bufferio.h>
 #include <util/flist.h>
 #include <tihs/exe.h>
 #include <cppo.h>
+#include <cppo/parallels.h>
 #include <stdlib.h>
 #include <unistd.h>
 
@@ -105,27 +105,21 @@ ExpandoResult expando_expando(Buffer buff, size_t* si, struct expando_targets wh
 			free(capt);
 			return Error_T(expando_result, pipe.r.error);
 		}
+		string_mut captv = null;
+		ThreadResult reader = parallels_readstr(pipe.r.ok.read, &captv);
+		if(!IsOk_T(reader)) retclean(Error_T(expando_result, {"failed to initialize parallels reader"}), {close(pipe.r.ok.read); close(pipe.r.ok.write);});
 		struct parcontext cctxt = *context;
-		if(!(cctxt.ios = iosstack_snapdup(cctxt.ios))) return Error_T(expando_result, {"failed to snapshot IO"});
-		iostack_io_close(cctxt.ios, IOSTREAM_STD_IN);
-		iostack_io_close(cctxt.ios, IOSTREAM_STD_ERR);
+		if(!(cctxt.ios = iosstack_snapdup(cctxt.ios))) retclean(Error_T(expando_result, {"failed to snapshot IO"}), {close(pipe.r.ok.read); close(pipe.r.ok.write);}); //FIXME unsafe
 		iostack_io_open(cctxt.ios, IOSTREAM_STD_OUT, pipe.r.ok.write);
-		cctxt.exeback = true;
 		TihsExeResult captr = tihs_exestr(capt, &cctxt);
-		close(pipe.r.ok.write);
 		free(capt);
-		if(!IsOk_T(captr)){
-			close(pipe.r.ok.read);
-			return Error_T(expando_result, captr.r.error);
-		}
-		BufferResult captv = buffer_from_fd(pipe.r.ok.read);
-		if(!IsOk_T(captv)){
-			close(pipe.r.ok.read);
-			return Error_T(expando_result, captv.r.error);
-		}
-		if(!IsOk(buffer_splice(buff, *si, *si+rei, captv.r.ok->data, captv.r.ok->size))) return Error_T(expando_result, {"captured data splice failed"});
-		*si += captv.r.ok->size;
-		buffer_destroy(captv.r.ok);
+		iosstack_destroy(cctxt.ios);
+		ThreadWaitResult captvw = thread_waitret(reader.r.ok);
+		if(!IsOk_T(captr)) return Error_T(expando_result, captr.r.error);
+		if(!IsOk_T(captvw)) return Error_T(expando_result, {"failed to wait for reader"});
+		if(!IsOk(buffer_splice_str(buff, *si, *si+rei, captv))) retclean(Error_T(expando_result, {"captured data splice failed"}), {free(captv);});
+		*si += strlen(captv);
+		free(captv);
 		return Ok_T(expando_result, null);
 	}
 	return Error_T(expando_result, {"not an expandable"});
