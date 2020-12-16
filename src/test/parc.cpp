@@ -198,5 +198,16 @@ SCENARIO("expansions", "[expando][full stack][parc]"){
 			REQUIRE_THAT(output, Equals(std::get<1>(exeo)));
 		}
 	}
+	GIVEN("a mess of an expansion"){
+		auto exeo = GENERATE(std::tuple<string, string>{"GGG=ato echo -n \\\"hello\\ there\" `echo -n \"pot$GGG \"` of the $(echo -n 'lands far and \\$GGG'\\'' widethn'\", $(echo -n yeah...)\")\"\\\"", "\"hello there potato  of the lands far and $GGG' widethn, yeah...\""});
+		CAPTURE(std::get<0>(exeo));
+		THEN("smooth sailing ahead"){
+			auto exer = tihs_exestr(std::get<0>(exeo), &ctxt.ctxt);
+			REQUIRE(IsOk_T(exer));
+			destrctxt(ctxt);
+			if(!IsOk_T(exethread_waitretcode(outread.r.ok))) FAIL("output read wait failed");
+			REQUIRE_THAT(output, Equals(std::get<1>(exeo)));
+		}
+	}
 	free(output);
 }
