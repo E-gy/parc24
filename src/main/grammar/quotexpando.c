@@ -203,13 +203,31 @@ ExpandoResult expando_word(string str, struct expando_targets what, ParContext c
 			buffer_delete(buff, i-1, i);
 		} else i++;
 	}
-	if(subjectopaexp && (strchr(buff->data, '*') || strchr(buff->data, '?' || strchr(buff->data, '[')))){ //TODO escapes have been deleted above but we may need them for pattern construction
-		PatCompResult patco = pattern_compile(context->patcomp, buff->data, *context->parcopts);
-		if(IsOk_T(patco)){
-			ArgsArr_Mut mf = files_list(patco.r.ok, *context->parcopts);
-			pattern_destroy(patco.r.ok);
-			if(mf->size > 0 || context->parcopts->nullglob) return Ok_T(expando_result, mf);
-			argsarrmut_destroy(mf);
+	if(subjectopaexp){
+		if(strchr(buff->data, '*') || strchr(buff->data, '?' || strchr(buff->data, '['))){ //TODO escapes have been deleted above but we may need them for pattern construction
+			PatCompResult patco = pattern_compile(context->patcomp, buff->data, *context->parcopts);
+			if(IsOk_T(patco)){
+				ArgsArr_Mut mf = files_list(patco.r.ok, *context->parcopts);
+				pattern_destroy(patco.r.ok);
+				if(mf->size > 0 || context->parcopts->nullglob) return Ok_T(expando_result, mf);
+				argsarrmut_destroy(mf);
+			}
+		} else {
+			string ifs = varstore_get(context->vars, "IFS");
+			if(ifs && *ifs){
+				ArgsArr_Mut is = argsarrmut_new(8);
+				for(size_t ns = 0; ns < buff->size;){
+					for(; ns < buff->size && strchr(ifs, buff->data[ns]); ns++);
+					if(ns < buff->size){
+						size_t e = ns;
+						for(; e < buff->size && !strchr(ifs, buff->data[e]); e++);
+						argsarrmut_append(is, strndup(buff->data+ns, e-ns));
+						ns = e;
+					}
+				}
+				buffer_destroy(buff);
+				return Ok_T(expando_result, is);
+			}
 		}
 	}
 	ArgsArr_Mut args = argsarrmut_new(1);
