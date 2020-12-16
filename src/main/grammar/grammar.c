@@ -12,6 +12,25 @@
 DEF_SYMBOL_TERMINAL(word, {
 	return capture_word(str);
 })
+#define word0chtok(str, capt, tok) (strpref(tok, str) && capt-str == ((sizeof(tok)-1)/sizeof(*tok)))
+DEF_SYMBOL_TERMINAL(word_0, {
+	string capt = capture_word(str);
+	if(!capt) return null;
+	if(word0chtok(str, capt, "if")) return null;
+	if(word0chtok(str, capt, "then")) return null;
+	if(word0chtok(str, capt, "elif")) return null;
+	if(word0chtok(str, capt, "else")) return null;
+	if(word0chtok(str, capt, "fi")) return null;
+	if(word0chtok(str, capt, "do")) return null;
+	if(word0chtok(str, capt, "done")) return null;
+	if(word0chtok(str, capt, "for")) return null;
+	if(word0chtok(str, capt, "in")) return null;
+	if(word0chtok(str, capt, "while")) return null;
+	if(word0chtok(str, capt, "until")) return null;
+	if(word0chtok(str, capt, "case")) return null;
+	if(word0chtok(str, capt, "esac")) return null;
+	return capt;
+})
 #define AWSEPS "\"'|&;(){}<> \t\r\n"
 DEF_SYMBOL_TERMINAL(assignment, {
 	if(!str) return null;
@@ -166,10 +185,11 @@ DEF_GROUP(command, RULE(SYMBOL_G(cmd_simple)); RULE(SYMBOL_G(cmd_compound); SYMB
 DEF_GROUP(cmd_simple_pref, RULE(SYMBOL_T(assignment)); RULE(SYMBOL_G(redirection)))
 DEF_GKLEENE(cmd_simple_pref_r, SYMBOL_G(cmd_simple_pref))
 DEF_GROUP(cmd_simple_el, RULE(SYMBOL_T(word)); RULE(SYMBOL_G(redirection)))
+DEF_GROUP(cmd_simple_el_0, RULE(SYMBOL_T(word_0)); RULE(SYMBOL_G(redirection)))
 DEF_GKLEENE(cmd_simple_el_r, SYMBOL_G(cmd_simple_el))
 DEF_GROUP(cmd_simple,
 	RULE(SYMBOL_G(cmd_simple_pref); SYMBOL_G(cmd_simple_pref_r));
-	RULE(SYMBOL_G(cmd_simple_pref_r); SYMBOL_G(cmd_simple_el); SYMBOL_G(cmd_simple_el_r))
+	RULE(SYMBOL_G(cmd_simple_pref_r); SYMBOL_G(cmd_simple_el_0); SYMBOL_G(cmd_simple_el_r))
 )
 
 static Group blok_if();
@@ -252,6 +272,7 @@ DEF_GRAMMAR(tihs24def,
 	GROUP(cmd_simple_pref);
 	GROUP(cmd_simple_pref_r);
 	GROUP(cmd_simple_el);
+	GROUP(cmd_simple_el_0);
 	GROUP(cmd_simple_el_r);
 	GROUP(cmd_simple);
 	GROUP(cmd_compound);
