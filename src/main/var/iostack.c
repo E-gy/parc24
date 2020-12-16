@@ -66,7 +66,7 @@ IOsStack iosstack_new(void){
 void iosstack_destroy(IOsStack s){
 	if(!s) return;
 	while(s->top) iosstack_pop(s);
-	for(size_t i = 0; i < MAXSTREAMS; i++) if(hasstream(s, i)) if(close(getstream(s, i)) < 0) parciolog(s, LL_SUPERCRITICAL, "FAILED TO CLOSE INITIAL STREAM (virt %d, real %d). THIS IS VERY VERY BAD!", i, getstream(s, i));
+	for(fd_t i = 0; i < MAXSTREAMS; i++) if(hasstream(s, i)) if(close(getstream(s, i)) < 0) parciolog(s, LL_SUPERCRITICAL, "FAILED TO CLOSE INITIAL STREAM (virt %d, real %d). THIS IS VERY VERY BAD!", i, getstream(s, i));
 	free(s);
 }
 
@@ -74,7 +74,7 @@ IOsStack iosstack_snapdup(IOsStack s){
 	if(!s) return null;
 	IOsStack ss = iosstack_new();
 	if(!ss) return null;
-	for(size_t i = 0; i < MAXSTREAMS; i++) if(hasstream(s, i)){
+	for(fd_t i = 0; i < MAXSTREAMS; i++) if(hasstream(s, i)){
 		fd_t d = dup(getstream(s, i));
 		if(d < 0) retclean(null, {iosstack_destroy(ss);});
 		setstream(ss, i, d);
