@@ -109,14 +109,14 @@ ExpandoResult expando_expando(Buffer buff, size_t* si, struct expando_targets wh
 		ThreadResult reader = parallels_readstr(pipe.r.ok.read, &captv);
 		if(!IsOk_T(reader)) retclean(Error_T(expando_result, {"failed to initialize parallels reader"}), {close(pipe.r.ok.read); close(pipe.r.ok.write);});
 		struct parcontext cctxt = *context;
-		if(!(cctxt.ios = iosstack_snapdup(cctxt.ios))) retclean(Error_T(expando_result, {"failed to snapshot IO"}), {close(pipe.r.ok.read); close(pipe.r.ok.write);}); //FIXME unsafe
+		if(!(cctxt.ios = iosstack_snapdup(cctxt.ios))) retclean(Error_T(expando_result, {"failed to snapshot IO"}), {close(pipe.r.ok.write); thread_waitret(reader.r.ok);});
 		iostack_io_open(cctxt.ios, IOSTREAM_STD_OUT, pipe.r.ok.write);
 		TihsExeResult captr = tihs_exestr(capt, &cctxt);
 		free(capt);
 		iosstack_destroy(cctxt.ios);
 		ThreadWaitResult captvw = thread_waitret(reader.r.ok);
-		if(!IsOk_T(captr)) return Error_T(expando_result, captr.r.error);
-		if(!IsOk_T(captvw)) return Error_T(expando_result, {"failed to wait for reader"});
+		if(!IsOk_T(captr)) retclean(Error_T(expando_result, captr.r.error), {free(captv);});
+		if(!IsOk_T(captvw)) retclean(Error_T(expando_result, {"failed to wait for reader"}), {free(captv);});
 		if(!IsOk(buffer_splice_str(buff, *si, *si+rei, captv))) retclean(Error_T(expando_result, {"captured data splice failed"}), {free(captv);});
 		*si += strlen(captv);
 		free(captv);
