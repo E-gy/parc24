@@ -190,10 +190,10 @@ ExpandoResult expando_word(string str, struct expando_targets what, ParContext c
 	bool subjectopaexp = what.path;
 	size_t i = 0;
 	while(buff->data[i]){
-		if(capture_isquotstart(s) && !isescaped(s, str)){ IfError_T(expando_quot(buff, &i, what, context), err, { return Error_T(expando_result, err); }); subjectopaexp = false; }
-		else if(capture_isexpandostart(s) && !isescaped(s, str)) IfError_T(expando_expando(buff, &i, what, context), err, { return Error_T(expando_result, err); });
-		else if(capture_isvariablestart(s) && !isescaped(s, str)) IfError_T(expando_variable(buff, &i, what, context), err, { return Error_T(expando_result, err); });
-		else if(capture_istildestart(s) && !isescaped(s, str)){ IfError_T(expando_tilde(buff, &i, what, context), err, { return Error_T(expando_result, err); }); subjectopaexp = false; }
+		if(capture_isquotstart(s) && !isescaped(s, buff->data)){ IfError_T(expando_quot(buff, &i, what, context), err, { return Error_T(expando_result, err); }); subjectopaexp = false; }
+		else if(capture_isexpandostart(s) && !isescaped(s, buff->data)) IfError_T(expando_expando(buff, &i, what, context), err, { return Error_T(expando_result, err); });
+		else if(capture_isvariablestart(s) && !isescaped(s, buff->data)) IfError_T(expando_variable(buff, &i, what, context), err, { return Error_T(expando_result, err); });
+		else if(capture_istildestart(s) && !isescaped(s, buff->data)){ IfError_T(expando_tilde(buff, &i, what, context), err, { return Error_T(expando_result, err); }); subjectopaexp = false; }
 		else if(s[0] == '\\'){
 			i++;
 			if(!*s){
