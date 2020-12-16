@@ -50,7 +50,7 @@ string capture_expando(const string str){
 	if(str[0] == '`'){
 		string quot = str;
 		do {
-			quot = strchr(quot+1, 'q');
+			quot = strchr(quot+1, '`');
 			if(!quot) return null;
 		} while(isescaped(quot, str));
 		return quot;
