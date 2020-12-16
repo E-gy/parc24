@@ -90,12 +90,12 @@ ExpandoResult expando_expando(Buffer buff, size_t* si, struct expando_targets wh
 	if(str[0] == '`'){
 		size_t i = 0;
 		do {
-			string quot = strchr(s+1, 'q');
+			string quot = strchr(s+1, '`');
 			if(!quot) return Error_T(expando_result, {"couldn't find closing '`'"});
 			i = quot-str;
 		} while(isescaped(s, str));
 		esi = 1;
-		eei = (rei=i)-1;
+		eei = (rei=i+1)-1;
 	}
 	if(esi){
 		string_mut capt = buffer_destr(buffer_new_from(str+esi, eei-esi));

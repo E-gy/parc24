@@ -53,7 +53,7 @@ string capture_expando(const string str){
 			quot = strchr(quot+1, '`');
 			if(!quot) return null;
 		} while(isescaped(quot, str));
-		return quot;
+		return quot+1;
 	}
 	return null;
 }
