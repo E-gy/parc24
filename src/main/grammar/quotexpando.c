@@ -16,6 +16,7 @@
 #define s (buff->data+i)
 
 ExpandoResult expando_quot(Buffer buff, size_t* si, struct expando_targets what, ParContext context);
+ExpandoResult expando_arith(Buffer buff, size_t* si, struct expando_targets what, ParContext context);
 ExpandoResult expando_expando(Buffer buff, size_t* si, struct expando_targets what, ParContext context);
 ExpandoResult expando_variable(Buffer buff, size_t* si, struct expando_targets what, ParContext context);
 ExpandoResult expando_tilde(Buffer buff, size_t* si, struct expando_targets what, ParContext context);
@@ -44,6 +45,10 @@ ExpandoResult expando_quot(Buffer buff, size_t* si, struct expando_targets what,
 					*si = i;
 					return Ok_T(expando_result, null);
 				}
+				if(capture_isarithstart(s)){
+					IfError_T(expando_arith(buff, &i, what, context), err, { return Error_T(expando_result, err); });
+					break;
+				} else
 				if(capture_isexpandostart(s)){
 					IfError_T(expando_expando(buff, &i, what, context), err, { return Error_T(expando_result, err); });
 					break;
@@ -66,6 +71,34 @@ ExpandoResult expando_quot(Buffer buff, size_t* si, struct expando_targets what,
 	return Error_T(expando_result, {"not a quoted"});
 }
 
+ExpandoResult expando_arith(Buffer buff, size_t* si, struct expando_targets what, ParContext context){
+	ATTR_UNUSED size_t esi = 0, eei, rei;
+	if(strpref("$((", str)){
+		int bal = 2;
+		size_t i = (*si)+3;
+		while(*s && bal > 0){
+			if(capture_isarithstart(s) && !isescaped(s, str)) IfError_T(expando_arith(buff, &i, what, context), err, { return Error_T(expando_result, err); });
+			else if(capture_isexpandostart(s) && !isescaped(s, str)) IfError_T(expando_expando(buff, &i, what, context), err, { return Error_T(expando_result, err); });
+			else if(capture_isvariablestart(s) && !isescaped(s, str)) IfError_T(expando_variable(buff, &i, what, context), err, { return Error_T(expando_result, err); });
+			else if(capture_istildestart(s) && !isescaped(s, str)) IfError_T(expando_tilde(buff, &i, what, context), err, { return Error_T(expando_result, err); });
+			else {
+				if(!isescaped(s, str)) bal += *s == '(' ? 1 : *s == ')' ? -1 : 0;
+				i++;
+			}
+		}
+		if(bal == 0){
+			esi = 3;
+			eei = (rei=(i-*si))-2;
+		}
+		//TODO
+		buffer_delete(buff, (*si)+eei, (*si)+rei);
+		buffer_delete(buff, *si, (*si)+esi);
+		*si = i-3-2;
+		return Ok_T(expando_result, null);
+	}
+	return Error_T(expando_result, {"not an arithmetic experssion"});
+}
+
 ExpandoResult expando_expando(Buffer buff, size_t* si, struct expando_targets what, ParContext context){
 	size_t esi = 0, eei, rei;
 	if(strpref("$(", str)){
@@ -74,6 +107,7 @@ ExpandoResult expando_expando(Buffer buff, size_t* si, struct expando_targets wh
 		size_t i = (*si)+2;
 		while(*s && bal > 0){
 			if(capture_isquotstart(s) && !isescaped(s, str)) IfError_T(expando_quot(buff, &i, what, context), err, { return Error_T(expando_result, err); });
+			else if(capture_isarithstart(s) && !isescaped(s, str)) IfError_T(expando_arith(buff, &i, what, context), err, { return Error_T(expando_result, err); });
 			else if(capture_isexpandostart(s) && !isescaped(s, str)) IfError_T(expando_expando(buff, &i, what, context), err, { return Error_T(expando_result, err); });
 			else if(capture_isvariablestart(s) && !isescaped(s, str)) IfError_T(expando_variable(buff, &i, what, context), err, { return Error_T(expando_result, err); });
 			else if(capture_istildestart(s) && !isescaped(s, str)) IfError_T(expando_tilde(buff, &i, what, context), err, { return Error_T(expando_result, err); });
@@ -185,6 +219,7 @@ ExpandoResult expando_word(string str, struct expando_targets what, ParContext c
 	size_t i = 0;
 	while(buff->data[i]){
 		if(capture_isquotstart(s) && !isescaped(s, buff->data)){ IfError_T(expando_quot(buff, &i, what, context), err, { return Error_T(expando_result, err); }); subjectopaexp = false; }
+		else if(capture_isarithstart(s) && !isescaped(s, buff->data)) IfError_T(expando_arith(buff, &i, what, context), err, { return Error_T(expando_result, err); });
 		else if(capture_isexpandostart(s) && !isescaped(s, buff->data)) IfError_T(expando_expando(buff, &i, what, context), err, { return Error_T(expando_result, err); });
 		else if(capture_isvariablestart(s) && !isescaped(s, buff->data)) IfError_T(expando_variable(buff, &i, what, context), err, { return Error_T(expando_result, err); });
 		else if(capture_istildestart(s) && !isescaped(s, buff->data)){ IfError_T(expando_tilde(buff, &i, what, context), err, { return Error_T(expando_result, err); }); subjectopaexp = false; }
