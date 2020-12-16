@@ -11,6 +11,7 @@
 #include <util/argsarr_mut.h>
 
 #define capture_isquotstart(str) (str && (str[0] == '\'' || str[0] == '"'))
+#define capture_isarithstart(str) (str && strpref("$((", str))
 #define capture_isexpandostart(str) (str && (str[0] == '`' || strpref("$(", str)))
 #define capture_isvariablestart(str) (str && (str[0] == '$'))
 #define capture_istildestart(str) (str && (str[0] == '~'))
@@ -22,6 +23,14 @@
  * @return @ref right after the end of subword, or null if capture error
  */
 string capture_quot(string str);
+
+/**
+ * Attempts to capture arithmetic group subword
+ * 
+ * @param str @ref string beginning with `$((`
+ * @return @ref right after the end of subword, or null if capture error
+ */
+string capture_arith(string str);
 
 /**
  * Attempts to capture expansion group subword

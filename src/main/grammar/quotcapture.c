@@ -18,8 +18,8 @@ string capture_quot(const string str){
 			if(!quot) return null;
 		} while(isescaped(quot, str));
 		for(string s = str+1; s < quot;){
-			if((capture_isexpandostart(s) || capture_isvariablestart(s)) && !isescaped(s, str)){
-				string expend = (capture_isexpandostart(s) ? capture_expando : capture_variable)(s);
+			if((capture_isarithstart(s) || capture_isexpandostart(s) || capture_isvariablestart(s)) && !isescaped(s, str)){
+				string expend = (capture_isarithstart(s) ? capture_arith : capture_isexpandostart(s) ? capture_expando : capture_variable)(s);
 				if(!expend) return null;
 				quot = strchr(expend, '"');
 				if(!quot) return null;
@@ -31,6 +31,25 @@ string capture_quot(const string str){
 	return null;
 }
 
+string capture_arith(const string str){
+	if(!str) return null;
+	if(strpref("$((", str)){
+		int bal = 2;
+		string s = str+3;
+		while(s && *s && bal > 0){
+			if(capture_isarithstart(s) && !isescaped(s, str)) s = capture_arith(s);
+			else if(capture_isexpandostart(s) && !isescaped(s, str)) s = capture_expando(s);
+			else if(capture_isvariablestart(s) && !isescaped(s, str)) s = capture_variable(s);
+			else {
+				if(!isescaped(s, str)) bal += *s == '(' ? 1 : *s == ')' ? -1 : 0;
+				s++;
+			}
+		}
+		return bal == 0 ? s : null;
+	}
+	return null;
+}
+
 string capture_expando(const string str){
 	if(!str) return null;
 	if(strpref("$(", str)){
@@ -38,6 +57,7 @@ string capture_expando(const string str){
 		string s = str+2;
 		while(s && *s && bal > 0){
 			if(capture_isquotstart(s) && !isescaped(s, str)) s = capture_quot(s);
+			else if(capture_isarithstart(s) && !isescaped(s, str)) s = capture_arith(s);
 			else if(capture_isexpandostart(s) && !isescaped(s, str)) s = capture_expando(s);
 			else if(capture_isvariablestart(s) && !isescaped(s, str)) s = capture_variable(s);
 			else {
@@ -83,6 +103,7 @@ string capture_word(const string str){
 	string s = str;
 	while(s && *s){
 		if(capture_isquotstart(s) && !isescaped(s, str)) s = capture_quot(s);
+		else if(capture_isarithstart(s) && !isescaped(s, str)) s = capture_arith(s);
 		else if(capture_isexpandostart(s) && !isescaped(s, str)) s = capture_expando(s);
 		else if(capture_isvariablestart(s) && !isescaped(s, str)) s = capture_variable(s);
 		else if(strchr(WSEPS, *s) && !isescaped(s, str)) break;
