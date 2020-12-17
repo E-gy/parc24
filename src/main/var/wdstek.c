@@ -88,12 +88,16 @@ string wdstack_get(WorkDirStack s, size_t depth){
 
 Result wdstack_changedir(WorkDirStack s, string dir){
 	if(!s || !dir) return Error;
-	if(!IsOk(chdir(dir))) return Error;
+	if(chdir(dir) < 0) return Error;
 	HistEl he = dirhel_captcur();
 	if(!he) return Error;
 	he->prev = s->history;
 	s->history = he;
 	return Ok;
+}
+
+Result wdstack_reapply(WorkDirStack s){
+	return !s || !s->history ? Error : chdir(s->history->dir) > 0 ? Error : Ok;
 }
 
 Result wdstack_goback(WorkDirStack s){

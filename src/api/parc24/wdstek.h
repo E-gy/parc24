@@ -35,6 +35,12 @@ string wdstack_get(WorkDirStack s, size_t depth);
 Result wdstack_changedir(WorkDirStack s, string dir);
 
 /**
+ * @param s @ref 
+ * @return Result 
+ */
+Result wdstack_reapply(WorkDirStack s);
+
+/**
  * @param s @refmut 
  * @return Result 
  */
