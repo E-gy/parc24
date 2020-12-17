@@ -2,7 +2,10 @@
 
 #include <ptypes.h>
 
+#ifndef _ARITH_DEF
+#define _ARITH_DEF
 typedef struct arith_calc* Arithmetics;
+#endif
 
 /**
  * @return @produces Arithmetics 
@@ -14,7 +17,8 @@ Arithmetics arith_new(void);
  */
 void arith_destroy(Arithmetics arith);
 
-Result_T(arith_result, double, string_v);
+typedef long long arithnum;
+Result_T(arith_result, arithnum, string_v);
 #define ArithResult struct arith_result
 
 /**
