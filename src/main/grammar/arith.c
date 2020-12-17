@@ -178,7 +178,7 @@ static ArithResult arith_travast(AST ast){
 		if(ast->d.group.cc == 1) return arith_travast(ast->d.group.children[0]);
 		ArithResult trl = arith_travast(ast->d.group.children[0]);
 		if(!IsOk_T(trl)) return trl;
-		if(trl.r.ok == 0) return trl;
+		if(trl.r.ok == 0) return Ok_T(arith_result, 1);
 		ArithResult trr = arith_travast(ast->d.group.children[2]);
 		if(!IsOk_T(trr)) return trr;
 		return Ok_T(arith_result, trl.r.ok && trr.r.ok);
@@ -187,7 +187,7 @@ static ArithResult arith_travast(AST ast){
 		if(ast->d.group.cc == 1) return arith_travast(ast->d.group.children[0]);
 		ArithResult trl = arith_travast(ast->d.group.children[0]);
 		if(!IsOk_T(trl)) return trl;
-		if(trl.r.ok != 0) return trl;
+		if(trl.r.ok != 0) return Ok_T(arith_result, 1);
 		ArithResult trr = arith_travast(ast->d.group.children[2]);
 		if(!IsOk_T(trr)) return trr;
 		return Ok_T(arith_result, trl.r.ok || trr.r.ok);
