@@ -16,6 +16,12 @@ void wdstack_destroy(WorkDirStack s);
 
 /**
  * @param s @ref 
+ * @return @produces 
+ */
+WorkDirStack wdstack_clone(WorkDirStack s);
+
+/**
+ * @param s @ref 
  * @param depth 
  * @return @nullable string 
  */

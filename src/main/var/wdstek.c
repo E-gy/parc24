@@ -14,6 +14,7 @@ struct dirhel {
 };
 
 static HistEl dirhel_new(string_mut dir){
+	if(!dir) return null;
 	new(HistEl, el);
 	*el = (struct dirhel){dir, null};
 	return el;
@@ -49,6 +50,21 @@ WorkDirStack wdstack_new(void){
 		return null;
 	}
 	return s;
+}
+
+WorkDirStack wdstack_clone(WorkDirStack s){
+	if(!s) return null;
+	new(WorkDirStack, ss);
+	ss->history = null;
+	HistEl* lh = &ss->history;
+	for(HistEl e = s->history; e; e = e->prev){
+		string_mut restr = strdup(e->dir);
+		if(!restr) retclean(null, { wdstack_destroy(ss); });
+		HistEl lhp = dirhel_new(restr);
+		if(!lhp) retclean(null, { free(restr); wdstack_destroy(ss); });
+		*lh = lhp;
+	}
+	return ss;
 }
 
 void wdstack_destroy(WorkDirStack s){
