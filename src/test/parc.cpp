@@ -188,6 +188,45 @@ SCENARIO("expansions", "[expando][full stack][parc]"){
 			REQUIRE_THAT(output, Equals(std::get<1>(exeo)));
 		}
 	}
+	GIVEN("arithmetics"){
+		THEN("division by 0 is error"){
+			auto exer = tihs_exestr("echo $((1 / 0))", &ctxt.ctxt);
+			REQUIRE(!IsOk_T(exer));
+			destrctxt(ctxt);
+			if(!IsOk_T(exethread_waitretcode(outread.r.ok))) FAIL("output read wait failed");
+		}
+		THEN("modulo by 0 is error"){
+			auto exer = tihs_exestr("echo $((1 % 0))", &ctxt.ctxt);
+			REQUIRE(!IsOk_T(exer));
+			destrctxt(ctxt);
+			if(!IsOk_T(exethread_waitretcode(outread.r.ok))) FAIL("output read wait failed");
+		}
+		THEN("&& is lazy"){
+			auto exer = tihs_exestr("echo -n $((!5 && 1/0))", &ctxt.ctxt);
+			REQUIRE(IsOk_T(exer));
+			destrctxt(ctxt);
+			if(!IsOk_T(exethread_waitretcode(outread.r.ok))) FAIL("output read wait failed");
+			REQUIRE(std::stol(output) == 0);
+		}
+		THEN("|| is lazy"){
+			auto exer = tihs_exestr("echo -n $((5 || 1/0))", &ctxt.ctxt);
+			REQUIRE(IsOk_T(exer));
+			destrctxt(ctxt);
+			if(!IsOk_T(exethread_waitretcode(outread.r.ok))) FAIL("output read wait failed");
+			REQUIRE(std::stol(output) == 1);
+		}
+		auto exeo = GENERATE(std::tuple<string, arithnum>{"0", 0}, std::tuple<string, arithnum>{"1", 1}, std::tuple<string, arithnum>{"-1", -1}, std::tuple<string, arithnum>{"!0", !0}, std::tuple<string, arithnum>{"~0", ~0}, std::tuple<string, arithnum>{"~1", ~1}, std::tuple<string, arithnum>{"1+1", 1+1}, std::tuple<string, arithnum>{"1*-3", 1*-3}, std::tuple<string, arithnum>{"2**2", 4}, std::tuple<string, arithnum>{"2 ** 3**2", 512}, std::tuple<string, arithnum>{"123|4000", 123|4000}, std::tuple<string, arithnum>{"123&4000", 123&4000}, std::tuple<string, arithnum>{"111 * (12-10)**4", 111*16}, std::tuple<string, arithnum>{"111 * (12-10)**3", 111*8}, std::tuple<string, arithnum>{"111 * -(12-10)**3", 111*-8});
+		CAPTURE(std::get<0>(exeo));
+		THEN("arithmetics does the math"){
+			std::stringstream exe;
+			exe << "echo -n $((" << std::get<0>(exeo) << "))";
+			auto exer = tihs_exestr(exe.str().c_str(), &ctxt.ctxt);
+			REQUIRE(IsOk_T(exer));
+			destrctxt(ctxt);
+			if(!IsOk_T(exethread_waitretcode(outread.r.ok))) FAIL("output read wait failed");
+			REQUIRE(std::stol(output) == std::get<1>(exeo));
+		}
+	}
 	GIVEN("command to expand"){
 		auto exeo = GENERATE(std::tuple<string, string>{"echo -n `echo -n hello there`", "hello there"}, std::tuple<string, string>{"echo -n $(echo -n hello there)", "hello there"}, std::tuple<string, string>{"echo -n $(echo -n `echo -n hello` $(echo -n there))", "hello there"});
 		CAPTURE(std::get<0>(exeo));
