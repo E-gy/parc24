@@ -50,7 +50,7 @@ static Group l1();
 DEF_GROUP(pOm, RULE(SYMBOL_T(plus)); RULE(SYMBOL_T(minus)))
 DEF_GROUP(tOd, RULE(SYMBOL_T(star)); RULE(SYMBOL_T(slash)); RULE(SYMBOL_T(percent)))
 DEF_GROUP(l0,
-	RULE(SYMBOL_G(ngn); SYMBOL_T(starstar); SYMBOL_G(l0));
+	RULEp(10, SYMBOL_G(ngn); SYMBOL_T(starstar); SYMBOL_G(l0));
 	RULE(SYMBOL_G(ngn))
 )
 DEF_GROUP(l1,
