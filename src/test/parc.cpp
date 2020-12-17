@@ -251,3 +251,60 @@ SCENARIO("expansions", "[expando][full stack][parc]"){
 	}
 	free(output);
 }
+
+SCENARIO("functions", "[functions][full stack][parc]"){
+	auto ctxt = initectxt();
+	string_mut output;
+	auto outread = parallels_readstr(ctxt.stdout_r, &output);
+	if(!IsOk_T(outread)) FAIL("output read setup failed");
+	GIVEN("function declaration"){
+		auto exer = tihs_exestr("function _ () { echo -n \"Hello World\"; }", &ctxt.ctxt);
+		REQUIRE(IsOk_T(exer));
+		THEN("function is added to the store"){
+			REQUIRE(funcstore_get(ctxt.ctxt.funcs, "_") != nullptr);
+			AND_WHEN("another function is declared"){
+				THEN("is is added too"){
+					auto exer = tihs_exestr("function gbb () { echo -n hwoof; }", &ctxt.ctxt);
+					REQUIRE(IsOk_T(exer));
+					REQUIRE(funcstore_get(ctxt.ctxt.funcs, "gbb") != nullptr);
+				}
+			}
+			destrctxt(ctxt);
+			if(!IsOk_T(exethread_waitretcode(outread.r.ok))) FAIL("output read wait failed");
+			REQUIRE_THAT(output, Equals(""));
+		}
+		AND_WHEN("it is overwritten"){
+			auto exer = tihs_exestr("function _ () { echo -n meow; }", &ctxt.ctxt);
+			REQUIRE(IsOk_T(exer));
+			THEN("function is added to the store"){
+				REQUIRE(funcstore_get(ctxt.ctxt.funcs, "_") != nullptr);
+				AND_THEN("executing it executes the override"){
+					auto exer = tihs_exestr("_", &ctxt.ctxt);
+					REQUIRE(IsOk_T(exer));
+					destrctxt(ctxt);
+					if(!IsOk_T(exethread_waitretcode(outread.r.ok))) FAIL("output read wait failed");
+					REQUIRE_THAT(output, Equals("meow"));
+				}
+			}
+		}
+	}
+	GIVEN("self invoking λ"){
+		THEN("it is added and immediately executed"){
+			auto exer = tihs_exestr("function _ () { echo -n \"Hello World\"; }; _", &ctxt.ctxt);
+			REQUIRE(IsOk_T(exer));
+			REQUIRE(funcstore_get(ctxt.ctxt.funcs, "_") != nullptr);
+			destrctxt(ctxt);
+			if(!IsOk_T(exethread_waitretcode(outread.r.ok))) FAIL("output read wait failed");
+			REQUIRE_THAT(output, Equals("Hello World"));
+		}
+		AND_GIVEN("that uses arguments"){
+			auto exer = tihs_exestr("function _ () { echo -n \"$1\"; }; _ 'Hello World'", &ctxt.ctxt);
+			REQUIRE(IsOk_T(exer));
+			REQUIRE(funcstore_get(ctxt.ctxt.funcs, "_") != nullptr);
+			destrctxt(ctxt);
+			if(!IsOk_T(exethread_waitretcode(outread.r.ok))) FAIL("output read wait failed");
+			REQUIRE_THAT(output, Equals("Hello World"));
+		}
+	}
+	free(output);
+}
