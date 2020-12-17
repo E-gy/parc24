@@ -3,6 +3,7 @@
 #include <util/string.h>
 #include <util/null.h>
 #include <util/buffer.h>
+#include <util/buffer_printf.h>
 #include <util/flist.h>
 #include <tihs/exe.h>
 #include <cppo.h>
@@ -90,10 +91,17 @@ ExpandoResult expando_arith(Buffer buff, size_t* si, struct expando_targets what
 			esi = 3;
 			eei = (rei=(i-*si))-2;
 		}
-		//TODO
-		buffer_delete(buff, (*si)+eei, (*si)+rei);
-		buffer_delete(buff, *si, (*si)+esi);
-		*si = i-3-2;
+		string_mut arithn = buffer_destr(buffer_new_from(str+esi, eei-esi));
+		if(!arithn) return Error_T(expando_result, {"failed to extract arithmetic expression"});
+		ArithResult ar = arith_eval(context->arith, arithn);
+		free(arithn);
+		if(!IsOk_T(ar)) return Error_T(expando_result, ar.r.error);
+		Buffer num = buffer_new(64);
+		if(!num) return Error_T(expando_result, {"failed to print arithmetic result"});
+		buffer_printf(num, "%d", ar.r.ok);
+		buffer_splice_str(buff, *si, (*si)+rei, num->data);
+		*si += num->size;
+		buffer_destroy(num);
 		return Ok_T(expando_result, null);
 	}
 	return Error_T(expando_result, {"not an arithmetic experssion"});
