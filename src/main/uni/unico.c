@@ -53,10 +53,12 @@ struct getvarv parcontext_getunivar(ParContext c, string v){
 		return varvcopy(buffer_destr(buff));
 	}
 	if(streq("PWD", v)){
-		Buffer buff = buffer_new(512);
-		getcwd(buff->data, buff->cap);
-		buff->size = strlen(buff->data);
-		return varvcopy(buffer_destr(buff));
+		string dir = wdstack_get(c->wd, 0);
+		return varvref(dir ? dir : "");
+	}
+	if(streq("OLDPWD", v)){
+		string dir = wdstack_get(c->wd, 1);
+		return varvref(dir ? dir : null);
 	}
 	#ifndef _WIN32
 	if(streq("UID", v)){
