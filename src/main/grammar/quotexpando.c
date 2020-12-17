@@ -225,16 +225,16 @@ ExpandoResult expando_word(string str, struct expando_targets what, ParContext c
 	bool subjectopaexp = what.path;
 	size_t i = 0;
 	while(buff->data[i]){
-		if(capture_isquotstart(s) && !isescaped(s, buff->data)){ IfError_T(expando_quot(buff, &i, what, context), err, { return Error_T(expando_result, err); }); subjectopaexp = false; }
-		else if(capture_isarithstart(s) && !isescaped(s, buff->data)) IfError_T(expando_arith(buff, &i, what, context), err, { return Error_T(expando_result, err); });
-		else if(capture_isexpandostart(s) && !isescaped(s, buff->data)) IfError_T(expando_expando(buff, &i, what, context), err, { return Error_T(expando_result, err); });
-		else if(capture_isvariablestart(s) && !isescaped(s, buff->data)) IfError_T(expando_variable(buff, &i, what, context), err, { return Error_T(expando_result, err); });
-		else if(capture_istildestart(s) && !isescaped(s, buff->data)){ IfError_T(expando_tilde(buff, &i, what, context), err, { return Error_T(expando_result, err); }); subjectopaexp = false; }
+		if(capture_isquotstart(s) && !isescaped(s, buff->data)){ IfError_T(expando_quot(buff, &i, what, context), err, { retclean(Error_T(expando_result, err), { buffer_destroy(buff); }); }); subjectopaexp = false; }
+		else if(capture_isarithstart(s) && !isescaped(s, buff->data)) IfError_T(expando_arith(buff, &i, what, context), err, { retclean(Error_T(expando_result, err), { buffer_destroy(buff); }); });
+		else if(capture_isexpandostart(s) && !isescaped(s, buff->data)) IfError_T(expando_expando(buff, &i, what, context), err, { retclean(Error_T(expando_result, err), { buffer_destroy(buff); }); });
+		else if(capture_isvariablestart(s) && !isescaped(s, buff->data)) IfError_T(expando_variable(buff, &i, what, context), err, { retclean(Error_T(expando_result, err), { buffer_destroy(buff); }); });
+		else if(capture_istildestart(s) && !isescaped(s, buff->data)){ IfError_T(expando_tilde(buff, &i, what, context), err, { retclean(Error_T(expando_result, err), { buffer_destroy(buff); }); }); subjectopaexp = false; }
 		else if(s[0] == '\\'){
 			i++;
 			if(!*s){
 				buffer_destroy(buff);
-				return Error_T(expando_result, {"\\ last character"});
+				retclean(Error_T(expando_result, {"\\ last character"}), { buffer_destroy(buff); });
 			}
 			buffer_delete(buff, i-1, i);
 		} else i++;
@@ -245,7 +245,7 @@ ExpandoResult expando_word(string str, struct expando_targets what, ParContext c
 			if(IsOk_T(patco)){
 				ArgsArr_Mut mf = files_list(patco.r.ok, *context->parcopts);
 				pattern_destroy(patco.r.ok);
-				if(mf->size > 0 || context->parcopts->nullglob) return Ok_T(expando_result, mf);
+				if(mf->size > 0 || context->parcopts->nullglob) retclean(Ok_T(expando_result, mf), {buffer_destroy(buff);});
 				argsarrmut_destroy(mf);
 			}
 		} else {
