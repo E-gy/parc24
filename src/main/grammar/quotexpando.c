@@ -81,7 +81,6 @@ ExpandoResult expando_arith(Buffer buff, size_t* si, struct expando_targets what
 			if(capture_isarithstart(s) && !isescaped(s, str)) IfError_T(expando_arith(buff, &i, what, context), err, { return Error_T(expando_result, err); });
 			else if(capture_isexpandostart(s) && !isescaped(s, str)) IfError_T(expando_expando(buff, &i, what, context), err, { return Error_T(expando_result, err); });
 			else if(capture_isvariablestart(s) && !isescaped(s, str)) IfError_T(expando_variable(buff, &i, what, context), err, { return Error_T(expando_result, err); });
-			else if(capture_istildestart(s) && !isescaped(s, str)) IfError_T(expando_tilde(buff, &i, what, context), err, { return Error_T(expando_result, err); });
 			else {
 				if(!isescaped(s, str)) bal += *s == '(' ? 1 : *s == ')' ? -1 : 0;
 				i++;
