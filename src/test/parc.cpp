@@ -41,7 +41,7 @@ struct parctesting {
 		string_mut noargs[] = {null}; \
 		auto vars = varstore_new(); \
 		(struct parctesting){ p0r.r.ok.write, p1r.r.ok.read, p2r.r.ok.read, { \
-			vars, vars, funcstore_new(), ccmds, aliastore_new(), ios, patcomp_new(), arith_new(), \
+			vars, vars, funcstore_new(), ccmds, aliastore_new(), ios, wdstack_new(), patcomp_new(), arith_new(), \
 			"parc", noargs, 0, false, &parcopts, \
 			parcer_defolt_new() \
 		}}; \
@@ -54,6 +54,7 @@ struct parctesting {
 		ccmdstore_destroy(context.ctxt.ccmds); \
 		funcstore_destroy(context.ctxt.funcs); \
 		varstore_destroy(context.ctxt.vars); \
+		wdstack_destroy(context.ctxt.wd); \
 		parser_destroy(context.ctxt.parcer); \
 		iosstack_destroy(context.ctxt.ios); \
 	} while(0)

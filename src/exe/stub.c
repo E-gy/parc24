@@ -30,6 +30,11 @@ int main(ATTR_UNUSED int argc, argsarr args){
 		parciolog(ios, LL_CRITICAL, "Failed to initalize parser. Report logs to CALP, thx.");
 		return 1;
 	}
+	WorkDirStack wd = wdstack_new();
+	if(!wd){
+		parciolog(ios, LL_CRITICAL, "Failed to create work dir stack");
+		return 1;
+	}
 	VarStore vars = varstore_new();
 	if(!vars || !IsOk(varstore_add(vars, "IFS", " \t\n"))){
 		parciolog(ios, LL_CRITICAL, "Failed to initialize variables store");
@@ -74,7 +79,7 @@ int main(ATTR_UNUSED int argc, argsarr args){
 		parciolog(ios, LL_CRITICAL, "Failed to create arithmetics calculator");
 		return 1;
 	}
-	struct parcontext ctxt = {vars, vars, funcs, ccmds, aliases, ios, patco, arith, args[0], opts.args, 0, false, &opts.parcopts, parcer};
+	struct parcontext ctxt = {vars, vars, funcs, ccmds, aliases, ios, wd, patco, arith, args[0], opts.args, 0, false, &opts.parcopts, parcer};
 	if(opts.commandstr || opts.commandfile){
 		string_mut str = opts.commandstr;
 		if(!(str = opts.commandstr)){
@@ -111,6 +116,7 @@ int main(ATTR_UNUSED int argc, argsarr args){
 	ccmdstore_destroy(ccmds);
 	funcstore_destroy(funcs);
 	varstore_destroy(vars);
+	wdstack_destroy(wd);
 	parser_destroy(parcer);
 	iosstack_destroy(ios);
 }

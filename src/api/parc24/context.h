@@ -7,6 +7,7 @@
 #include "ccmdstore.h"
 #include "aliastore.h"
 #include "iosstack.h"
+#include "wdstek.h"
 #include "options.h"
 #include "patterns.h"
 #include "arith.h"
@@ -20,6 +21,7 @@ struct parcontext {
 	/** @ref */ CCMDStore ccmds;
 	/** @ref */ AliasStore aliases;
 	/** @ref */ IOsStack ios;
+	/** @ref */ WorkDirStack wd;
 	/** @ref */ PatternCompiler patcomp;
 	/** @ref */ Arithmetics arith;
 	string currexe;
