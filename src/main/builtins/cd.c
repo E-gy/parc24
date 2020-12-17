@@ -19,24 +19,16 @@ TraverseASTResult cmd_cd(argsarr args, ParContext context){
 	struct getvarv home = parcontext_getunivar(context, "HOME");
 	string dst = args[1] ? args[1] : home.v.ref;
 	if(streq("~", dst)) dst = home.v.ref;
-	if(streq("-", dst)) dst = varstore_get(context->vars, "OLDPWD");
+	if(streq("-", dst)) if(!(dst = wdstack_get(context->wd, 1))) retclean(Ok_T(travast_result, {TRAV_COMPLETED, {.completed = 0}}), { if(home.copy) free(home.v.copy); } );
 	if(!*dst) retclean(Ok_T(travast_result, {TRAV_COMPLETED, {.completed = 1}}), { if(home.copy) free(home.v.copy); } );
-	char opwd[PATH_MAX];
-	if(!getcwd(opwd, PATH_MAX)) retclean(Ok_T(travast_result, {TRAV_COMPLETED, {.completed = 2}}), { if(home.copy) free(home.v.copy); });
-	Buffer buff = buffer_new(PATH_MAX);
-	if(isabs(dst)) buffer_append_str(buff, dst);
-	else buffer_printf(buff, "%s/%s", opwd, dst);
+	Result ok = wdstack_changedir(context->wd, dst);
 	if(home.copy) free(home.v.copy);
-	int chok = chdir(buff->data);
-	buffer_destroy(buff);
-	if(chok < 0) return Ok_T(travast_result, {TRAV_COMPLETED, {.completed = 1}});
-	varstore_add(context->vars_cmus, "OLDPWD", opwd);
-	return Ok_T(travast_result, {TRAV_COMPLETED, {.completed = 0}});
+	return Ok_T(travast_result, {TRAV_COMPLETED, {.completed = IsOk(ok) ? 0 : 1}});
 }
 
 TraverseASTResult cmd_pwd( ATTR_UNUSED argsarr args, ParContext context){
-	char cwd[PATH_MAX];
-	if(getcwd(cwd, PATH_MAX)) parciolog(context->ios, LL_INFO, cwd);
+	string cwd = wdstack_get(context->wd, 0);
+	if(cwd) parciolog(context->ios, LL_INFO, cwd);
 	else return Ok_T(travast_result, {TRAV_COMPLETED, {.completed = 2}});
 	return Ok_T(travast_result, {TRAV_COMPLETED, {.completed = 0}});
 }
