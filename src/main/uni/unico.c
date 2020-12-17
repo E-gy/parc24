@@ -92,7 +92,7 @@ TraverseASTResult parcontext_unixec(argsarr args, ParContext ctxt){
 	if(fun){
 		struct parcontext fctxt = *ctxt;
 		fctxt.currexe = args[0];
-		fctxt.args = args;
+		fctxt.args = args+1;
 		fctxt.ios = iosstack_snapdup(fctxt.ios);
 		TraverseASTResult tfr = traverse_ast(fun, &fctxt);
 		iosstack_destroy(fctxt.ios);
