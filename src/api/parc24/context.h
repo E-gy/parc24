@@ -9,6 +9,7 @@
 #include "iosstack.h"
 #include "options.h"
 #include "patterns.h"
+#include "arith.h"
 #include <cppo/types.h>
 #include <calp/parser.h>
 
@@ -20,6 +21,7 @@ struct parcontext {
 	/** @ref */ AliasStore aliases;
 	/** @ref */ IOsStack ios;
 	/** @ref */ PatternCompiler patcomp;
+	/** @ref */ Arithmetics arith;
 	string currexe;
 	argsarr args;
 	int lastexit;

@@ -41,13 +41,14 @@ struct parctesting {
 		string_mut noargs[] = {null}; \
 		auto vars = varstore_new(); \
 		(struct parctesting){ p0r.r.ok.write, p1r.r.ok.read, p2r.r.ok.read, { \
-			vars, vars, funcstore_new(), ccmds, aliastore_new(), ios, patcomp_new(), \
+			vars, vars, funcstore_new(), ccmds, aliastore_new(), ios, patcomp_new(), arith_new(), \
 			"parc", noargs, 0, false, &parcopts, \
 			parcer_defolt_new() \
 		}}; \
 	})
 
 #define destrctxt(context) do { \
+		arith_destroy(context.ctxt.arith); \
 		patcomp_destroy(context.ctxt.patcomp); \
 		aliastore_destroy(context.ctxt.aliases); \
 		ccmdstore_destroy(context.ctxt.ccmds); \

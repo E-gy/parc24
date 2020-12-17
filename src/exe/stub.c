@@ -69,7 +69,12 @@ int main(ATTR_UNUSED int argc, argsarr args){
 		parciolog(ios, LL_CRITICAL, "Failed to create aliases store");
 		return 1;
 	}
-	struct parcontext ctxt = {vars, vars, funcs, ccmds, aliases, ios, patco, args[0], opts.args, 0, false, &opts.parcopts, parcer};
+	Arithmetics arith = arith_new();
+	if(!arith){
+		parciolog(ios, LL_CRITICAL, "Failed to create arithmetics calculator");
+		return 1;
+	}
+	struct parcontext ctxt = {vars, vars, funcs, ccmds, aliases, ios, patco, arith, args[0], opts.args, 0, false, &opts.parcopts, parcer};
 	if(opts.commandstr || opts.commandfile){
 		string_mut str = opts.commandstr;
 		if(!(str = opts.commandstr)){
@@ -100,6 +105,7 @@ int main(ATTR_UNUSED int argc, argsarr args){
 			parciolog(ios, LL_ERROR, "Failed to read from standard input - %s", err.s);
 		});
 	}
+	arith_destroy(arith);
 	patcomp_destroy(patco);
 	aliastore_destroy(aliases);
 	ccmdstore_destroy(ccmds);
