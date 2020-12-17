@@ -18,11 +18,12 @@ typedef Parser Arithmetics;
 DEF_SYMBOL_TERMINAL(eof, { return !*str ? str : null; })
 // DEF_SYMBOL_TERMINAL(s0, { return str ? str : null; })
 DEF_SYMBOL_TERMINAL(number, {
-	// if(!isdigit(*str)){
-	// 	if(*str != '-') return NULL;
-	// 	str++;
-	// 	if(!isdigit(*str)) return NULL;
-	// }
+	if(!str || !isdigit(*str)) return null;
+	/*if(!isdigit(*str)){
+		if(*str != '-') return NULL;
+		str++;
+		if(!isdigit(*str)) return NULL;
+	}*/
 	for(; isdigit(*str); str++);
 	return str;
 })
@@ -135,8 +136,10 @@ static ArithResult arith_travast(AST ast){
 		if(!IsOk_T(trl)) return trl;
 		ArithResult trr = arith_travast(ast->d.group.children[2]);
 		if(!IsOk_T(trr)) return trr;
-		TerminalSymbolId op = ast->d.group.children[1]->d.leaf.symbolId;
-		return Ok_T(arith_result, op == plus ? trl.r.ok + trr.r.ok : trl.r.ok - trr.r.ok);
+		TerminalSymbolId op = ast->d.group.children[1]->d.group.children[0]->d.leaf.symbolId;
+		if(op == slash && trr.r.ok == 0) return Error_T(arith_result, {"division by 0"});
+		if(op == percent && trr.r.ok == 0) return Error_T(arith_result, {"modulo by 0"});
+		return Ok_T(arith_result, op == star ? trl.r.ok * trr.r.ok : op == slash ? trl.r.ok / trr.r.ok : trl.r.ok % trr.r.ok);
 	}
 	if(gid == l2){
 		if(ast->d.group.cc == 1) return arith_travast(ast->d.group.children[0]);
@@ -144,10 +147,8 @@ static ArithResult arith_travast(AST ast){
 		if(!IsOk_T(trl)) return trl;
 		ArithResult trr = arith_travast(ast->d.group.children[2]);
 		if(!IsOk_T(trr)) return trr;
-		TerminalSymbolId op = ast->d.group.children[1]->d.leaf.symbolId;
-		if(op == slash && trr.r.ok == 0) return Error_T(arith_result, {"division by 0"});
-		if(op == percent && trr.r.ok == 0) return Error_T(arith_result, {"modulo by 0"});
-		return Ok_T(arith_result, op == star ? trl.r.ok * trr.r.ok : op == slash ? trl.r.ok / trr.r.ok : trl.r.ok % trr.r.ok);
+		TerminalSymbolId op = ast->d.group.children[1]->d.group.children[0]->d.leaf.symbolId;
+		return Ok_T(arith_result, op == plus ? trl.r.ok + trr.r.ok : trl.r.ok - trr.r.ok);
 	}
 	if(gid == l3){
 		if(ast->d.group.cc == 1) return arith_travast(ast->d.group.children[0]);
@@ -199,6 +200,7 @@ static ArithResult arith_travast(AST ast){
 		TerminalSymbolId op = ast->d.group.children[0]->d.leaf.symbolId;
 		return Ok_T(arith_result, op == minus ? -trn.r.ok : op == excl ? !trn.r.ok : op == tilde ? ~trn.r.ok : trn.r.ok);
 	}
+	if(gid == entry) return arith_travast(ast->d.group.children[0]);
 	return Error_T(arith_result, {"AST (group) not recognized"});
 }
 
