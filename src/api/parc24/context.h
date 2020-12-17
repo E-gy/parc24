@@ -45,6 +45,22 @@ struct getvarv {
 };
 
 /**
+ * 
+ * Dups `vars`, `funcs`, `aliases`, `wd`, and `parcopts`.
+ * 
+ * @param context @refmut 
+ * @return Result 
+ */
+Result parcontext_subco_all(ParContext context);
+
+/**
+ * Destroys `vars`, `funcs`, `aliases`, `wd`, and `parcopts`.
+ * 
+ * @param context @refmut 
+ */
+void parcontext_subco_destroy(ParContext context);
+
+/**
  * @param context @ref
  * @param variable @ref 
  * @return @produces value

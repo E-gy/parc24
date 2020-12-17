@@ -180,3 +180,33 @@ TraverseASTResult parcontext_uniwait(TraverseASTResult r){
 		default: return r;
 	}
 }
+
+Result parcontext_subco_all(ParContext c){
+	if(!c) return Error;
+	c->vars = null;
+	c->funcs = null;
+	c->aliases = null;
+	c->wd = null;
+	c->parcopts = null;
+	c->vars = varstore_clone(c->vars);
+	c->funcs = funcstore_clone(c->funcs);
+	c->aliases = aliastore_clone(c->aliases);
+	c->wd = wdstack_clone(c->wd);
+	struct parc_options o = *c->parcopts;
+	c->parcopts = malloc(sizeof(*c->parcopts));
+	if(!c->vars || !c->funcs || !c->aliases || !c->wd || !c->parcopts){
+		parcontext_subco_destroy(c);
+		return Error;
+	}
+	*(c->parcopts) = o;
+	return Ok;
+}
+
+void parcontext_subco_destroy(ParContext c){
+	if(!c) return;
+	varstore_destroy(c->vars);
+	funcstore_destroy(c->funcs);
+	aliastore_destroy(c->aliases);
+	wdstack_destroy(c->wd);
+	free(c->parcopts);
+}
