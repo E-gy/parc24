@@ -25,6 +25,7 @@ static int dothething(struct tihsopts opts, ParContext ctxt){
 			str = buffer_destr(buff.r.ok);
 		}
 		TihsExeResult exer = tihs_exestr(str, ctxt);
+		free(str);
 		IfError_T(exer, err, {
 			parciolog(ctxt->ios, LL_ERROR, "Execution error - %s", err.s);
 			return 1;
@@ -38,6 +39,7 @@ static int dothething(struct tihsopts opts, ParContext ctxt){
 		IfElse_T(parcio_derp_std_read(), line, {
 			if(!line) return ctxt->lastexit;
 			TihsExeResult exer = tihs_exestr(line, ctxt);
+			free(line);
 			IfError_T(exer, err, { parciolog(ctxt->ios, LL_ERROR, "Execution error - %s", err.s); });
 			IfOk_T(exer, ec, { ctxt->lastexit = ec.code; exit = ec.exit; });
 		}, err, {
