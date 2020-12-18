@@ -152,8 +152,11 @@ ExpandoResult expando_expando(Buffer buff, size_t* si, struct expando_targets wh
 		struct parcontext cctxt = *context;
 		if(!(cctxt.ios = iosstack_snapdup(cctxt.ios))) retclean(Error_T(expando_result, {"failed to snapshot IO"}), {close(pipe.r.ok.write); thread_waitret(reader.r.ok);});
 		iostack_io_open(cctxt.ios, IOSTREAM_STD_OUT, pipe.r.ok.write);
+		if(!IsOk(parcontext_subco_all(&cctxt))) retclean(Error_T(expando_result, {"failed to subcontext"}), { iosstack_destroy(cctxt.ios); thread_waitret(reader.r.ok); });
 		TihsExeResult captr = tihs_exestr(capt, &cctxt);
 		free(capt);
+		parcontext_subco_destroy(&cctxt);
+		wdstack_reapply(context->wd);
 		iosstack_destroy(cctxt.ios);
 		ThreadWaitResult captvw = thread_waitret(reader.r.ok);
 		if(!IsOk_T(captr)) retclean(Error_T(expando_result, captr.r.error), {free(captv);});
