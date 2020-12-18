@@ -68,6 +68,7 @@ struct expando_targets {
 #define expando_targets_all ((struct expando_targets){ .tilde = true, .parvar = true, .arithmetics = true, .command = true, .process = true, .path = true, .quot = true })
 #define expando_targets_quot ((struct expando_targets){.quot=true})
 #define expando_targets_parc ((struct expando_targets){.parvar=true, .arithmetics = true, .command = true})
+#define expando_targets_patt ((struct expando_targets){.tilde = true, .parvar = true, .arithmetics = true, .command = true, .process = true, .quot = true})
 
 Result_T(expando_result, ArgsArr_Mut, string_v);
 #define ExpandoResult struct expando_result

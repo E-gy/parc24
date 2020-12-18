@@ -621,7 +621,7 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 		AST cases = ast->d.group.children[5];
 		AST cc = cases->d.group.children[0];
 		do {
-			ExpandoResult ccp0a = expando_word(cc->d.group.children[1]->d.leaf.val, expando_targets_all, ctxt);
+			ExpandoResult ccp0a = expando_word(cc->d.group.children[1]->d.leaf.val, expando_targets_patt, ctxt);
 			if(!IsOk_T(ccp0a)) return captclean(Error_T(travast_result, {"failed to expand case pattern"}), {free(mv);});
 			arrmuttake1(ccp0, ccp0a.r.ok, {});
 			PatCompResult patr = pattern_compile(ctxt->patcomp, ccp0, *ctxt->parcopts);
