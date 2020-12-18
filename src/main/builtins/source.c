@@ -17,7 +17,7 @@ TraverseASTResult cmd_source(argsarr args, ParContext context){
 	if(args[2]) cctxt.args = args+2;
 	TihsExeResult exer = tihs_exestr(buff.r.ok->data, &cctxt);
 	buffer_destroy(buff.r.ok);
-	if(!IsOk_T(buff)){
+	if(!IsOk_T(exer)){
 		parciolog(context->ios, LL_ERROR, "%s: execution error: ", args[1], exer.r.error);
 		return Ok_T(travast_result, {TRAV_COMPLETED, {.completed = 2}});
 	}
