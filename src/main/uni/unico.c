@@ -181,18 +181,16 @@ TraverseASTResult parcontext_uniwait(TraverseASTResult r){
 	}
 }
 
+#define closwp(prop, clo) do { __typeof__ (prop) _p = clo(prop); prop = _p; } while(0)
+
 Result parcontext_subco_all(ParContext c){
 	if(!c) return Error;
-	c->vars = null;
-	c->funcs = null;
-	c->aliases = null;
-	c->wd = null;
-	c->parcopts = null;
-	c->vars = varstore_clone(c->vars);
-	c->funcs = funcstore_clone(c->funcs);
-	c->aliases = aliastore_clone(c->aliases);
-	c->wd = wdstack_clone(c->wd);
+	closwp(c->vars, varstore_clone);
+	closwp(c->funcs, funcstore_clone);
+	closwp(c->aliases, aliastore_clone);
+	closwp(c->wd, wdstack_clone);
 	struct parc_options o = *c->parcopts;
+	c->parcopts = null;
 	c->parcopts = malloc(sizeof(*c->parcopts));
 	if(!c->vars || !c->funcs || !c->aliases || !c->wd || !c->parcopts){
 		parcontext_subco_destroy(c);
