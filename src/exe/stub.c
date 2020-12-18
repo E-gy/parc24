@@ -58,6 +58,8 @@ int main(ATTR_UNUSED int argc, argsarr args){
 		!IsOk(ccmdstore_set(ccmds, "unalias", cmd_unalias)) ||
 		!IsOk(ccmdstore_set(ccmds, "cd", cmd_cd)) ||
 		!IsOk(ccmdstore_set(ccmds, "pwd", cmd_pwd)) ||
+		!IsOk(ccmdstore_set(ccmds, "source", cmd_source)) ||
+		!IsOk(ccmdstore_set(ccmds, ".", cmd_source)) ||
 		!IsOk(ccmdstore_set(ccmds, "echo", cmd_echo)) ||
 		!IsOk(ccmdstore_set(ccmds, "shopt", cmd_shopt))
 	){

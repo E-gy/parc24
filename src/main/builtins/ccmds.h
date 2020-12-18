@@ -15,3 +15,5 @@ TraverseASTResult cmd_unalias(argsarr args, ParContext context);
 
 TraverseASTResult cmd_echo(argsarr args, ParContext context);
 TraverseASTResult cmd_shopt(argsarr args, ParContext context);
+
+TraverseASTResult cmd_source(argsarr args, ParContext context);
