@@ -14,7 +14,7 @@ jobs:
       run: cmake -E make_directory ${{runner.workspace}}/build
     - name: Install Utilities
       shell: bash
-      run: sudo apt-get install -y lcov valgrind
+      run: sudo apt-get update && sudo apt-get install -y lcov valgrind
     - name: Configure CMake
       shell: bash
       working-directory: ${{runner.workspace}}/build
