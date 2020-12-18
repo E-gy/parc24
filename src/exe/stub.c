@@ -13,6 +13,40 @@
 
 ParC24IOReadResult parcio_derp_std_read(void);
 
+static int dothething(struct tihsopts opts, ParContext ctxt){
+	if(opts.commandstr || opts.commandfile){
+		string_mut str = opts.commandstr;
+		if(!(str = opts.commandstr)){
+			BufferResult buff = buffer_from_file(opts.commandfile);
+			IfError_T(buff, err, {
+				parciolog(ctxt->ios, LL_ERROR, "Failed to read file - %s", err.s);
+				return 1;
+			});
+			str = buffer_destr(buff.r.ok);
+		}
+		TihsExeResult exer = tihs_exestr(str, ctxt);
+		IfError_T(exer, err, {
+			parciolog(ctxt->ios, LL_ERROR, "Execution error - %s", err.s);
+			return 1;
+		});
+		return exer.r.ok.code;
+	} else for(bool exit = false; !exit;){
+		if(isatty(STDIN_FILENO)){ //FIXME shouldn't `io` be used for that..?
+			printf("42sh> ");
+			fflush(stdout);
+		}
+		IfElse_T(parcio_derp_std_read(), line, {
+			if(!line) return ctxt->lastexit;
+			TihsExeResult exer = tihs_exestr(line, ctxt);
+			IfError_T(exer, err, { parciolog(ctxt->ios, LL_ERROR, "Execution error - %s", err.s); });
+			IfOk_T(exer, ec, { ctxt->lastexit = ec.code; exit = ec.exit; });
+		}, err, {
+			parciolog(ctxt->ios, LL_ERROR, "Failed to read from standard input - %s", err.s);
+		});
+	}
+	return 0;
+}
+
 int main(ATTR_UNUSED int argc, argsarr args){
 	IOsStack ios = parcio_new_fromstd();
 	if(!ios){
@@ -82,36 +116,7 @@ int main(ATTR_UNUSED int argc, argsarr args){
 		return 1;
 	}
 	struct parcontext ctxt = {vars, vars, funcs, ccmds, aliases, ios, wd, patco, arith, args[0], opts.args, 0, false, &opts.parcopts, parcer};
-	if(opts.commandstr || opts.commandfile){
-		string_mut str = opts.commandstr;
-		if(!(str = opts.commandstr)){
-			BufferResult buff = buffer_from_file(opts.commandfile);
-			IfError_T(buff, err, {
-				parciolog(ios, LL_ERROR, "Failed to read file - %s", err.s);
-				return 1;
-			});
-			str = buffer_destr(buff.r.ok);
-		}
-		TihsExeResult exer = tihs_exestr(str, &ctxt);
-		IfError_T(exer, err, {
-			parciolog(ios, LL_ERROR, "Execution error - %s", err.s);
-			return 1;
-		});
-		return exer.r.ok.code;
-	} else for(bool exit = false; !exit;){
-		if(isatty(STDIN_FILENO)){ //FIXME shouldn't `io` be used for that..?
-			printf("42sh> ");
-			fflush(stdout);
-		}
-		IfElse_T(parcio_derp_std_read(), line, {
-			if(!line) return ctxt.lastexit;
-			TihsExeResult exer = tihs_exestr(line, &ctxt);
-			IfError_T(exer, err, { parciolog(ios, LL_ERROR, "Execution error - %s", err.s); });
-			IfOk_T(exer, ec, { ctxt.lastexit = ec.code; exit = ec.exit; });
-		}, err, {
-			parciolog(ios, LL_ERROR, "Failed to read from standard input - %s", err.s);
-		});
-	}
+	int ec = dothething(opts, &ctxt);
 	arith_destroy(arith);
 	patcomp_destroy(patco);
 	aliastore_destroy(aliases);
@@ -121,4 +126,5 @@ int main(ATTR_UNUSED int argc, argsarr args){
 	wdstack_destroy(wd);
 	parser_destroy(parcer);
 	iosstack_destroy(ios);
+	return ec;
 }
