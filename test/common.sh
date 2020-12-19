@@ -30,3 +30,24 @@ function asserteq(){
 function assertout(){
 	asserteq "$output" "$1"
 }
+
+function testagainstbash(){
+	TMPF=$(mktemp)
+	cat - >$TMPF
+	expected_o=$(bash "$@" <$TMPF)
+	expected_c=$?
+	run 42test "$@" <$TMPF
+	rm $TMPF
+	err=0
+	if [ $status -ne $expected_c ]; then
+		echo "expected: $expected_c"
+		echo "got: $status"
+		err=1
+	fi
+	if [ "$output" != "$expected_o" ]; then
+		echo "expected: $expected_o"
+		echo "got: $output"
+		err=1
+	fi
+	return $err
+}
