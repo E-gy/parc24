@@ -47,19 +47,19 @@ ExpandoResult expando_quot(Buffer buff, size_t* si, struct expando_targets what,
 					*si = i;
 					return Ok_T(expando_result, null);
 				}
-				if(capture_isarithstart(s)){
+				if(what.arithmetics&& capture_isarithstart(s)){
 					IfError_T(expando_arith(buff, &i, what, context), err, { return Error_T(expando_result, err); });
 					break;
 				} else
-				if(capture_isexpandostart(s)){
+				if(what.command && capture_isexpandostart(s)){
 					IfError_T(expando_expando(buff, &i, what, context), err, { return Error_T(expando_result, err); });
 					break;
 				} else
-				if(capture_isvariablestart(s)){
+				if(what.parvar && capture_isvariablestart(s)){
 					IfError_T(expando_variable(buff, &i, what, context), err, { return Error_T(expando_result, err); });
 					break;
 				} else
-				if(capture_istildestart(s)){
+				if(what.tilde && capture_istildestart(s)){
 					IfError_T(expando_tilde(buff, &i, what, context), err, { return Error_T(expando_result, err); });
 					break;
 				} else if(strpref("\\$", s) || strpref("\\`", s) || strpref("\\\"", s) || strpref("\\\\", s) || strpref("\\\n", s)){
@@ -86,9 +86,9 @@ ExpandoResult expando_arith(Buffer buff, size_t* si, struct expando_targets what
 		int bal = 2;
 		size_t i = (*si)+3;
 		while(*s && bal > 0){
-			if(capture_isarithstart(s)) IfError_T(expando_arith(buff, &i, what, context), err, { return Error_T(expando_result, err); });
-			else if(capture_isexpandostart(s)) IfError_T(expando_expando(buff, &i, what, context), err, { return Error_T(expando_result, err); });
-			else if(char_isvarstart(s[0])) IfError_T(expando_variable_f(buff, &i, what, context, true), err, { return Error_T(expando_result, err); });
+			if(what.arithmetics && capture_isarithstart(s)) IfError_T(expando_arith(buff, &i, what, context), err, { return Error_T(expando_result, err); });
+			else if(what.command && capture_isexpandostart(s)) IfError_T(expando_expando(buff, &i, what, context), err, { return Error_T(expando_result, err); });
+			else if(what.parvar && char_isvarstart(s[0])) IfError_T(expando_variable_f(buff, &i, what, context, true), err, { return Error_T(expando_result, err); });
 			else {
 				if(!isescaped(s, str)) bal += *s == '(' ? 1 : *s == ')' ? -1 : 0;
 				i++;
@@ -122,9 +122,9 @@ ExpandoResult expando_expando(Buffer buff, size_t* si, ATTR_UNUSED struct expand
 		int bal = 1;
 		size_t i = (*si)+2;
 		while(*s && bal > 0){
-			if(capture_isquotstart(s) && !isescaped(s, str)) captsmort(capture_quot);
-			else if(capture_isarithstart(s) && !isescaped(s, str)) captsmort(capture_arith);
-			else if(capture_isexpandostart(s) && !isescaped(s, str)) captsmort(capture_expando);
+			if(what.quot && capture_isquotstart(s) && !isescaped(s, str)) captsmort(capture_quot);
+			else if(what.arithmetics && capture_isarithstart(s) && !isescaped(s, str)) captsmort(capture_arith);
+			else if(what.command && capture_isexpandostart(s) && !isescaped(s, str)) captsmort(capture_expando);
 			else {
 				if(!isescaped(s, str)) bal += *s == '(' ? 1 : *s == ')' ? -1 : 0;
 				i++;
@@ -243,11 +243,11 @@ ExpandoResult expando_word(string str, struct expando_targets what, ParContext c
 	bool subjectopaexp = what.path;
 	size_t i = 0;
 	while(buff->data[i]){
-		if(capture_isquotstart(s) && !isescaped(s, buff->data)){ IfError_T(expando_quot(buff, &i, what, context), err, { retclean(Error_T(expando_result, err), { buffer_destroy(buff); }); }); subjectopaexp = false; }
-		else if(capture_isarithstart(s) && !isescaped(s, buff->data)) IfError_T(expando_arith(buff, &i, what, context), err, { retclean(Error_T(expando_result, err), { buffer_destroy(buff); }); });
-		else if(capture_isexpandostart(s) && !isescaped(s, buff->data)) IfError_T(expando_expando(buff, &i, what, context), err, { retclean(Error_T(expando_result, err), { buffer_destroy(buff); }); });
-		else if(capture_isvariablestart(s) && !isescaped(s, buff->data)) IfError_T(expando_variable(buff, &i, what, context), err, { retclean(Error_T(expando_result, err), { buffer_destroy(buff); }); });
-		else if(capture_istildestart(s) && !isescaped(s, buff->data)){ IfError_T(expando_tilde(buff, &i, what, context), err, { retclean(Error_T(expando_result, err), { buffer_destroy(buff); }); }); subjectopaexp = false; }
+		if(what.quot && capture_isquotstart(s) && !isescaped(s, buff->data)){ IfError_T(expando_quot(buff, &i, what, context), err, { retclean(Error_T(expando_result, err), { buffer_destroy(buff); }); }); subjectopaexp = false; }
+		else if(what.arithmetics && capture_isarithstart(s) && !isescaped(s, buff->data)) IfError_T(expando_arith(buff, &i, what, context), err, { retclean(Error_T(expando_result, err), { buffer_destroy(buff); }); });
+		else if(what.command && capture_isexpandostart(s) && !isescaped(s, buff->data)) IfError_T(expando_expando(buff, &i, what, context), err, { retclean(Error_T(expando_result, err), { buffer_destroy(buff); }); });
+		else if(what.parvar && capture_isvariablestart(s) && !isescaped(s, buff->data)) IfError_T(expando_variable(buff, &i, what, context), err, { retclean(Error_T(expando_result, err), { buffer_destroy(buff); }); });
+		else if(what.tilde && capture_istildestart(s) && !isescaped(s, buff->data)){ IfError_T(expando_tilde(buff, &i, what, context), err, { retclean(Error_T(expando_result, err), { buffer_destroy(buff); }); }); subjectopaexp = false; }
 		else if(s[0] == '\\'){
 			i++;
 			if(!*s){
