@@ -240,7 +240,7 @@ DEF_GKLEENE(blok_case_case_rec, SYMBOL_T(vpip); SYMBOL_T(word))
 DEF_GOPT(cmdlist_l3ext_opt, RULE(SYMBOL_G(cmdlist_l3ext)))
 DEF_GROUP(blok_case_case, RULE(SYMBOL_G(parl_opt); SYMBOL_T(word); SYMBOL_G(blok_case_case_rec); SYMBOL_T(parr); SYMBOL_G(newlines); SYMBOL_G(cmdlist_l3ext_opt)))
 DEF_GKLEENE(blok_case_s_rec, SYMBOL_T(scolscol); SYMBOL_G(newlines); SYMBOL_G(blok_case_case))
-DEF_GROUP(blok_case_s, RULE(SYMBOL_G(blok_case_case); SYMBOL_G(blok_case_s_rec); SYMBOL_G(scolscol_opt); SYMBOL_G(newlines)))
+DEF_GOPT(blok_case_s, RULE(SYMBOL_G(blok_case_case); SYMBOL_G(blok_case_s_rec); SYMBOL_G(scolscol_opt); SYMBOL_G(newlines)))
 DEF_GROUP(blok_case, RULE(SYMBOL_T(sp_case); SYMBOL_T(word); SYMBOL_G(newlines); SYMBOL_T(sp_in); SYMBOL_G(newlines); SYMBOL_G(blok_case_s); SYMBOL_T(sp_esac)))
 
 DEF_SYMBOL_TERMINAL(eoi, { return str && !*str ? str : null; })
@@ -646,10 +646,11 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 		return res;
 	}
 	if(gid == blok_case){
+		AST cases = ast->d.group.children[5];
+		if(cases->d.group.cc == 1) return Ok_T(travast_result, {TRAV_COMPLETED, {.completed=0}});
 		ExpandoResult matchvra = expando_word(ast->d.group.children[1]->d.leaf.val, expando_targets_all, ctxt);
 		if(!IsOk_T(matchvra)) return Error_T(travast_result, {"failed to resolve matching target"});
 		arrmuttake1(mv, matchvra.r.ok, {});
-		AST cases = ast->d.group.children[5];
 		AST cc = cases->d.group.children[0];
 		do {
 			ExpandoResult ccp0a = expando_word(cc->d.group.children[1]->d.leaf.val, expando_targets_patt, ctxt);
