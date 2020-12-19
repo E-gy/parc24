@@ -571,7 +571,19 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 		}
 	}
 	if(gid == cmd_compound){
-		if(ast->d.group.cc == 3) return traverse_ast(ast->d.group.children[1], ctxt);
+		if(ast->d.group.cc == 3){
+			if(ast->d.group.children[0]->d.leaf.symbolId == parl){
+				struct parcontext cctxt = *ctxt;
+				if(!IsOk(parcontext_subco_all(&cctxt))) return Error_T(travast_result, {"failed to subcontextualize"});
+				TraverseASTResult rtra = traverse_ast(ast->d.group.children[1], &cctxt);
+				parcontext_subco_destroy(&cctxt);
+				if(!IsOk_T(rtra)) return rtra;
+				if(rtra.r.ok.type == TRAV_SHRTCT_EXIT) return Ok_T(travast_result, {TRAV_COMPLETED, {.completed = rtra.r.ok.v.completed}});
+				if(travt_is_shrtct(rtra.r.ok.type)) return Ok_T(travast_result, {TRAV_COMPLETED, {.completed = 0}});
+				return rtra;
+			}
+			return traverse_ast(ast->d.group.children[1], ctxt);
+		}
 		if(ast->d.group.cc == 1) return traverse_ast(ast->d.group.children[0], ctxt);
 	}
 	if(gid == cmd_fundecl){
