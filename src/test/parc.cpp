@@ -240,7 +240,7 @@ SCENARIO("expansions", "[expando][full stack][parc]"){
 		}
 	}
 	GIVEN("a mess of an expansion"){
-		auto exeo = GENERATE(std::tuple<string, string>{"GGG=ato echo -n \\\"hello\\ there\" `echo -n \"pot$GGG \"` of the $(echo -n 'lands far and \\$GGG'\\'' widethn'\", $(echo -n yeah...)\")\"\\\"", "\"hello there potato  of the lands far and $GGG' widethn, yeah...\""});
+		auto exeo = GENERATE(std::tuple<string, string>{"GGG=ato echo -n \\\"hello\\ there\" `echo -n \"pot$GGG \"` of the $(echo -n 'lands far and $GGG'\\'' widethn'\", $(echo -n yeah...)\")\"\\\"", "\"hello there potato  of the lands far and $GGG' widethn, yeah...\""});
 		CAPTURE(std::get<0>(exeo));
 		THEN("smooth sailing ahead"){
 			auto exer = tihs_exestr(std::get<0>(exeo), &ctxt.ctxt);
