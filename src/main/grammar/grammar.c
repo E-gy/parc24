@@ -8,6 +8,14 @@
 #include <stdlib.h>
 #include <ctype.h>
 
+enum hijakmore_op {
+	HIJAKMORE_RST = 0,
+	HIJAKMORE_MRK,
+	HIJAKMORE_GET
+};
+
+static bool hijakmore_ctrl(enum hijakmore_op op);
+
 //what is a word? - whatver that deserves an entire header on its own
 DEF_SYMBOL_TERMINAL(word, {
 	return capture_word(str);
@@ -51,9 +59,12 @@ DEF_SYMBOL_TERMINAL(heredoc, {
 		if(!cq) str = null;
 		else buffer_delete(delim, cq-delim->data, delim->size);
 	}
-	while(str && *str){
+	while(str){
 		str = strstr(str, delim->data);
-		if(!str) break;
+		if(!str){
+			hijakmore_ctrl(HIJAKMORE_MRK);
+			break;
+		}
 		if(str > sstr && str[-1] == '\n' && (str[delim->size] == '\0' || str[delim->size] == '\n' || strpref("\r\n", str+delim->size))){
 			str += delim->size;
 			break;
@@ -321,12 +332,6 @@ Parser parcer_defolt_new(void){
 #include <parc24/pars.h>
 
 #define space_comments_skippity(str) for(; *str && (isspace(*str) || *str == '#') && *str != '\n' && *str != '\r'; str++) if(*str == '#'){ for(; *str && *str != '\n'; str++); if(!*str) str--; }
-
-enum hijakmore_op {
-	HIJAKMORE_RST = 0,
-	HIJAKMORE_MRK,
-	HIJAKMORE_GET
-};
 
 static bool hijakmore_ctrl(enum hijakmore_op op){
 	static __thread bool conditionmet = false;
