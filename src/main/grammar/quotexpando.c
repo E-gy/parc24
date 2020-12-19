@@ -114,18 +114,17 @@ ExpandoResult expando_arith(Buffer buff, size_t* si, struct expando_targets what
 	return Error_T(expando_result, {"not an arithmetic experssion"});
 }
 
-ExpandoResult expando_expando(Buffer buff, size_t* si, struct expando_targets what, ParContext context){
+#define captsmort(capt) do { string _e = capt(s); if(!_e) return Error_T(expando_result, {"expando expando "#capt" failed"}); i = _e-buff->data; } while(0)
+
+ExpandoResult expando_expando(Buffer buff, size_t* si, ATTR_UNUSED struct expando_targets what, ParContext context){
 	size_t esi = 0, eei, rei;
 	if(strpref("$(", str)){
-		what.path = true;
 		int bal = 1;
 		size_t i = (*si)+2;
 		while(*s && bal > 0){
-			if(capture_isquotstart(s) && !isescaped(s, str)) IfError_T(expando_quot(buff, &i, what, context), err, { return Error_T(expando_result, err); });
-			else if(capture_isarithstart(s) && !isescaped(s, str)) IfError_T(expando_arith(buff, &i, what, context), err, { return Error_T(expando_result, err); });
-			else if(capture_isexpandostart(s) && !isescaped(s, str)) IfError_T(expando_expando(buff, &i, what, context), err, { return Error_T(expando_result, err); });
-			else if(capture_isvariablestart(s) && !isescaped(s, str)) IfError_T(expando_variable(buff, &i, what, context), err, { return Error_T(expando_result, err); });
-			else if(capture_istildestart(s) && !isescaped(s, str)) IfError_T(expando_tilde(buff, &i, what, context), err, { return Error_T(expando_result, err); });
+			if(capture_isquotstart(s) && !isescaped(s, str)) captsmort(capture_quot);
+			else if(capture_isarithstart(s) && !isescaped(s, str)) captsmort(capture_arith);
+			else if(capture_isexpandostart(s) && !isescaped(s, str)) captsmort(capture_expando);
 			else {
 				if(!isescaped(s, str)) bal += *s == '(' ? 1 : *s == ')' ? -1 : 0;
 				i++;
