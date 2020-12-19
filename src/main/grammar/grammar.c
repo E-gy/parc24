@@ -81,7 +81,7 @@ DEF_GROUP(ampamp_or_vpipvpip, RULE(SYMBOL_T(ampamp)); RULE(SYMBOL_T(vpipvpip)))
 
 #define DEF_SYMBOL_TERMINAL_CSTR(symbl, cstr) DEF_SYMBOL_TERMINAL(symbl, { return str && strpref(cstr, str) ? str+(sizeof(cstr)/sizeof(*cstr)-1) : null; })
 #define WSEPS "|&;()<> \t\r\n"
-#define DEF_SYMBOL_TERMINAL_CSTRE(symbl, cstr) DEF_SYMBOL_TERMINAL(symbl, { return str && strpref(cstr, str) && strchr(WSEPS, str[(sizeof(cstr)/sizeof(*cstr))-1]) ? str+(sizeof(cstr)/sizeof(*cstr)) : null; })
+#define DEF_SYMBOL_TERMINAL_CSTRE(symbl, cstr) DEF_SYMBOL_TERMINAL(symbl, { return str && strpref(cstr, str) && strchr(WSEPS, str[(sizeof(cstr)/sizeof(*cstr))-1]) ? str+(sizeof(cstr)/sizeof(*cstr)-1) : null; })
 DEF_SYMBOL_TERMINAL_CSTRE(sp_if,	"if")
 DEF_SYMBOL_TERMINAL_CSTRE(sp_then,	"then")
 DEF_SYMBOL_TERMINAL_CSTRE(sp_elif,	"elif")
