@@ -161,8 +161,10 @@ DEF_GOPT(amp_or_scol_opt, RULE(SYMBOL_G(amp_or_scol)))
 DEF_GOPT(excl_opt, RULE(SYMBOL_T(excl)))
 DEF_GKLEENE(cmdlist_l3_r, SYMBOL_G(amp_or_scol); SYMBOL_G(cmdlist_l2))
 DEF_GROUP(cmdlist_l3, RULE(SYMBOL_G(cmdlist_l2); SYMBOL_G(cmdlist_l3_r); SYMBOL_G(amp_or_scol_opt)))
-DEF_GKLEENE(cmdlist_l2_r, SYMBOL_G(ampamp_or_vpipvpip); SYMBOL_G(newlines); SYMBOL_G(cmdlist_l1))
-DEF_GROUP(cmdlist_l2, RULE(SYMBOL_G(cmdlist_l1); SYMBOL_G(cmdlist_l2_r)))
+DEF_GROUP(cmdlist_l2,
+	RULE(SYMBOL_G(cmdlist_l2); SYMBOL_G(ampamp_or_vpipvpip); SYMBOL_G(cmdlist_l1));
+	RULE(SYMBOL_G(cmdlist_l1))
+)
 DEF_GKLEENE(cmdlist_l1_r, SYMBOL_T(vpip); SYMBOL_G(newlines); SYMBOL_G(command))
 DEF_GROUP(cmdlist_l1, RULE(SYMBOL_G(excl_opt); SYMBOL_G(command); SYMBOL_G(cmdlist_l1_r)))
 
@@ -260,7 +262,6 @@ DEF_GRAMMAR(tihs24def,
 	GROUP(excl_opt);
 	GROUP(cmdlist_l3_r);
 	GROUP(cmdlist_l3);
-	GROUP(cmdlist_l2_r);
 	GROUP(cmdlist_l2);
 	GROUP(cmdlist_l1_r);
 	GROUP(cmdlist_l1);
@@ -411,18 +412,13 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 	}
 	if(gid == cmdlist_l3ext_opt) return ast->d.group.children[0]->type == AST_GROUP ? traverse_ast(ast->d.group.children[0], ctxt) : Ok_T(travast_result, {0});
 	//l2: || &&
-	if(gid == cmdlist_l2 || gid == cmdlist_l2_r){
-		if(ast->d.group.cc == 1) return Ok_T(travast_result, {0});
-		const size_t it1 = gid == cmdlist_l2 ? 0 : 2;
-		const size_t ir = gid == cmdlist_l2 ? 1 : 3;
-		TraverseASTResult t1 = traverse_ast(ast->d.group.children[it1], ctxt);
-		if(!IsOk_T(t1)) return t1;
-		AST r = ast->d.group.children[ir];
-		if(r->d.group.cc == 1) return t1;
+	if(gid == cmdlist_l2){
+		TraverseASTResult t1 = traverse_ast(ast->d.group.children[0], ctxt);
+		if(ast->d.group.cc == 1 || !IsOk_T(t1)) return t1;
 		t1 = parcontext_uniwait(t1);
 		if(!IsOk_T(t1) || travt_is_shrtct(t1.r.ok.type)) return t1;
 		int rc = ctxt->lastexit = t1.r.ok.v.completed;
-		return(r->d.group.children[0]->d.group.children[0]->d.leaf.symbolId == (isexitcodeok(rc) ? ampamp : vpipvpip)) ? t1 : traverse_ast(ast->d.group.children[ir], ctxt);
+		return (ast->d.group.children[1]->d.group.children[0]->d.leaf.symbolId == (isexitcodeok(rc) ? ampamp : vpipvpip)) ? t1 : traverse_ast(ast->d.group.children[2], ctxt);
 	}
 	//l1: |
 	if(gid == cmdlist_l1 || gid == cmdlist_l1_r){
