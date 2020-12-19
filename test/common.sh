@@ -11,6 +11,14 @@ function 42test(){
 	memchk ./42shcov "$@"
 }
 
+function assertsuccess(){
+	if [ "$status" -ne 0 ]; then
+		echo "actual status: $status"
+		echo "command output: $output"
+		return 1
+	fi
+}
+
 function asserteq(){
 	if [ "$1" != "$2" ]; then
 		echo "expected: $2"
