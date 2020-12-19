@@ -34,7 +34,8 @@ function assertout(){
 function testagainstbash(){
 	TMPF=$(mktemp)
 	cat - >$TMPF
-	expected_o=$(bash "$@" <$TMPF)
+	run bash "$@" <$TMPF
+	expected_o="$output"
 	expected_c=$?
 	run 42test "$@" <$TMPF
 	rm $TMPF
