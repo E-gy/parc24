@@ -10,3 +10,14 @@ function memchk(){
 function 42test(){
 	memchk ./42shcov "$@"
 }
+
+function asserteq(){
+	if [ "$1" != "$2" ]; then
+		echo "<$1> != <$2>"
+		return 1
+	fi
+}
+
+function assertout(){
+	asserteq "$output" "$1"
+}
