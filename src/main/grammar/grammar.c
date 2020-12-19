@@ -59,7 +59,7 @@ DEF_SYMBOL_TERMINAL(heredoc, {
 
 DEF_SYMBOL_TERMINAL(s0, { return str ? str : null; })
 //terminals
-#define DEF_SYMBOL_TERMINAL_1xCHAR(symbl, chr) DEF_SYMBOL_TERMINAL(symbl, { return str && str[0] == chr ? str+1 : null; })
+#define DEF_SYMBOL_TERMINAL_1xCHAR(symbl, chr) DEF_SYMBOL_TERMINAL(symbl, { return str && str[0] == chr && str[1] != chr ? str+1 : null; })
 DEF_SYMBOL_TERMINAL_1xCHAR(amp,'&')
 DEF_SYMBOL_TERMINAL_1xCHAR(vpip,'|')
 DEF_SYMBOL_TERMINAL_1xCHAR(scol,';')
