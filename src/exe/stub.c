@@ -25,7 +25,7 @@ static int dothething(struct tihsopts opts, ParContext ctxt){
 			str = buffer_destr(buff.r.ok);
 		}
 		TihsExeResult exer = tihs_exestr(str, ctxt);
-		free(str);
+		if(str != opts.commandstr) free(str);
 		IfError_T(exer, err, {
 			parciolog(ctxt->ios, LL_ERROR, "Execution error - %s", err.s);
 			return 1;
