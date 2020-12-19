@@ -1,9 +1,9 @@
 #!/usr/bin/env bats
 
-load valgr.sh
+load common.sh
 
 @test "say hi with echo" {
-	run memchk ./42sh -c "echo -n hi"
+	run 42test -c "echo -n hi"
 	[ "$status" -eq 0 ]
 	[ "$output" = "hi" ]
 }
