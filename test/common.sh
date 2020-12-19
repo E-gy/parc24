@@ -1,8 +1,8 @@
 function memchk(){
-	echo "#########################" >> ./memchck.log
-	valgrind --leak-check=full --error-exitcode=100 --log-fd=9 9>>./memchck.log -- "$@"
+	echo "#########################" >> ./memcheck.log
+	valgrind --leak-check=full --error-exitcode=100 --log-fd=9 9>>./memcheck.log -- "$@"
 	EXC=$?
-	echo "#########################" >> ./memchck.log
+	echo "#########################" >> ./memcheck.log
 	return $EXC
 }
 
