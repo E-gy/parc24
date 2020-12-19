@@ -79,9 +79,9 @@ ExpandoResult expando_arith(Buffer buff, size_t* si, struct expando_targets what
 		int bal = 2;
 		size_t i = (*si)+3;
 		while(*s && bal > 0){
-			if(capture_isarithstart(s) && !isescaped(s, str)) IfError_T(expando_arith(buff, &i, what, context), err, { return Error_T(expando_result, err); });
-			else if(capture_isexpandostart(s) && !isescaped(s, str)) IfError_T(expando_expando(buff, &i, what, context), err, { return Error_T(expando_result, err); });
-			else if(capture_isvariablestart(s) && !isescaped(s, str)) IfError_T(expando_variable(buff, &i, what, context), err, { return Error_T(expando_result, err); });
+			if(capture_isarithstart(s)) IfError_T(expando_arith(buff, &i, what, context), err, { return Error_T(expando_result, err); });
+			else if(capture_isexpandostart(s)) IfError_T(expando_expando(buff, &i, what, context), err, { return Error_T(expando_result, err); });
+			else if(capture_isvariablestart(s)) IfError_T(expando_variable(buff, &i, what, context), err, { return Error_T(expando_result, err); });
 			else {
 				if(!isescaped(s, str)) bal += *s == '(' ? 1 : *s == ')' ? -1 : 0;
 				i++;
