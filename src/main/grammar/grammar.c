@@ -46,7 +46,7 @@ DEF_SYMBOL_TERMINAL(assignment, {
 	if(*str++ != '=') return null;
 	return !*str || isblank(*str) ? str : capture_word(str);
 })
-DEF_SYMBOL_TERMINAL(heredoc, {
+static string heredoc_(string str, bool remt){
 	if(!str) return null;
 	const string sstr = str;
 	str = capture_word(str);
@@ -65,7 +65,10 @@ DEF_SYMBOL_TERMINAL(heredoc, {
 			hijakmore_ctrl(HIJAKMORE_MRK);
 			break;
 		}
-		if(str > sstr && str[-1] == '\n' && (str[delim->size] == '\0' || str[delim->size] == '\n' || strpref("\r\n", str+delim->size))){
+		string sss = str-1;
+		if(remt) for(; sss > sstr && *sss == '\t'; sss--);
+		bool laste = sss > sstr && *sss == '\n';
+		if(laste && (str[delim->size] == '\0' || str[delim->size] == '\n' || strpref("\r\n", str+delim->size))){
 			str += delim->size;
 			break;
 		}
@@ -73,7 +76,9 @@ DEF_SYMBOL_TERMINAL(heredoc, {
 	}
 	buffer_destroy(delim);
 	return str;
-})
+}
+DEF_SYMBOL_TERMINAL(heredoc1, { return heredoc_(str, false); })
+DEF_SYMBOL_TERMINAL(heredoc2, { return heredoc_(str, true); })
 
 DEF_SYMBOL_TERMINAL(s0, { return str ? str : null; })
 //terminals
@@ -158,8 +163,8 @@ DEF_GROUP(redirection,
 	RULE(SYMBOL_G(streamid_opt); SYMBOL_T(redir_out); SYMBOL_T(word));
 	RULE(SYMBOL_G(streamid_opt); SYMBOL_T(redir_in); SYMBOL_T(word));
 	RULE(SYMBOL_G(streamid_opt); SYMBOL_T(redir_out_append); SYMBOL_T(word));
-	RULE(SYMBOL_G(streamid_opt); SYMBOL_T(redir_in_fromheredoc_1); SYMBOL_T(heredoc));
-	RULE(SYMBOL_G(streamid_opt); SYMBOL_T(redir_in_fromheredoc_2); SYMBOL_T(heredoc));
+	RULE(SYMBOL_G(streamid_opt); SYMBOL_T(redir_in_fromheredoc_1); SYMBOL_T(heredoc1));
+	RULE(SYMBOL_G(streamid_opt); SYMBOL_T(redir_in_fromheredoc_2); SYMBOL_T(heredoc2));
 	RULE(SYMBOL_G(streamid_opt); SYMBOL_T(redir_in_fromherestring); SYMBOL_T(word));
 	RULE(SYMBOL_G(streamid_opt); SYMBOL_T(redir_out_dup); SYMBOL_T(word));
 	RULE(SYMBOL_G(streamid_opt); SYMBOL_T(redir_in_dup); SYMBOL_T(word));
