@@ -15,7 +15,7 @@
  * @return TihsExeResult 
  */
 TihsExeResult tihs_exeast(AST ast, ParContext ctxt){
-	ast_log(ast); //TODO merge(?) tihs options and ParContext
+	// ast_log(ast); //TODO merge(?) tihs options and ParContext
 	TraverseASTResult trr = traverse_ast(ast, ctxt);
 	if(!ctxt->exeback) trr = parcontext_uniwait(trr);
 	if(!IsOk_T(trr)) return Error_T(tihs_exe_result, trr.r.error);
