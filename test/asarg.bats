@@ -94,3 +94,15 @@ load common.sh
 	[ "$status" -eq 0 ]
 	assertout "- 3- 512- 58"
 }
+
+@test "[arg](4) var, while, echo, arith" {
+	run 42test -c 'NUM=0; while [ $NUM -lt 6 ] ; do echo -n "$NUM,"; NUM=$((NUM+2)); done'
+	[ "$status" -eq 0 ]
+	assertout "0,2,4,"
+}
+
+@test "[arg](4) var, until, echo, arith" {
+	run 42test -c 'NUM=0; until [ $NUM -gt 6 ] ; do echo -n "$NUM,"; NUM=$((NUM+2)); done'
+	[ "$status" -eq 0 ]
+	assertout "0,2,4,6,"
+}
