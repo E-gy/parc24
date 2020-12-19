@@ -2,7 +2,7 @@
 
 load common.sh
 
-@test "[in](2) if/elif/else invalid syntax" {
+@test "[in](1) if/elif/else invalid syntax" {
 	testNeGagainstbash <<<'if [ 1 -eq 1 ] ; fi'
 	testNeGagainstbash <<<'if ; echo hi; fi'
 	testNeGagainstbash <<<'if [ 1 -eq 1 ]  then echo -n "one"; fi'

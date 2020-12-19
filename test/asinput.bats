@@ -16,7 +16,7 @@ ls #i am a comment too!
 input
 }
 
-@test "[in](2) if/elif/else" {
+@test "[in](1) if/elif/else" {
 	testagainstbash <<<'if [ 1 -eq 1 ] ; then echo -n "one"; fi'
 	testagainstbash <<<'if [ 2 -eq 1 ] ; then echo -n "one"; fi'
 	testagainstbash <<<'if [ 2 -eq 1 ] ; then echo -n "one"; else echo -n "other"; fi'
@@ -25,7 +25,7 @@ input
 	testagainstbash <<<'if [ 3 -eq 1 ] ; then echo -n "one"; elif [ 3 -eq 2 ] ; then echo -n "two"; fi'
 }
 
-@test "[in](2) if/elif/else multiline" {
+@test "[in](1) if/elif/else multiline" {
 	testagainstbash <<input
 if [ 3 -eq 1 ];
 	then
