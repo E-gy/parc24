@@ -38,9 +38,25 @@ static int dothething(struct tihsopts opts, ParContext ctxt){
 		}
 		IfElse_T(parcio_derp_std_read(), line, {
 			if(!line) return ctxt->lastexit;
-			TihsExeResult exer = tihs_exestr(line, ctxt);
-			free(line);
-			IfError_T(exer, err, { parciolog(ctxt->ios, LL_ERROR, "Execution error - %s", err.s); });
+			TihsExeCGMResult exer = tihs_exestr_cgm(line, ctxt);
+			if(!IsOk_T(exer) && exer.r.error.needmore){
+				Buffer li = buffer_new_from(line, -1);
+				free(line);
+				while(!IsOk_T(exer) && exer.r.error.needmore){
+					if(isatty(STDIN_FILENO)){ //FIXME shouldn't `io` be used for that..?
+						printf("    > ");
+						fflush(stdout);
+					}
+					ParC24IOReadResult nl = parcio_derp_std_read();
+					if(!IsOk_T(nl) || !nl.r.ok) break;
+					buffer_append_str(li, "\n");
+					buffer_append_str(li, nl.r.ok);
+					free(nl.r.ok);
+					exer = tihs_exestr_cgm(li->data, ctxt);
+				}
+				buffer_destroy(li);
+			} else free(line);
+			IfError_T(exer, err, { parciolog(ctxt->ios, LL_ERROR, "Execution error - %s", err.err.s); });
 			IfOk_T(exer, ec, { ctxt->lastexit = ec.code; exit = ec.exit; });
 		}, err, {
 			parciolog(ctxt->ios, LL_ERROR, "Failed to read from standard input - %s", err.s);
