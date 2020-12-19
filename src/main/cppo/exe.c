@@ -133,6 +133,7 @@ ExeWaitResult exe_waitretcode(ChildProcessInfo proc){
 	if(!proc) return Error_T(exewait_result, {"Invalid child process info"});
 	int cstatus;
 	if(waitpid(proc->pid, &cstatus, 0) < 0) return Error_T(exewait_result, {"wait failed"});
+	free(proc);
 	return Ok_T(exewait_result, WEXITSTATUS(cstatus));
 }
 
