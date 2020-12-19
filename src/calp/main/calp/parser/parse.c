@@ -79,10 +79,9 @@ static ParsPreResult parser_makast(Parser p, Lexer l, Symbol symb, string* str){
 			if(!gi) return Error_T(parspreresult, {"[INTERNAL] Invalid state: group not in map"});
 			for(FirstListElement fl = gi->i.group.firsts->first; fl; fl = fl->next){
 				if(fl->symbol->type != SYMB_TERM) return Error_T(parspreresult, {"[INTERNAL] Invalid state: non-terminal first list element"});
-				if(fl->symbol->i.term.symbolId(*str)){
-					ParsPreResult res = parser_makastr(p, l, str, fl->r, symb, gi);
-					if(IsOk_T(res)) return res;
-				}
+				if(!IsOk_T(l(*str, fl->symbol->i.term.symbolId))) continue;
+				ParsPreResult res = parser_makastr(p, l, str, fl->r, symb, gi);
+				if(IsOk_T(res)) return res;
 			}
 			if(gi->i.group.firsts->fallback){
 				ParsPreResult res = parser_makastr(p, l, str, gi->i.group.firsts->fallback, symb, gi);
