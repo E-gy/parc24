@@ -51,3 +51,22 @@ function testagainstbash(){
 	fi
 	return $err
 }
+
+function testNeGagainstbash(){
+	TMPF=$(mktemp)
+	cat - >$TMPF
+	run bash "$@" <$TMPF
+	expected_o="$output"
+	expected_c=$?
+	run 42test "$@" <$TMPF
+	rm $TMPF
+	err=0
+	if [ $status -ne $expected_c ]; then
+		echo "expected: $expected_c"
+		echo "got: $status"
+		echo "reference output: $expected_o"
+		echo "output: $output"
+		err=1
+	fi
+	return $err
+}
