@@ -73,6 +73,8 @@ ExpandoResult expando_quot(Buffer buff, size_t* si, struct expando_targets what,
 	return Error_T(expando_result, {"not a quoted"});
 }
 
+#include <ctype.h>
+int char_isword(int c);
 ExpandoResult expando_arith(Buffer buff, size_t* si, struct expando_targets what, ParContext context){
 	ATTR_UNUSED size_t esi = 0, eei, rei;
 	if(strpref("$((", str)){
@@ -171,7 +173,7 @@ ExpandoResult expando_expando(Buffer buff, size_t* si, struct expando_targets wh
 }
 
 ExpandoResult expando_variable_f(Buffer buff, size_t* si, ATTR_UNUSED struct expando_targets what, ParContext context, bool force){
-	size_t esi = 0, eei, rei;
+	ssize_t esi = -1, eei, rei;
 	if(strpref("${", str)){
 		string ent = capture_variable(str);
 		if(!ent) return Error_T(expando_result, {"failed to capture variable"});
@@ -179,12 +181,19 @@ ExpandoResult expando_variable_f(Buffer buff, size_t* si, ATTR_UNUSED struct exp
 		eei = (rei=ent-str)-1;
 	} else if(force || str[0] == '$'){
 		const bool fds = str[0] == '$';
-		string ent = capture_variable(fds ? str+1 : str);
-		if(!ent) return Error_T(expando_result, {"failed to capture variable"});
+		string ent;
+		if(fds){
+			if(!(ent = capture_variable(str))) return Error_T(expando_result, {"failed to capture variable"});
+		} else {
+			ent = str;
+			if(isgraph(*ent)) ent++;
+			for(; *ent && char_isword(*ent); ent++);
+			if(ent == str) return Error_T(expando_result, {"failed to capture forced unprefixed variable"});
+		}
 		esi = fds ? 1 : 0;
 		eei = rei = ent-str;
 	}
-	if(esi){
+	if(esi >= 0){
 		string_mut varn = buffer_destr(buffer_new_from(str+esi, eei-esi));
 		if(!varn) return Error_T(expando_result, {"buffer capture failed"});
 		struct getvarv varv = parcontext_getunivar(context, varn);
