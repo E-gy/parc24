@@ -19,7 +19,8 @@
 ExpandoResult expando_quot(Buffer buff, size_t* si, struct expando_targets what, ParContext context);
 ExpandoResult expando_arith(Buffer buff, size_t* si, struct expando_targets what, ParContext context);
 ExpandoResult expando_expando(Buffer buff, size_t* si, struct expando_targets what, ParContext context);
-ExpandoResult expando_variable(Buffer buff, size_t* si, struct expando_targets what, ParContext context);
+ExpandoResult expando_variable_f(Buffer buff, size_t* si, struct expando_targets what, ParContext context, bool force);
+#define expando_variable(buff, si, what, context) expando_variable_f(buff, si, what, context, false)
 ExpandoResult expando_tilde(Buffer buff, size_t* si, struct expando_targets what, ParContext context);
 
 ExpandoResult expando_quot(Buffer buff, size_t* si, struct expando_targets what, ParContext context){
@@ -169,17 +170,18 @@ ExpandoResult expando_expando(Buffer buff, size_t* si, struct expando_targets wh
 	return Error_T(expando_result, {"not an expandable"});
 }
 
-ExpandoResult expando_variable(Buffer buff, size_t* si, ATTR_UNUSED struct expando_targets what, ParContext context){
+ExpandoResult expando_variable_f(Buffer buff, size_t* si, ATTR_UNUSED struct expando_targets what, ParContext context, bool force){
 	size_t esi = 0, eei, rei;
 	if(strpref("${", str)){
 		string ent = capture_variable(str);
 		if(!ent) return Error_T(expando_result, {"failed to capture variable"});
 		esi = 2;
 		eei = (rei=ent-str)-1;
-	} else if(str[0] == '$'){
-		string ent = capture_variable(str);
+	} else if(force || str[0] == '$'){
+		const bool fds = str[0] == '$';
+		string ent = capture_variable(fds ? str+1 : str);
 		if(!ent) return Error_T(expando_result, {"failed to capture variable"});
-		esi = 1;
+		esi = fds ? 1 : 0;
 		eei = rei = ent-str;
 	}
 	if(esi){
