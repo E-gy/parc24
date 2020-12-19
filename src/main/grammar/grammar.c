@@ -310,22 +310,43 @@ Parser parcer_defolt_new(void){
 
 #include <calp/parser/fun.h>
 #include <calp/lexer.h>
+#include <parc24/pars.h>
 
 #define space_comments_skippity(str) for(; *str && (isspace(*str) || *str == '#') && *str != '\n' && *str != '\r'; str++) if(*str == '#'){ for(; *str && *str != '\n'; str++); if(!*str) str--; }
+
+enum hijakmore_op {
+	HIJAKMORE_RST = 0,
+	HIJAKMORE_MRK,
+	HIJAKMORE_GET
+};
+
+static bool hijakmore_ctrl(enum hijakmore_op op){
+	static __thread bool conditionmet = false;
+	switch(op){
+		case HIJAKMORE_RST: return conditionmet = false;
+		case HIJAKMORE_MRK: return conditionmet = true;
+		case HIJAKMORE_GET: return conditionmet;
+		default: return false;
+	}
+}
 
 static LexerResult lexer_spacebegone_withcomments(string str, SelfLexingToken tok){
 	if(!str) return Error_T(lexer_result, {"Invalid input - null string"});
 	space_comments_skippity(str);
+	if(tok == newline && !*str) hijakmore_ctrl(HIJAKMORE_MRK);
 	string nom = tok(str);
 	if(!nom) return Error_T(lexer_result, {"Token refused to eat"});
 	string next = nom;
 	space_comments_skippity(next);
+	if(tok == newline && !*next) hijakmore_ctrl(HIJAKMORE_MRK);
 	return Ok_T(lexer_result, {str, nom, next});
 }
 
 
-ParseResult parcer_parse(Parser p, string str){
-	return parser_parse(p, lexer_spacebegone_withcomments, str, &entry);
+ParceResult parcer_parse(Parser p, string str, bool cangivemore){
+	if(cangivemore) hijakmore_ctrl(HIJAKMORE_RST);
+	ParseResult pr = parser_parse(p, lexer_spacebegone_withcomments, str, &entry);
+	return IsOk_T(pr) ? Ok_T(parce_result, { pr.r.ok.ast, pr.r.ok.end }) : Error_T(parce_result, { cangivemore && hijakmore_ctrl(HIJAKMORE_GET), pr.r.error });
 }
 
 #include <parc24/travast.h>
