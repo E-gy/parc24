@@ -78,6 +78,7 @@ string capture_expando(const string str){
 	return null;
 }
 
+#include <ctype.h>
 int char_isword(int c);
 
 string capture_variable(string str){
@@ -90,6 +91,7 @@ string capture_variable(string str){
 	}
 	if(str[0] == '$'){
 		string s = str+1;
+		if(isgraph(*s)) s++;
 		for(; *s && char_isword(*s); s++);
 		return s > str+1 ? s : null;
 	}
