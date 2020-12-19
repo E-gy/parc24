@@ -25,6 +25,12 @@ CCMDStore ccmdstore_new();
 void ccmdstore_destroy(CCMDStore store);
 
 /**
+ * @param store @consumes
+ * @return @produces CCMDStore 
+ */
+CCMDStore ccmdstore_clone(CCMDStore store);
+
+/**
  * @param @ref store 
  * @param @ref cmd 
  * @return @ref CCMD 

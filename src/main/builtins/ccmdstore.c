@@ -11,6 +11,7 @@ typedef Trie CCMDStore;
 #include <util/string.h>
 
 static void ccmd_destroy(ATTR_UNUSED CCMD ccmd){}
+static CCMD ccmd_clone(CCMD ccmd){ return ccmd; }
 
 CCMDStore ccmdstore_new(void){
 	return trie_new(ccmd_destroy);
@@ -18,6 +19,10 @@ CCMDStore ccmdstore_new(void){
 
 void ccmdstore_destroy(CCMDStore s){
 	trie_destroy(s);
+}
+
+CCMDStore ccmdstore_clone(CCMDStore store){
+	return trie_clone(store, ccmd_clone);
 }
 
 CCMD ccmdstore_get(CCMDStore s, string cmd){
