@@ -478,30 +478,48 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 			case REDIR_IN_HERE: {
 				string s = ast->d.group.children[2]->d.leaf.val;
 				if(assid == redir_in_fromherestring){
-					ExpandoResult wexa = expando_word(s, expando_targets_all, ctxt);
+					ExpandoResult wexa = expando_word(s, expando_targets_patt, ctxt);
 					if(!IsOk_T(wexa)) return Error_T(travast_result, wexa.r.error);
 					arrmuttake1(wex, wexa.r.ok, {});
-					target = wex;
+					Buffer buff = buffer_new_from(wex, -1);
+					free(wex);
+					if(!buff) return Error_T(travast_result, {"herestring append newline failed"});
+					buffer_append_str(buff, "\n");
+					target = buffer_destr(buff);
 				} else {
-					string ss = capture_word(s);
-					if(!ss) return Error_T(travast_result, {"heredoc delimiter capture failed"});
+					bool remtabs = assid == redir_in_fromheredoc_2;
+					string ss;
 					bool expand;
-					if((expand = (s[0] == '\'' || s[0] == '"'))){
-						ExpandoResult esxa = expando_word(s, expando_targets_quot, ctxt);
-						if(!IsOk_T(esxa)) return Error_T(travast_result, esxa.r.error);
-						arrmuttake1(esx, esxa.r.ok, {});
-						s = esx;
+					size_t dels;
+					if(s[0] == '\'' || s[0] == '"'){
+						char q = s[0];
+						if(!(ss = strchr(s, q))) return Error_T(travast_result, {"heredoc delimiter capture failed"});
+						dels = ss-s-1;
+						expand = false;
+					} else {
+						if(!(ss = capture_word(s))) return Error_T(travast_result, {"heredoc delimiter capture failed"});
+						dels = ss-s;
+						expand = true;
 					}
-					if(strpref("\r\n", ss)) ss += 2;
-					else if(ss[0] == '\n') ss++;
-					if(!(target = buffer_destr(buffer_new_from(ss, strlen(ss)-strlen(s))))) return Error_T(travast_result, {"heredoc capture failed"});
+					for(; *ss && *ss != '\n'; ss++);
+					if(ss[0] == '\n') ss++;
+					if(!ss[0]) return Error_T(travast_result, {"heredoc end not found"});
+					Buffer buff = buffer_new_from(ss, strlen(ss)-dels);
+					if(!buff) return Error_T(travast_result, {"heredoc capture failed"});
+					if(remtabs) for(size_t ni = 0; ni < buff->size;){
+						size_t nit = ni;
+						for(; nit < buff->size && buff->data[nit] == '\t'; nit++);
+						buffer_delete(buff, ni, nit);
+						for(; ni < buff->size && buff->data[ni] != '\n'; ni++);
+						if(ni < buff->size && buff->data[ni] == '\n') ni++;
+					}
 					if(expand){
-						ExpandoResult texa = expando_word(target, expando_targets_all, ctxt);
-						free(target);
+						ExpandoResult texa = expando_word(buff->data, expando_targets_parc, ctxt);
+						buffer_destroy(buff);
 						if(!IsOk_T(texa)) return Error_T(travast_result, texa.r.error);
 						arrmuttake1(tex, texa.r.ok, {});
 						target = tex;
-					}
+					} else target = buffer_destr(buff);
 				}
 				break;
 			}
