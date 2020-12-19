@@ -657,7 +657,7 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 			cc = cases->d.group.children[2];
 		} while(true);
 		free(mv);
-		return Ok_T(travast_result, {TRAV_COMPLETED, {.completed = 1}});
+		return Ok_T(travast_result, {TRAV_COMPLETED, {.completed = 0}});
 	}
 	// ctxt->io.log(LL_ERROR, "Failed to recognize group: %s", ast->d.group.group->name);
 	return Error_T(travast_result, {"AST (group) not recognized"});
