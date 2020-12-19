@@ -43,7 +43,14 @@ DEF_SYMBOL_TERMINAL(heredoc, {
 	const string sstr = str;
 	str = capture_word(str);
 	if(!str) return null;
-	Buffer delim = buffer_new_from(sstr, str-sstr); //TODO quote expansion on delim
+	Buffer delim = buffer_new_from(sstr, str-sstr);
+	if(delim->data[0] == '\'' || delim->data[0] == '\"'){
+		char q = delim->data[0];
+		buffer_delete(delim, 0, 1);
+		string cq = strchr(delim->data, q);
+		if(!cq) str = null;
+		else buffer_delete(delim, cq-delim->data, delim->size);
+	}
 	while(str && *str){
 		str = strstr(str, delim->data);
 		if(!str) break;
