@@ -590,7 +590,7 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 	}
 	if(gid == blok_do_done) return traverse_ast(ast->d.group.children[1], ctxt);
 	if(gid == blok_while || gid == blok_until){
-		bool brekon = gid != blok_while;
+		bool brekon = gid == blok_while;
 		TraverseASTResult res = Ok_T(travast_result, {0});
 		do {
 			TraverseASTResult ec = parcontext_uniwait(traverse_ast(ast->d.group.children[1], ctxt));
