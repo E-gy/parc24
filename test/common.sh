@@ -8,7 +8,11 @@ function memchk(){
 }
 
 function 42test(){
-	memchk ./42shcov "$@"
+	hs=./42sh
+	if test -f ./42shcov; then
+		hs=./42shcov
+	fi
+	memchk $hs "$@"
 }
 
 function assertsuccess(){
