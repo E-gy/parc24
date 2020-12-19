@@ -75,6 +75,11 @@ ExpandoResult expando_quot(Buffer buff, size_t* si, struct expando_targets what,
 
 #include <ctype.h>
 int char_isword(int c);
+
+static bool char_isvarstart(char c){
+	return c == '$' || isalpha(c) || c == '?' || c == '#'|| c == '@';
+}
+
 ExpandoResult expando_arith(Buffer buff, size_t* si, struct expando_targets what, ParContext context){
 	ATTR_UNUSED size_t esi = 0, eei, rei;
 	if(strpref("$((", str)){
@@ -83,7 +88,7 @@ ExpandoResult expando_arith(Buffer buff, size_t* si, struct expando_targets what
 		while(*s && bal > 0){
 			if(capture_isarithstart(s)) IfError_T(expando_arith(buff, &i, what, context), err, { return Error_T(expando_result, err); });
 			else if(capture_isexpandostart(s)) IfError_T(expando_expando(buff, &i, what, context), err, { return Error_T(expando_result, err); });
-			else if(capture_isvariablestart(s)) IfError_T(expando_variable(buff, &i, what, context), err, { return Error_T(expando_result, err); });
+			else if(char_isvarstart(s[0])) IfError_T(expando_variable_f(buff, &i, what, context, true), err, { return Error_T(expando_result, err); });
 			else {
 				if(!isescaped(s, str)) bal += *s == '(' ? 1 : *s == ')' ? -1 : 0;
 				i++;
