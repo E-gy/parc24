@@ -26,6 +26,27 @@ load common.sh
 	assertout "$(ls; ls ..)"
 }
 
+@test "[arg](2) if elif else" {
+	run 42test -c 'if [ $1 -eq 1 ] ; then echo -n "one"; fi' 1
+	[ "$status" -eq 0 ]
+	assertout "one"
+	run 42test -c 'if [ $1 -eq 1 ] ; then echo -n "one"; fi' 2
+	[ "$status" -eq 0 ]
+	assertout ""
+	run 42test -c 'if [ $1 -eq 1 ] ; then echo -n "one"; else echo -n "other"; fi' 2
+	[ "$status" -eq 0 ]
+	assertout "other"
+	run 42test -c 'if [ $1 -eq 1 ] ; then echo -n "one"; elif [ $1 -eq 2 ] ; then echo -n "two"; else echo -n "other"; fi' 2
+	[ "$status" -eq 0 ]
+	assertout "two"
+	run 42test -c 'if [ $1 -eq 1 ] ; then echo -n "one"; elif [ $1 -eq 2 ] ; then echo -n "two"; else echo -n "other"; fi' 3
+	[ "$status" -eq 0 ]
+	assertout "other"
+	run 42test -c 'if [ $1 -eq 1 ] ; then echo -n "one"; elif [ $1 -eq 2 ] ; then echo -n "two"; fi' 3
+	[ "$status" -eq 0 ]
+	assertout ""
+}
+
 @test "[arg](2) for" {
 	run 42test -c 'for i do echo -n $i; done'
 	[ "$status" -eq 0 ]
