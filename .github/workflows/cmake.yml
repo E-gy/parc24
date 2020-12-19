@@ -34,16 +34,28 @@ jobs:
       working-directory: ${{runner.workspace}}/build
       shell: bash
       run: lcov --capture -i --directory ./CMakeFiles/parc24cov.dir --directory ./CMakeFiles/42shcov.dir -o cov-base.info
-    - name: Test
+    - name: Unit Test
+      id: testu
       working-directory: ${{runner.workspace}}/build
       shell: bash
       run: ctest -C $BUILD_TYPE -T memcheck --overwrite MemoryCheckCommandOptions="--leak-check=full --error-exitcode=100" --output-on-failure --timeout 120
-    - name: On Test Failure report memcheck logs
-      if: ${{ failure() }}
+    - name: On Unit Test Failure report memcheck logs
+      if: ${{ failure() && steps.testu.outcome == 'failure' }}
       uses: actions/upload-artifact@v2
       with:
         name: memcheck-logs
         path: ${{runner.workspace}}/build/Testing/**/MemoryChecker.*.log
+    - name: Integration Test
+      id: testi
+      working-directory: ${{runner.workspace}}/build
+      shell: bash
+      run: bats -r ../test
+    - name: On Integration Test Failure report memcheck logs
+      if: ${{ failure() && steps.testi.outcome == 'failure' }}
+      uses: actions/upload-artifact@v2
+      with:
+        name: memcheck-logs
+        path: ${{runner.workspace}}/build/memchck.log
     - name: Generate Coverage
       if: ${{ always() && steps.collcov.outcome == 'success' }}
       working-directory: ${{runner.workspace}}/build
