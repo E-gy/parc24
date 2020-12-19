@@ -598,6 +598,7 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 			ExpandoResult nva = expando_word(nvw->d.group.children[0]->d.leaf.val, expando_targets_all, ctxt);
 			if(!IsOk_T(nva)){ res = Error_T(travast_result, {"in list element expando failed"}); break; }
 			for(size_t i = 0; i < nva.r.ok->size; i++){
+				if(!IsOk_T((res = parcontext_uniwait(res)))) break;
 				Result varadr = varstore_add(ctxt->vars, varn, nva.r.ok->args[i]);
 				if(!IsOk(varadr)){ res = Error_T(travast_result, {"varstore add failed"}); break; }
 				if(!IsOk_T((res = parcontext_uniwait(res)))) break;
