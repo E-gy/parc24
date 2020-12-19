@@ -360,6 +360,8 @@ ParceResult parcer_parse(Parser p, string str, bool cangivemore){
 
 #define arrmuttake1(var, arr, clenup) if(!arr || arr->size != 1) retclean(Error_T(travast_result, {"expected a word to expand to one word"}), { argsarrmut_destroy(arr); clenup }); string_mut var = arr->args[0]; arr->args[0] = null; argsarrmut_destroy(arr)
 
+static Result traverse_ast_background(AST ast, ParContext ctxt);
+
 TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 	if(ast->type == AST_LEAF){
 		const TerminalSymbolId sid = ast->d.leaf.symbolId;
@@ -435,8 +437,8 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 		iostack_io_open(cl.ios, IOSTREAM_STD_OUT, pipe.r.ok.write);
 		cl.exeback = true;
 		iostack_io_open(cr.ios, IOSTREAM_STD_IN, pipe.r.ok.read);
-		TraverseASTResult ret = traverse_ast(ast->d.group.children[it1], &cl);
-		if(IsOk_T(ret)) ret = traverse_ast(ast->d.group.children[ir], &cr);
+		Result lr = traverse_ast_background(ast->d.group.children[it1], &cr);
+		TraverseASTResult ret = IsOk(lr) ? traverse_ast(ast->d.group.children[ir], &cr) : Error_T(travast_result, {"pipeline background left failed"});
 		iosstack_destroy(cl.ios);
 		iosstack_destroy(cr.ios);
 		return ret;
@@ -691,4 +693,40 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 	}
 	// ctxt->io.log(LL_ERROR, "Failed to recognize group: %s", ast->d.group.group->name);
 	return Error_T(travast_result, {"AST (group) not recognized"});
+}
+
+#include <cppo/parallels.h>
+#include <parc24/ioslog.h>
+
+struct travastbgrargs {
+	AST ast;
+	ParContext ctxt;
+};
+typedef struct travastbgrargs* TraverseASTBackgroundArgs;
+
+static void* traverse_ast_background_(void* a){
+	TraverseASTBackgroundArgs args = a;
+	TraverseASTResult r = traverse_ast(args->ast, args->ctxt);
+	if(!IsOk_T(r)) parciolog(args->ctxt->ios, LL_ERROR, "Background traversal error: %s", r.r.error);
+	parcontext_subco_destroy(args->ctxt);
+	iosstack_destroy(args->ctxt->ios);
+	free(args->ctxt);
+	ast_destroy(args->ast);
+	free(args);
+	return null;
+}
+
+static Result traverse_ast_background(AST ast, ParContext ctxt){
+	TraverseASTBackgroundArgs args = malloc(sizeof(*args));
+	if(!args) return Error;
+	AST dast = ast_clone(ast);
+	if(!dast) retclean(Error, { free(args); });
+	ParContext cctxt = malloc(sizeof(*cctxt));
+	if(!cctxt) retclean(Error, { ast_destroy(dast); free(args); });
+	*cctxt = *ctxt;
+	ctxt->ios = iosstack_snapdup(ctxt->ios);
+	if(!ctxt->ios) retclean(Error, { ast_destroy(dast); free(cctxt); free(args); });
+	if(!IsOk(parcontext_subco_all(cctxt))) retclean(Error, { iosstack_destroy(ctxt->ios); ast_destroy(dast); free(cctxt); free(args); });
+	*args = (struct travastbgrargs){dast, cctxt};
+	return parallels_runf(traverse_ast_background_, args, true).result;
 }
