@@ -437,7 +437,7 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 		iostack_io_open(cl.ios, IOSTREAM_STD_OUT, pipe.r.ok.write);
 		cl.exeback = true;
 		iostack_io_open(cr.ios, IOSTREAM_STD_IN, pipe.r.ok.read);
-		Result lr = traverse_ast_background(ast->d.group.children[it1], &cr);
+		Result lr = traverse_ast_background(ast->d.group.children[it1], &cl);
 		TraverseASTResult ret = IsOk(lr) ? traverse_ast(ast->d.group.children[ir], &cr) : Error_T(travast_result, {"pipeline background left failed"});
 		iosstack_destroy(cl.ios);
 		iosstack_destroy(cr.ios);
