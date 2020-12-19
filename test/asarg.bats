@@ -106,3 +106,9 @@ load common.sh
 	[ "$status" -eq 0 ]
 	assertout "0,2,4,6,"
 }
+
+@test "[arg](4) nested arith & loops" {
+	run 42test -c 'echo -n $((123+$(for i in 3 2 1 ; do echo -n $((i+$(until [ $i -gt 2 ] ; do i=$((i*2)) ; done ; echo -n $i ))) ; done)))'
+	assertsuccess
+	assertout "788"
+}
