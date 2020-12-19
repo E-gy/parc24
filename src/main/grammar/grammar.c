@@ -360,6 +360,12 @@ ParceResult parcer_parse(Parser p, string str, bool cangivemore){
 
 #define arrmuttake1(var, arr, clenup) if(!arr || arr->size != 1) retclean(Error_T(travast_result, {"expected a word to expand to one word"}), { argsarrmut_destroy(arr); clenup }); string_mut var = arr->args[0]; arr->args[0] = null; argsarrmut_destroy(arr)
 
+/**
+ * @consumes ctxt->ios
+ * @param ast @ref
+ * @param ctxt @ref
+ * @return Result 
+ */
 static Result traverse_ast_background(AST ast, ParContext ctxt);
 
 TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
@@ -438,7 +444,6 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 		iostack_io_open(cr.ios, IOSTREAM_STD_IN, pipe.r.ok.read);
 		Result lr = traverse_ast_background(ast->d.group.children[it1], &cl);
 		TraverseASTResult ret = IsOk(lr) ? traverse_ast(ast->d.group.children[ir], &cr) : Error_T(travast_result, {"pipeline background left failed"});
-		iosstack_destroy(cl.ios);
 		iosstack_destroy(cr.ios);
 		return ret;
 	}
@@ -708,6 +713,7 @@ static void* traverse_ast_background_(void* a){
 	TraverseASTResult r = parcontext_uniwait(traverse_ast(args->ast, args->ctxt));
 	if(!IsOk_T(r)) parciolog(args->ctxt->ios, LL_ERROR, "Background traversal error: %s", r.r.error);
 	parcontext_subco_destroy(args->ctxt);
+	iosstack_destroy(args->ctxt->ios);
 	free(args->ctxt);
 	ast_destroy(args->ast);
 	free(args);
@@ -718,11 +724,11 @@ static Result traverse_ast_background(AST ast, ParContext ctxt){
 	TraverseASTBackgroundArgs args = malloc(sizeof(*args));
 	if(!args) return Error;
 	AST dast = ast_clone(ast);
-	if(!dast) retclean(Error, { free(args); });
+	if(!dast) retclean(Error, { free(args); iosstack_destroy(ctxt->ios); });
 	ParContext cctxt = malloc(sizeof(*cctxt));
-	if(!cctxt) retclean(Error, { ast_destroy(dast); free(args); });
+	if(!cctxt) retclean(Error, { ast_destroy(dast); free(args); iosstack_destroy(ctxt->ios); });
 	*cctxt = *ctxt;
-	if(!IsOk(parcontext_subco_all(cctxt))) retclean(Error, { ast_destroy(dast); free(cctxt); free(args); });
+	if(!IsOk(parcontext_subco_all(cctxt))) retclean(Error, { ast_destroy(dast); free(cctxt); free(args); iosstack_destroy(ctxt->ios); });
 	*args = (struct travastbgrargs){dast, cctxt};
 	return parallels_runf(traverse_ast_background_, args, true).result;
 }
