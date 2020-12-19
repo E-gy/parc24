@@ -49,7 +49,7 @@ jobs:
       id: testi
       working-directory: ${{runner.workspace}}/build
       shell: bash
-      run: bats -v; bats -h; ls; ls './../test'; bats -r './../test'
+      run: bats -v; bats -h; ls; ls './..'; ls './../test'; bats -r './../test'
     - name: On Integration Test Failure report memcheck logs
       if: ${{ failure() && steps.testi.outcome == 'failure' }}
       uses: actions/upload-artifact@v2
