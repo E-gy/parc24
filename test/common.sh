@@ -13,7 +13,8 @@ function 42test(){
 
 function asserteq(){
 	if [ "$1" != "$2" ]; then
-		echo "<$1> != <$2>"
+		echo "expected: $2"
+		echo "got: $1"
 		return 1
 	fi
 }
