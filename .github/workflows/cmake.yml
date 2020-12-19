@@ -15,6 +15,9 @@ jobs:
     - name: Install Utilities
       shell: bash
       run: sudo apt-get update && sudo apt-get install -y lcov valgrind bats-core
+    - name: Install bats-core
+      shell: bash
+      run: sudo npm i --global bats
     - name: Configure CMake
       shell: bash
       working-directory: ${{runner.workspace}}/build
