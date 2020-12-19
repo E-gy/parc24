@@ -586,14 +586,23 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 	}
 	if(gid == blok_for){
 		AST inli = ast->d.group.children[2];
-		if(inli->d.group.cc == 1) return Ok_T(travast_result, {0});
-		AST nvw = inli->d.group.children[2];
-		if(nvw->d.group.cc == 1) return Ok_T(travast_result, {0});
+		bool iterargs = inli->d.group.cc == 1;
+		AST nvw = iterargs ? null : inli->d.group.children[2];
 		const ExpandoResult varnr = expando_word(ast->d.group.children[1]->d.leaf.val, expando_targets_all, ctxt);
 		if(!IsOk_T(varnr)) return Error_T(travast_result, {"failed to resolve variable name"});
 		arrmuttake1(varn, varnr.r.ok, {});
 		TraverseASTResult res = Ok_T(travast_result, {0});
-		do {
+		if(iterargs) for(argsarr arg = ctxt->args; *arg; arg++){
+			if(!IsOk_T((res = parcontext_uniwait(res)))) break;
+			Result varadr = varstore_add(ctxt->vars, varn, *arg);
+			if(!IsOk(varadr)){ res = Error_T(travast_result, {"varstore add failed"}); break; }
+			if(!IsOk_T((res = parcontext_uniwait(res)))) break;
+			if(travt_is_shrtct(res.r.ok.type)) if(res.r.ok.type != TRAV_SHRTCT_CONTINUE || res.r.ok.v.shortcut_depth > 1){
+				if(res.r.ok.type != TRAV_SHRTCT_EXIT) if(--res.r.ok.v.shortcut_depth == 0) res = Ok_T(travast_result, {0});
+				break;
+			}
+			res = traverse_ast(ast->d.group.children[4], ctxt);
+		} else do {
 			if(!IsOk_T((res = parcontext_uniwait(res)))) break;
 			ExpandoResult nva = expando_word(nvw->d.group.children[0]->d.leaf.val, expando_targets_all, ctxt);
 			if(!IsOk_T(nva)){ res = Error_T(travast_result, {"in list element expando failed"}); break; }
