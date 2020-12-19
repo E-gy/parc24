@@ -188,11 +188,13 @@ Result parcontext_subco_all(ParContext c){
 	closwp(c->vars, varstore_clone);
 	closwp(c->funcs, funcstore_clone);
 	closwp(c->aliases, aliastore_clone);
+	closwp(c->ccmds, ccmdstore_clone);
+	closwp(c->ios, iosstack_snapdup);
 	closwp(c->wd, wdstack_clone);
 	struct parc_options o = *c->parcopts;
 	c->parcopts = null;
 	c->parcopts = malloc(sizeof(*c->parcopts));
-	if(!c->vars || !c->funcs || !c->aliases || !c->wd || !c->parcopts){
+	if(!c->vars || !c->funcs || !c->aliases || !c->ccmds || !c->ios || !c->wd || !c->parcopts){
 		parcontext_subco_destroy(c);
 		return Error;
 	}
@@ -202,9 +204,11 @@ Result parcontext_subco_all(ParContext c){
 
 void parcontext_subco_destroy(ParContext c){
 	if(!c) return;
+	iosstack_destroy(c->ios);
 	varstore_destroy(c->vars);
 	funcstore_destroy(c->funcs);
 	aliastore_destroy(c->aliases);
+	ccmdstore_destroy(c->ccmds);
 	wdstack_destroy(c->wd);
 	free(c->parcopts);
 }

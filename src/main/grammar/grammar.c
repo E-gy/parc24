@@ -706,10 +706,9 @@ typedef struct travastbgrargs* TraverseASTBackgroundArgs;
 
 static void* traverse_ast_background_(void* a){
 	TraverseASTBackgroundArgs args = a;
-	TraverseASTResult r = traverse_ast(args->ast, args->ctxt);
+	TraverseASTResult r = parcontext_uniwait(traverse_ast(args->ast, args->ctxt));
 	if(!IsOk_T(r)) parciolog(args->ctxt->ios, LL_ERROR, "Background traversal error: %s", r.r.error);
 	parcontext_subco_destroy(args->ctxt);
-	iosstack_destroy(args->ctxt->ios);
 	free(args->ctxt);
 	ast_destroy(args->ast);
 	free(args);
@@ -724,9 +723,7 @@ static Result traverse_ast_background(AST ast, ParContext ctxt){
 	ParContext cctxt = malloc(sizeof(*cctxt));
 	if(!cctxt) retclean(Error, { ast_destroy(dast); free(args); });
 	*cctxt = *ctxt;
-	ctxt->ios = iosstack_snapdup(ctxt->ios);
-	if(!ctxt->ios) retclean(Error, { ast_destroy(dast); free(cctxt); free(args); });
-	if(!IsOk(parcontext_subco_all(cctxt))) retclean(Error, { iosstack_destroy(ctxt->ios); ast_destroy(dast); free(cctxt); free(args); });
+	if(!IsOk(parcontext_subco_all(cctxt))) retclean(Error, { ast_destroy(dast); free(cctxt); free(args); });
 	*args = (struct travastbgrargs){dast, cctxt};
 	return parallels_runf(traverse_ast_background_, args, true).result;
 }
