@@ -36,18 +36,18 @@ function testagainstbash(){
 	cat - >$TMPF
 	run bash "$@" <$TMPF
 	expected_o="$output"
-	expected_c=$?
+	expected_c=$status
 	run 42test "$@" <$TMPF
 	rm $TMPF
 	err=0
 	if [ $status -ne $expected_c ]; then
-		echo "expected: $expected_c"
-		echo "got: $status"
+		echo "expected status: $expected_c"
+		echo "got status: $status"
 		err=1
 	fi
 	if [ "$output" != "$expected_o" ]; then
-		echo "expected: $expected_o"
-		echo "got: $output"
+		echo "expected output: $expected_o"
+		echo "got output: $output"
 		err=1
 	fi
 	return $err
@@ -58,13 +58,13 @@ function testNeGagainstbash(){
 	cat - >$TMPF
 	run bash "$@" <$TMPF
 	expected_o="$output"
-	expected_c=$?
+	expected_c=$status
 	run 42test "$@" <$TMPF
 	rm $TMPF
 	err=0
 	if [ $status -ne $expected_c ]; then
-		echo "expected: $expected_c"
-		echo "got: $status"
+		echo "expected status: $expected_c"
+		echo "got status: $status"
 		echo "reference output: $expected_o"
 		echo "output: $output"
 		err=1
