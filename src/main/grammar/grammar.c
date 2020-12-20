@@ -645,15 +645,17 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 	if(gid == blok_while || gid == blok_until){
 		Result brekon = gid == blok_while ? Error : Ok;
 		TraverseASTResult res = Ok_T(travast_result, {0});
+		ctxt->lupdepth++;
 		do {
 			TraverseASTResult ec = parcontext_uniwait(traverse_ast(ast->d.group.children[1], ctxt));
-			if(!IsOk_T(ec)) return ec;
-			if(travt_is_shrtct(ec.r.ok.type)) return ec; //TODO hmmmm...
+			if(!IsOk_T(ec)) retclean(ec, { ctxt->lupdepth--; });
+			if(travt_is_shrtct(ec.r.ok.type)) retclean(ec, { ctxt->lupdepth--; }); //TODO hmmmm...
 			if(isexitcodeok(ec.r.ok.v.completed) == brekon) break;
 			if(!IsOk_T((res = parcontext_uniwait(traverse_ast(ast->d.group.children[2], ctxt))))) break;
 			chkshrtctexit(res);
 		} while(true);
 		if(travt_is_shrtct(res.r.ok.type) && res.r.ok.type != TRAV_SHRTCT_EXIT && res.r.ok.v.shortcut_depth == 0) res = Ok_T(travast_result, {TRAV_COMPLETED, {.completed = ctxt->lastexit}});
+		ctxt->lupdepth--;
 		return res;
 	}
 	if(gid == blok_for){
@@ -663,6 +665,7 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 		const ExpandoResult varnr = expando_word(ast->d.group.children[1]->d.leaf.val, expando_targets_all, ctxt);
 		if(!IsOk_T(varnr)) return Error_T(travast_result, {"failed to resolve variable name"});
 		arrmuttake1(varn, varnr.r.ok, {});
+		ctxt->lupdepth++;
 		TraverseASTResult res = Ok_T(travast_result, {0});
 		if(iterargs) for(argsarr arg = ctxt->args; *arg; arg++){
 			if(!IsOk_T((res = parcontext_uniwait(res)))) break;
@@ -687,6 +690,7 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 		} while(nvw->d.group.cc > 1);
 		free(varn);
 		if(travt_is_shrtct(res.r.ok.type) && res.r.ok.type != TRAV_SHRTCT_EXIT && res.r.ok.v.shortcut_depth == 0) res = Ok_T(travast_result, {TRAV_COMPLETED, {.completed = ctxt->lastexit}});
+		ctxt->lupdepth--;
 		return res;
 	}
 	#undef chkshrtctexit
