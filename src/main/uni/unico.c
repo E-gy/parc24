@@ -115,8 +115,6 @@ TraverseASTResult parcontext_unixec(argsarr args, ParContext ctxt){
 TraverseASTResult parcontext_uniredir(enum redirection redir, int stream, string target, ParContext ctxt){
 	if(!target || !ctxt) return Error_T(travast_result, {"invalid args"});
 	if(stream < 0) stream = redir < REDIR_IN ? IOSTREAM_STD_OUT : IOSTREAM_STD_IN;
-	const int maxstreams = sizeof(ctxt->ios)/sizeof(fd_t);
-	if(stream >= maxstreams) return Error_T(travast_result, {"stream # outside of supported bounds"});
 	const bool noclobber = false;//FIXME use tihs options
 	fd_t f = -1;
 	switch(redir){
