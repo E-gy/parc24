@@ -56,7 +56,7 @@ input
 	testagainstbash <<<'for i in hello there friend; do echo -n $i; done'
 	testagainstbash <<'input'
 for i in d e f; do
-	echo -n $i;
+	echo -n $i
 done
 input
 }
