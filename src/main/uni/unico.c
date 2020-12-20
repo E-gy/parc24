@@ -197,6 +197,7 @@ Result parcontext_subco_all(ParContext c){
 		return Error;
 	}
 	*(c->parcopts) = o;
+	c->lupdepth = 0;
 	return Ok;
 }
 
