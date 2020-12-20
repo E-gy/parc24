@@ -60,13 +60,17 @@ static int cmd_echo_exe(TSPA a){
 	for(; i < a->args->size && !juststop; i++) if(bakslsh){
 		Buffer buff = buffer_new_from(a->args->args[i], -1);
 		if(!buff) retclean(2, { pakked_destroy(a); });
-		for(size_t i = 0; i < buff->size && !juststop; i++) if(buff->data[i] == '\\'){
+		for(size_t i = 0; i < buff->size; i++) if(buff->data[i] == '\\'){
 			char repl[] = { 0, 0 };
 			size_t repld = 2;
 			switch(buff->data[i+1]){
 				case 'a': repl[0] = '\a'; break;
 				case 'b': repl[0] = '\b'; break;
-				case 'c': juststop = true; break;
+				case 'c':
+					buffer_delete(buff, i, buff->size);
+					repld = 0;
+					omitnl = juststop = true;
+					break;
 				case 'e': repl[0] = 27; break;
 				case 'f': repl[0] = '\f'; break;
 				case 'n': repl[0] = '\n'; break;
@@ -80,7 +84,7 @@ static int cmd_echo_exe(TSPA a){
 			}
 			if(repld > 0) buffer_splice_str(buff, i, i+repld, repl);
 		}
-		parcioprintf(a->ios, LL_INFO, "%s%s", buff->data, i < a->args->size-1 ? " " : "");
+		parcioprintf(a->ios, LL_INFO, "%s%s", buff->data, i < a->args->size-1 && !juststop ? " " : "");
 		buffer_destroy(buff);
 	} else parcioprintf(a->ios, LL_INFO, "%s%s", a->args->args[i], i < a->args->size-1 ? " " : "");
 	if(!omitnl) parcioprintf(a->ios, LL_INFO, "\n");
