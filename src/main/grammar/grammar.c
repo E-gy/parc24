@@ -160,6 +160,8 @@ DEF_SYMBOL_TERMINAL_CSTR(redir_inout, "<>")
 
 //TODO add more
 DEF_GROUP(redirection,
+	RULEp(-10, SYMBOL_G(streamid_opt); SYMBOL_T(redir_out); SYMBOL_T(word));
+	RULEp(-10, SYMBOL_G(streamid_opt); SYMBOL_T(redir_in); SYMBOL_T(word));
 	RULE(SYMBOL_G(streamid_opt); SYMBOL_T(redir_out_append); SYMBOL_T(word));
 	RULE(SYMBOL_G(streamid_opt); SYMBOL_T(redir_in_fromheredoc_1); SYMBOL_T(heredoc1));
 	RULE(SYMBOL_G(streamid_opt); SYMBOL_T(redir_in_fromheredoc_2); SYMBOL_T(heredoc2));
@@ -168,8 +170,6 @@ DEF_GROUP(redirection,
 	RULE(SYMBOL_G(streamid_opt); SYMBOL_T(redir_in_dup); SYMBOL_T(word));
 	RULE(SYMBOL_G(streamid_opt); SYMBOL_T(redir_out_ignorenoclobber); SYMBOL_T(word));
 	RULE(SYMBOL_G(streamid_opt); SYMBOL_T(redir_inout); SYMBOL_T(word));
-	RULE(SYMBOL_G(streamid_opt); SYMBOL_T(redir_out); SYMBOL_T(word));
-	RULE(SYMBOL_G(streamid_opt); SYMBOL_T(redir_in); SYMBOL_T(word));
 )
 DEF_GKLEENE(redirections, SYMBOL_G(redirection))
 
