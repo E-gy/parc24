@@ -16,12 +16,16 @@
 #endif
 
 TraverseASTResult cmd_cd(argsarr args, ParContext context){
+	bool printdst = false;
 	struct getvarv home = parcontext_getunivar(context, "HOME");
 	string dst = args[1] ? args[1] : home.v.ref;
 	if(streq("~", dst)) dst = home.v.ref;
-	if(streq("-", dst)) if(!(dst = wdstack_get(context->wd, 1))) retclean(Ok_T(travast_result, {TRAV_COMPLETED, {.completed = 0}}), { if(home.copy) free(home.v.copy); } );
+	if(streq("-", dst)){
+		if(!(dst = wdstack_get(context->wd, 1))) retclean(Ok_T(travast_result, {TRAV_COMPLETED, {.completed = 0}}), { if(home.copy) free(home.v.copy); } ); else printdst = true;
+	}
 	if(!*dst) retclean(Ok_T(travast_result, {TRAV_COMPLETED, {.completed = 1}}), { if(home.copy) free(home.v.copy); } );
 	Result ok = wdstack_changedir(context->wd, dst);
+	if(IsOk(ok) && printdst) parciolog(context->ios, LL_INFO, dst);
 	if(home.copy) free(home.v.copy);
 	return Ok_T(travast_result, {TRAV_COMPLETED, {.completed = IsOk(ok) ? 0 : 1}});
 }
