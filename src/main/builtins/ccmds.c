@@ -11,6 +11,7 @@
 struct pakkedi {
 	ArgsArr_Mut args;
 	IOsStack ios;
+	struct parc_options opts;
 };
 typedef struct pakkedi* TSPA;
 
@@ -25,14 +26,14 @@ static TSPA pakked_new(argsarr args, ParContext c){
 	if(!args || !c) return null;
 	new(TSPA, p);
 	*p = (struct pakkedi){0};
-	*p = (struct pakkedi){argsarrmut_from(cpt2ptr(args)), iosstack_snapdup(c->ios)};
+	*p = (struct pakkedi){argsarrmut_from(cpt2ptr(args)), iosstack_snapdup(c->ios), *c->parcopts};
 	if(!p->args) retclean(null, {pakked_destroy(p);});
 	return p;
 }
 
 static int cmd_echo_exe(TSPA a){
 	bool omitnl = false;
-	ATTR_UNUSED bool bakslsh = false; //TODO baskslsh processing
+	ATTR_UNUSED bool bakslsh = a->opts.xpg_echo; //TODO baskslsh processing
 	size_t i = 1;
 	for(; i < a->args->size; i++) if(streq("-n", a->args->args[i])) omitnl = true; else if(streq("-e", a->args->args[i])) bakslsh = true; else if(streq("-E", a->args->args[i])) bakslsh = false; else break;
 	for(; i < a->args->size; i++) parcioprintf(a->ios, LL_INFO, "%s%s", a->args->args[i], i < a->args->size-1 ? " " : "");
