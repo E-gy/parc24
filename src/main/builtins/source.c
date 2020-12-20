@@ -7,11 +7,14 @@
 #include <tihs/exe.h>
 
 TraverseASTResult cmd_source(argsarr args, ParContext context){
-	if(!args[1]) return Ok_T(travast_result, {TRAV_COMPLETED, {.completed = 1}});
+	if(!args[1]){
+		parciolog(context->ios, LL_ERROR, "%s: filename argument required", args[1]);
+		return Ok_T(travast_result, {TRAV_COMPLETED, {.completed = 2}});
+	}
 	BufferResult buff = buffer_from_file(args[1]);
 	if(!IsOk_T(buff)){
 		parciolog(context->ios, LL_ERROR, "%s: read error: %s", args[1], buff.r.error);
-		return Ok_T(travast_result, {TRAV_COMPLETED, {.completed = 2}});
+		return Ok_T(travast_result, {TRAV_COMPLETED, {.completed = 1}});
 	}
 	struct parcontext cctxt = *context;
 	if(args[2]) cctxt.args = args+2;
