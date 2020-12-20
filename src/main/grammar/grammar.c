@@ -419,7 +419,7 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 		if(!IsOk_T(t1)) return t1;
 		if(ast->d.group.children[ir]->d.group.cc == 1) return t1;
 		t1 = parcontext_uniwait(t1);
-		if(!IsOk_T(t1) || travt_is_shrtct(t1.r.ok.type)) return t1;
+		if(!IsOk_T(t1) || travt_is_shrtct(t1.r.ok.type) || (travt_is_hascode(t1.r.ok.type) && !IsOk(isexitcodeok(t1.r.ok.v.completed)))) return t1;
 		ctxt->lastexit = t1.r.ok.v.completed;
 		return traverse_ast(ast->d.group.children[ir], ctxt);
 	}
@@ -431,7 +431,7 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 		if(!IsOk_T(t1)) return t1;
 		if(ast->d.group.children[ir]->d.group.cc == 1) return t1;
 		t1 = parcontext_uniwait(t1);
-		if(!IsOk_T(t1) || travt_is_shrtct(t1.r.ok.type)) return t1;
+		if(!IsOk_T(t1) || travt_is_shrtct(t1.r.ok.type) || (travt_is_hascode(t1.r.ok.type) && !IsOk(isexitcodeok(t1.r.ok.v.completed)))) return t1;
 		ctxt->lastexit = t1.r.ok.v.completed;
 		return traverse_ast(ast->d.group.children[ir], ctxt);
 	}
@@ -637,8 +637,13 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 		return traverse_ast(ast->d.group.children[cond.r.ok.v.completed == 0 ? 3 : 4], ctxt);
 	}
 	if(gid == blok_do_done) return traverse_ast(ast->d.group.children[1], ctxt);
+	#define chkshrtctexit(res) \
+		if(res.r.ok.type == TRAV_SHRTCT_EXIT) break;\
+		if(res.r.ok.type == TRAV_SHRTCT_BREAK){ res.r.ok.v.shortcut_depth--; break; }\
+		if(res.r.ok.type == TRAV_SHRTCT_CONTINUE){ if(res.r.ok.v.shortcut_depth > 1){ res.r.ok.v.shortcut_depth--; break; } else res = Ok_T(travast_result, {TRAV_COMPLETED, {.completed = ctxt->lastexit}}); }\
+		else if(travt_is_hascode(res.r.ok.type) && !IsOk(isexitcodeok(res.r.ok.v.completed))) break
 	if(gid == blok_while || gid == blok_until){
-		bool brekon = gid == blok_while;
+		Result brekon = gid == blok_while ? Error : Ok;
 		TraverseASTResult res = Ok_T(travast_result, {0});
 		do {
 			TraverseASTResult ec = parcontext_uniwait(traverse_ast(ast->d.group.children[1], ctxt));
@@ -646,11 +651,9 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 			if(travt_is_shrtct(ec.r.ok.type)) return ec; //TODO hmmmm...
 			if(isexitcodeok(ec.r.ok.v.completed) == brekon) break;
 			if(!IsOk_T((res = parcontext_uniwait(traverse_ast(ast->d.group.children[2], ctxt))))) break;
-			if(travt_is_shrtct(res.r.ok.type) && (res.r.ok.type != TRAV_SHRTCT_CONTINUE || res.r.ok.v.shortcut_depth > 1)){
-				if(res.r.ok.type != TRAV_SHRTCT_EXIT) if(--res.r.ok.v.shortcut_depth == 0) res = Ok_T(travast_result, {0});
-				break;
-			}
+			chkshrtctexit(res);
 		} while(true);
+		if(travt_is_shrtct(res.r.ok.type) && res.r.ok.type != TRAV_SHRTCT_EXIT && res.r.ok.v.shortcut_depth == 0) res = Ok_T(travast_result, {TRAV_COMPLETED, {.completed = ctxt->lastexit}});
 		return res;
 	}
 	if(gid == blok_for){
@@ -663,36 +666,30 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 		TraverseASTResult res = Ok_T(travast_result, {0});
 		if(iterargs) for(argsarr arg = ctxt->args; *arg; arg++){
 			if(!IsOk_T((res = parcontext_uniwait(res)))) break;
-			Result varadr = varstore_add(ctxt->vars, varn, *arg);
-			if(!IsOk(varadr)){ res = Error_T(travast_result, {"varstore add failed"}); break; }
-			if(!IsOk_T((res = parcontext_uniwait(res)))) break;
-			if(travt_is_shrtct(res.r.ok.type)) if(res.r.ok.type != TRAV_SHRTCT_CONTINUE || res.r.ok.v.shortcut_depth > 1){
-				if(res.r.ok.type != TRAV_SHRTCT_EXIT) if(--res.r.ok.v.shortcut_depth == 0) res = Ok_T(travast_result, {0});
-				break;
-			}
+			chkshrtctexit(res);
+			if(!IsOk(varstore_add(ctxt->vars, varn, *arg))){ res = Error_T(travast_result, {"varstore add failed"}); break; }
 			res = traverse_ast(ast->d.group.children[4], ctxt);
+			chkshrtctexit(res);
 		} else do {
 			if(!IsOk_T((res = parcontext_uniwait(res)))) break;
 			ExpandoResult nva = expando_word(nvw->d.group.children[0]->d.leaf.val, expando_targets_all, ctxt);
 			if(!IsOk_T(nva)){ res = Error_T(travast_result, {"in list element expando failed"}); break; }
 			for(size_t i = 0; i < nva.r.ok->size; i++){
 				if(!IsOk_T((res = parcontext_uniwait(res)))) break;
-				Result varadr = varstore_add(ctxt->vars, varn, nva.r.ok->args[i]);
-				if(!IsOk(varadr)){ res = Error_T(travast_result, {"varstore add failed"}); break; }
-				if(!IsOk_T((res = parcontext_uniwait(res)))) break;
-				if(travt_is_shrtct(res.r.ok.type)) if(res.r.ok.type != TRAV_SHRTCT_CONTINUE || res.r.ok.v.shortcut_depth > 1){
-					if(res.r.ok.type != TRAV_SHRTCT_EXIT) if(--res.r.ok.v.shortcut_depth == 0) res = Ok_T(travast_result, {0});
-					break;
-				}
+				chkshrtctexit(res);
+				if(!IsOk(varstore_add(ctxt->vars, varn, nva.r.ok->args[i]))){ res = Error_T(travast_result, {"varstore add failed"}); break; }
 				res = traverse_ast(ast->d.group.children[4], ctxt);
+				chkshrtctexit(res);
 			}
 			argsarrmut_destroy(nva.r.ok);
-			if(!IsOk_T(res)) break;
+			if(!IsOk_T(res) || travt_is_shrtct(res.r.ok.type)) break;
 			nvw = nvw->d.group.children[1];
 		} while(nvw->d.group.cc > 1);
 		free(varn);
+		if(travt_is_shrtct(res.r.ok.type) && res.r.ok.type != TRAV_SHRTCT_EXIT && res.r.ok.v.shortcut_depth == 0) res = Ok_T(travast_result, {TRAV_COMPLETED, {.completed = ctxt->lastexit}});
 		return res;
 	}
+	#undef chkshrtctexit
 	if(gid == blok_case){
 		AST cases = ast->d.group.children[5];
 		if(cases->d.group.cc == 1) return Ok_T(travast_result, {TRAV_COMPLETED, {.completed=0}});
