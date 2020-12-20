@@ -188,6 +188,6 @@ grep f >>ttuc.txt <<-lul
 	adqewfefvioiyt
 	kyikjswcbors
 lul
-grep h <rakk.txt | cat - ttuc.txt 5>&1 5>reeh.txt | grep s > quack
+grep h <rakk.txt | cat - ttuc.txt 5>reeh.txt 5>&1 | grep s > quack
 input
 }
