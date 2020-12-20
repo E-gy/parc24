@@ -42,7 +42,7 @@ struct parctesting {
 		auto vars = varstore_new(); \
 		(struct parctesting){ p0r.r.ok.write, p1r.r.ok.read, p2r.r.ok.read, { \
 			vars, vars, funcstore_new(), ccmds, aliastore_new(), ios, wdstack_new(), patcomp_new(), arith_new(), \
-			"parc", noargs, 0, false, &parcopts, \
+			"parc", noargs, 0, 0, false, &parcopts, \
 			parcer_defolt_new() \
 		}}; \
 	})

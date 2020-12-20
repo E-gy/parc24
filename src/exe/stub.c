@@ -133,7 +133,7 @@ int main(ATTR_UNUSED int argc, argsarr args){
 		parciolog(ios, LL_CRITICAL, "Failed to initialize arithmetics");
 		return 3;
 	}
-	struct parcontext ctxt = {vars, vars, funcs, ccmds, aliases, ios, wd, patco, arith, args[0], opts.args, 0, false, &opts.parcopts, parcer};
+	struct parcontext ctxt = {vars, vars, funcs, ccmds, aliases, ios, wd, patco, arith, args[0], opts.args, 0, 0, false, &opts.parcopts, parcer};
 	int ec = dothething(opts, &ctxt);
 	arith_destroy(arith);
 	patcomp_destroy(patco);

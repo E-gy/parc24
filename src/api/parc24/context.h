@@ -27,6 +27,7 @@ struct parcontext {
 	string currexe;
 	argsarr args;
 	int lastexit;
+	int lupdepth;
 	bool exeback;
 	ParcOptions parcopts;
 	Parser parcer;
