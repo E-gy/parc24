@@ -140,7 +140,7 @@ DEF_SYMBOL_TERMINAL(streamid, {
 	if(!str) return null;
 	string_mut end = null;
 	long sid = strtol(str, &end, 10);
-	return sid >= 0 && sid < 10 ? end : null;
+	return end > str && sid >= 0 ? end : null;
 })
 DEF_GOPT(streamid_opt, RULE(SYMBOL_T(streamid)))
 
