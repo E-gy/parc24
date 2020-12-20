@@ -38,7 +38,7 @@ TraverseASTResult cmd_break(argsarr args, ATTR_UNUSED ParContext context){
 			return Ok_T(travast_result, {TRAV_COMPLETED, {.completed = 1}});
 		}
 	}
-	return Ok_T(travast_result, {TRAV_SHRTCT_BREAK, {.shortcut_depth = lvl}});
+	return Ok_T(travast_result, {TRAV_SHRTCT_BREAK, {.shortcut_depth = lvl > context->lupdepth ? context->lupdepth : lvl}});
 }
 
 TraverseASTResult cmd_continue(argsarr args, ATTR_UNUSED ParContext context){
@@ -59,5 +59,5 @@ TraverseASTResult cmd_continue(argsarr args, ATTR_UNUSED ParContext context){
 			return Ok_T(travast_result, {TRAV_COMPLETED, {.completed = 1}});
 		}
 	}
-	return Ok_T(travast_result, {TRAV_SHRTCT_CONTINUE, {.shortcut_depth = lvl}});
+	return Ok_T(travast_result, {TRAV_SHRTCT_CONTINUE, {.shortcut_depth = lvl > context->lupdepth ? context->lupdepth : lvl}});
 }
