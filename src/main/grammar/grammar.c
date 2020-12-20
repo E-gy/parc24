@@ -573,17 +573,16 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 			for(AST elr = ast->d.group.children[2]; elr->d.group.cc > 1; elr = elr->d.group.children[1]) if(elr->d.group.children[0]->d.group.children[0]->type == AST_LEAF) words++;
 			if(words == 0) return Error_T(travast_result, {"don't know what to do with a command without words"}); //FIXME
 			struct parcontext c = *ctxt;
-			c.vars = varstore_clone(c.vars);
 			iosstack_push(c.ios);
 			#undef cleanup
-			#define cleanup { iosstack_pop(c.ios); varstore_destroy(c.vars); }
+			#define cleanup { iosstack_pop(c.ios); }
 			for(AST ar = ast->d.group.children[0]; ar->d.group.cc > 1; ar = ar->d.group.children[1]){
 				TraverseASTResult rass = traverse_ast(ar->d.group.children[0]->d.group.children[0], &c);
 				if(!IsOk_T(rass)) return captclean(rass, cleanup);
 			}
 			ArgsArr_Mut args = argsarrmut_new(words);
 			#undef cleanup
-			#define cleanup { argsarrmut_destroy(args); iosstack_pop(c.ios); varstore_destroy(c.vars); }
+			#define cleanup { argsarrmut_destroy(args); iosstack_pop(c.ios); }
 			if(!args) return captclean(Error_T(travast_result, {"args construction failed"}), cleanup);
 			if(c0->type == AST_LEAF){
 				ExpandoResult expra = expando_word(c0->d.leaf.val, (struct expando_targets){ .tilde = true, .parvar = true, .arithmetics = true, .command = true, .process = true, .path = true, .quot = true }, &c);
