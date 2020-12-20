@@ -419,7 +419,7 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 		if(!IsOk_T(t1)) return t1;
 		if(ast->d.group.children[ir]->d.group.cc == 1) return t1;
 		t1 = parcontext_uniwait(t1);
-		if(!IsOk_T(t1) || travt_is_shrtct(t1.r.ok.type) || (travt_is_hascode(t1.r.ok.type) && !IsOk(isexitcodeok(t1.r.ok.v.completed)))) return t1;
+		if(!IsOk_T(t1) || travt_is_shrtct(t1.r.ok.type)) return t1;
 		ctxt->lastexit = t1.r.ok.v.completed;
 		return traverse_ast(ast->d.group.children[ir], ctxt);
 	}
@@ -431,7 +431,7 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 		if(!IsOk_T(t1)) return t1;
 		if(ast->d.group.children[ir]->d.group.cc == 1) return t1;
 		t1 = parcontext_uniwait(t1);
-		if(!IsOk_T(t1) || travt_is_shrtct(t1.r.ok.type) || (travt_is_hascode(t1.r.ok.type) && !IsOk(isexitcodeok(t1.r.ok.v.completed)))) return t1;
+		if(!IsOk_T(t1) || travt_is_shrtct(t1.r.ok.type)) return t1;
 		ctxt->lastexit = t1.r.ok.v.completed;
 		return traverse_ast(ast->d.group.children[ir], ctxt);
 	}
