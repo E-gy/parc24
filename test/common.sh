@@ -60,6 +60,41 @@ function testagainstbash(){
 	return $err
 }
 
+function testagainstbash_cmpfs(){
+	OGD=$(pwd)
+	TMPF=$(mktemp)
+	cat - >$TMPF
+	TMPDe=$(mktemp -d)
+	TMPDa=$(mktemp -d)
+	cp -r . $TMPDe/
+	cp -r . $TMPDa/
+	cd $TMPDe
+	run bash "$@" <$TMPF
+	expected_o="$output"
+	expected_c=$status
+	cd $TMPDa
+	run 42test "$@" <$TMPF
+	rm $TMPF
+	cd $OGD
+	err=0
+	if [ $status -ne $expected_c ]; then
+		echo "expected status: $expected_c"
+		echo "got status: $status"
+		err=1
+	fi
+	if [ "$output" != "$expected_o" ]; then
+		echo "expected output:"
+		echo $expected_o
+		echo "got output:"
+		echo $output
+		err=1
+	fi
+	if ! diff -ru $TMPDa $TMPDe; then
+		err=1
+	fi
+	return $err
+}
+
 function testNeGagainstbash(){
 	TMPF=$(mktemp)
 	cat - >$TMPF

@@ -498,7 +498,7 @@ TraverseASTResult traverse_ast(AST ast, ParContext ctxt){
 					size_t dels;
 					if(s[0] == '\'' || s[0] == '"'){
 						char q = s[0];
-						if(!(ss = strchr(s, q))) return Error_T(travast_result, {"heredoc delimiter capture failed"});
+						if(!(ss = strchr(s+1, q))) return Error_T(travast_result, {"heredoc delimiter capture failed"});
 						dels = ss-s-1;
 						expand = false;
 					} else {
