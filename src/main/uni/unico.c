@@ -11,6 +11,7 @@
 #include <util/caste.h>
 #include <util/str2i.h>
 #include <cppo/parallels.h>
+#include <cppo/fdi.h>
 #include <grammar/aliaser.h>
 #include <util/buffer_printf.h>
 
@@ -149,9 +150,9 @@ TraverseASTResult parcontext_uniredir(enum redirection redir, int stream, string
 			if(streq(target, "-")) return !IsOk(iostack_io_close(ctxt->ios, stream)) ? Error_T(travast_result, {"failed to close target stream"}) : Ok_T(travast_result, {0});
 			Str2IResult sn = str2i(target);
 			if(!IsOk_T(sn)) return Error_T(travast_result, {"target is not a number"});
+			if(!(redir == REDIR_OUT_DUP ? fdiswriteable : fdisreadable)(iosstack_raw_get(ctxt->ios, sn.r.ok))) return Error_T(travast_result, {"target stream not writeable/readable"});
 			if(!IsOk(iosstack_io_dup(ctxt->ios, stream, sn.r.ok))) return Error_T(travast_result, {"failed to dup stream"});
-			//TODO check readable/writeable
-			break;
+			return Ok_T(travast_result, {0});
 		}
 		case REDIR_INOUT:
 			f = open(target, O_RDWR|O_CLOEXEC,S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
