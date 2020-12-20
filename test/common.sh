@@ -51,8 +51,10 @@ function testagainstbash(){
 		err=1
 	fi
 	if [ "$output" != "$expected_o" ]; then
-		echo "expected output: $expected_o"
-		echo "got output: $output"
+		echo "expected output:"
+		echo $expected_o
+		echo "got output:"
+		echo $output
 		err=1
 	fi
 	return $err
