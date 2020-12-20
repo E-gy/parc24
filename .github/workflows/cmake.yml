@@ -55,7 +55,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: memcheck-logs
-        path: ${{runner.workspace}}/build/memchck.log
+        path: $GITHUB_WORKSPACE/test/*.memcheck.log
     - name: Generate Coverage
       if: ${{ always() && steps.collcov.outcome == 'success' }}
       working-directory: ${{runner.workspace}}/build

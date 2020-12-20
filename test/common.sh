@@ -1,9 +1,10 @@
 
 function memchk(){
-	echo "#########################" >> ./memcheck.log
-	valgrind --leak-check=full --error-exitcode=100 --log-fd=9 9>>./memcheck.log -- "$@"
+	mcl="$BATS_TEST_FILENAME.$BATS_TEST_NUMBER.memcheck.log"
+	echo "#########################" >> "$mcl"
+	valgrind --leak-check=full --error-exitcode=100 --log-file="$mcl" -- "$@"
 	EXC=$?
-	echo "#########################" >> ./memcheck.log
+	echo "#########################" >> "$mcl"
 	return $EXC
 }
 
