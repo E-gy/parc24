@@ -155,7 +155,7 @@ TraverseASTResult parcontext_uniredir(enum redirection redir, int stream, string
 			return Ok_T(travast_result, {0});
 		}
 		case REDIR_INOUT:
-			f = open(target, O_RDWR|O_CLOEXEC,S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
+			f = open(target, O_RDWR|O_CREAT|O_CLOEXEC,S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
 			break;
 		default:
 			return Error_T(travast_result, {"unknown redirection"});
