@@ -64,7 +64,7 @@ TihsOptsParseResult tihsopts_parse(argsarr args, IOsStack io){
 		} else parciolog(io, LL_ERROR, "%s: invalid option", *args);
 	}
 	if(printshopt) printopts(opts.parcopts, 0, io, false ? args : null);
-	if(!(opts.commandstr || readfromstdin) && *args) opts.commandfile = *args;
+	if(!(opts.commandstr || readfromstdin) && *args) opts.commandfile = *args++;
 	opts.args = args;
 	return Ok_T(tihsopts_parse_result, opts);
 }
