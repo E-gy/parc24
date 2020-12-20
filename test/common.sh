@@ -2,7 +2,7 @@
 function memchk(){
 	mcl="$BATS_TEST_FILENAME.$BATS_TEST_NUMBER.memcheck.log"
 	echo "#########################" >> "$mcl"
-	timeout 10 valgrind --leak-check=full --error-exitcode=100 --log-file="$mcl" -- "$@"
+	timeout 20 valgrind --leak-check=full --error-exitcode=100 --log-file="$mcl" -- "$@"
 	EXC=$?
 	echo "#########################" >> "$mcl"
 	return $EXC
