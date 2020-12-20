@@ -36,6 +36,13 @@ function assertout(){
 	asserteq "$output" "$1"
 }
 
+function isolatefs(){
+	tmpdir=$(mktemp -d)
+	cp ./42* $tmpdir/
+	cp ./*.so $tmpdir/
+	cd $tmpdir
+}
+
 function testagainstbash(){
 	TMPF=$(mktemp)
 	cat - >$TMPF
