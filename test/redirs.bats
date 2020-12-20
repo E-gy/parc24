@@ -161,7 +161,7 @@ cat <<-"inp"
 input
 }
 
-@test "[in](2) redirections and pipes" {
+@test "[in](2) redirections and pipes" { skip
 	testagainstbash_cmpfs <<'input'
 grep f >>rakk.txt <<-lul
 	hair
