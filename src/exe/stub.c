@@ -62,7 +62,7 @@ static int dothething(struct tihsopts opts, ParContext ctxt){
 			parciolog(ctxt->ios, LL_ERROR, "Failed to read from standard input - %s", err.s);
 		});
 	}
-	return 0;
+	return ctxt->lastexit;
 }
 
 int main(ATTR_UNUSED int argc, argsarr args){
