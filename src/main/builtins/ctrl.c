@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <parc24/ioslog.h>
 
-TraverseASTResult cmd_exit(argsarr args, ATTR_UNUSED ParContext context){
+TraverseASTResult cmd_exit(argsarr args, ParContext context){
 	int code = context->lastexit;
 	if(args[1]){
 		Str2IResult ps = str2i(args[1]);
@@ -20,7 +20,7 @@ TraverseASTResult cmd_exit(argsarr args, ATTR_UNUSED ParContext context){
 	return Ok_T(travast_result, {TRAV_SHRTCT_EXIT, {.completed = code}});
 }
 
-TraverseASTResult cmd_break(argsarr args, ATTR_UNUSED ParContext context){
+TraverseASTResult cmd_break(argsarr args, ParContext context){
 	if(context->lupdepth == 0){
 		parciolog(context->ios, LL_ERROR, "%s: makes no sense outside looops", args[0]);
 		return Ok_T(travast_result, {TRAV_COMPLETED, {.completed = 128}});
@@ -41,7 +41,7 @@ TraverseASTResult cmd_break(argsarr args, ATTR_UNUSED ParContext context){
 	return Ok_T(travast_result, {TRAV_SHRTCT_BREAK, {.shortcut_depth = lvl > context->lupdepth ? context->lupdepth : lvl}});
 }
 
-TraverseASTResult cmd_continue(argsarr args, ATTR_UNUSED ParContext context){
+TraverseASTResult cmd_continue(argsarr args, ParContext context){
 	if(context->lupdepth == 0){
 		parciolog(context->ios, LL_ERROR, "%s: makes no sense outside looops", args[0]);
 		return Ok_T(travast_result, {TRAV_COMPLETED, {.completed = 128}});
