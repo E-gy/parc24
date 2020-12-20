@@ -21,6 +21,10 @@ TraverseASTResult cmd_exit(argsarr args, ATTR_UNUSED ParContext context){
 }
 
 TraverseASTResult cmd_break(argsarr args, ATTR_UNUSED ParContext context){
+	if(context->lupdepth == 0){
+		parciolog(context->ios, LL_ERROR, "%s: makes no sense outside looops", args[0]);
+		return Ok_T(travast_result, {TRAV_COMPLETED, {.completed = 128}});
+	}
 	int lvl = 1;
 	if(args[1]){
 		Str2IResult ps = str2i(args[1]);
@@ -38,6 +42,10 @@ TraverseASTResult cmd_break(argsarr args, ATTR_UNUSED ParContext context){
 }
 
 TraverseASTResult cmd_continue(argsarr args, ATTR_UNUSED ParContext context){
+	if(context->lupdepth == 0){
+		parciolog(context->ios, LL_ERROR, "%s: makes no sense outside looops", args[0]);
+		return Ok_T(travast_result, {TRAV_COMPLETED, {.completed = 128}});
+	}
 	int lvl = 1;
 	if(args[1]){
 		Str2IResult ps = str2i(args[1]);
