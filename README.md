@@ -1,5 +1,6 @@
 [![Build](https://github.com/E-gy/parc24/workflows/CMake/badge.svg?branch=master)](https://github.com/E-gy/parc24/actions?query=branch%3Amaster)
 [![Coverage Status](https://coveralls.io/repos/github/E-gy/parc24/badge.svg?branch=master&t=hm2C4O)](https://coveralls.io/github/E-gy/parc24?branch=master)
+[![License: CC0-1.0](https://licensebuttons.net/l/zero/1.0/80x15.png)](http://creativecommons.org/publicdomain/zero/1.0/)
 # parc24
 _Cross platform almost-bash-like on modern concepts_
 
@@ -12,6 +13,8 @@ What is *almost*-bourne-again-shell-*like* exactly?
 - minus some features that weren't part of the scope of this project (`[`, `[[`, ...)
 - minus legacy features, or them differently (aliases can alias only into command segments / other aliases for example)  
 - using modern platfrom-independent concepts&features inside (single-proc, multi-threaded, fully-contextual\*,...)
+
+Notice: Oh and there is an UB somewhere - as is clear by the unit tests failing on Linux, but passing just fine on Win. Either in the tests themselves, or in the lib...
 
 ---
 PS: this project essentially served as a part of an assigned project within scope of validating some requirements. Therefore it has no reason to be maintained any longer. It is released in the public domain because why not. Sadly, both the outer project, and the requirements it was made for, are closed source and will remain this way.
