@@ -4,13 +4,13 @@
 _Cross platform almost-bash-like on modern concepts_
 
 It is 2 things
-- a dynamic/static library for running bash-like command/scripts programmatically
+- a dynamic/static library for running commands/scripts programmatically
 - an executable CLI wrapper for the wrapper (essentially a bash-like terminal)
 
-What is *almost*-bash-*like* exactly?
-- follow bash specification on the outside
-- minus some bash features that weren't part of the scope of this project (`[`, `[[`, ...)
-- minus legacy bash features, or them differently (aliases can alias only into command segments / other aliases for example)  
+What is *almost*-bourne-again-shell-*like* exactly?
+- follow specification on the outside
+- minus some features that weren't part of the scope of this project (`[`, `[[`, ...)
+- minus legacy features, or them differently (aliases can alias only into command segments / other aliases for example)  
 - using modern platfrom-independent concepts&features inside (single-proc, multi-threaded, fully-contextual\*,...)
 
 ---
