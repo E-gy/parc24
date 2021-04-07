@@ -54,26 +54,26 @@ target_compile_definitions(parc24cov PRIVATE _GNU_SOURCE)
 
 file(GLOB_RECURSE src_exe "${PROJECT_SOURCE_DIR}/src/exe/*.h" "${PROJECT_SOURCE_DIR}/src/exe/*.c")
 
-add_executable(42sh ${src_exe})
-include_directories(42sh ${PROJECT_SOURCE_DIR}/src/api)
-include_directories(42sh ${PROJECT_SOURCE_DIR}/src/main)
-include_directories(42sh ${PROJECT_SOURCE_DIR}/src/exe)
-target_compile_options(42sh PRIVATE
+add_executable(tihs24 ${src_exe})
+include_directories(tihs24 ${PROJECT_SOURCE_DIR}/src/api)
+include_directories(tihs24 ${PROJECT_SOURCE_DIR}/src/main)
+include_directories(tihs24 ${PROJECT_SOURCE_DIR}/src/exe)
+target_compile_options(tihs24 PRIVATE
 	$<$<CXX_COMPILER_ID:MSVC>:/W4 /WX>
 	$<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Werror -pedantic>
 )
-target_link_libraries(42sh parc24)
-set_property(TARGET 42sh PROPERTY POSITION_INDEPENDENT_CODE TRUE)
+target_link_libraries(tihs24 parc24)
+set_property(TARGET tihs24 PROPERTY POSITION_INDEPENDENT_CODE TRUE)
 
-add_executable(42shcov ${src_exe})
-include_directories(42shcov ${PROJECT_SOURCE_DIR}/src/api)
-include_directories(42shcov ${PROJECT_SOURCE_DIR}/src/main)
-include_directories(42shcov ${PROJECT_SOURCE_DIR}/src/exe)
-target_compile_options(42shcov PRIVATE
+add_executable(tihs24cov ${src_exe})
+include_directories(tihs24cov ${PROJECT_SOURCE_DIR}/src/api)
+include_directories(tihs24cov ${PROJECT_SOURCE_DIR}/src/main)
+include_directories(tihs24cov ${PROJECT_SOURCE_DIR}/src/exe)
+target_compile_options(tihs24cov PRIVATE
 	$<$<CXX_COMPILER_ID:MSVC>:/W4 /WX>
 	$<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Werror -pedantic>
 )
-target_link_libraries(42shcov parc24cov)
+target_link_libraries(tihs24cov parc24cov)
 
 # Tests
 

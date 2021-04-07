@@ -8,10 +8,10 @@ function memchk(){
 	return $EXC
 }
 
-function 42test(){
-	hs=./42sh
-	if test -f ./42shcov; then
-		hs=./42shcov
+function test24(){
+	hs=./tihs24
+	if test -f ./tihs24cov; then
+		hs=./tihs24cov
 	fi
 	memchk $hs "$@"
 }
@@ -49,7 +49,7 @@ function testagainstbash(){
 	run bash "$@" <$TMPF
 	expected_o="$output"
 	expected_c=$status
-	run 42test "$@" <$TMPF
+	run test24 "$@" <$TMPF
 	rm $TMPF
 	err=0
 	if [ $status -ne $expected_c ]; then
@@ -80,7 +80,7 @@ function testagainstbash_cmpfs(){
 	expected_o="$output"
 	expected_c=$status
 	cd $TMPDa
-	run 42test "$@" <$TMPF
+	run test24 "$@" <$TMPF
 	rm $TMPF
 	cd $OGD
 	err=0
@@ -108,7 +108,7 @@ function testNeGagainstbash(){
 	run bash "$@" <$TMPF
 	expected_o="$output"
 	expected_c=$status
-	run 42test "$@" <$TMPF
+	run test24 "$@" <$TMPF
 	rm $TMPF
 	err=0
 	if [ $status -ne $expected_c ]; then

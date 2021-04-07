@@ -33,7 +33,7 @@ jobs:
       id: collcov
       working-directory: ${{runner.workspace}}/build
       shell: bash
-      run: lcov --capture -i --directory ./CMakeFiles/parc24cov.dir --directory ./CMakeFiles/42shcov.dir -o cov-base.info
+      run: lcov --capture -i --directory ./CMakeFiles/parc24cov.dir --directory ./CMakeFiles/tihs24cov.dir -o cov-base.info
     - name: Unit Test
       id: testu
       working-directory: ${{runner.workspace}}/build
@@ -65,7 +65,7 @@ jobs:
       if: ${{ always() && steps.collcov.outcome == 'success' }}
       working-directory: ${{runner.workspace}}/build
       shell: bash
-      run: lcov --capture --directory ./CMakeFiles/parc24cov.dir --directory ./CMakeFiles/42shcov.dir -o cov-test.info
+      run: lcov --capture --directory ./CMakeFiles/parc24cov.dir --directory ./CMakeFiles/tihs24cov.dir -o cov-test.info
     - name: Combine to actual coverage
       if: ${{ always() && steps.collcov.outcome == 'success' }}
       working-directory: ${{runner.workspace}}/build
